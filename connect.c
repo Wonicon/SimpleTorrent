@@ -4,6 +4,9 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <sys/epoll.h>
 
 /**
  * @brief 与 tracker 建立连接
@@ -162,4 +165,59 @@ send_http_request(struct HttpRequest *req, int sfd)
         return -1;
     }
     return 0;
+}
+
+int
+make_nonblocking(int sfd)
+{
+    int flags = fcntl(sfd, F_GETFL, 0);
+    if (flags == -1) {
+        perror("fcntl to get sfd flags");
+        return -1;
+    }
+
+    flags |= O_NONBLOCK;
+    if (fcntl(sfd, F_SETFL, flags) == -1) {
+        perror("fcntl to set sfd flags");
+        return -1;
+    }
+
+    return 0;
+}
+
+int
+make_blocking(int sfd)
+{
+    int flags = fcntl(sfd, F_GETFL, 0);
+    if (flags == -1) {
+        perror("fcntl to get sfd flags");
+        return -1;
+    }
+
+    flags ^= O_NONBLOCK;
+    if (fcntl(sfd, F_SETFL, flags) == -1) {
+        perror("fcntl to set sfd flags");
+        return -1;
+    }
+
+    return 0;
+}
+
+int
+async_connect(int efd, int sfd, const struct sockaddr *addr, socklen_t addrlen)
+{
+    make_nonblocking(sfd);
+    if (connect(sfd, addr, addrlen) == 0) {
+        return 0;
+    }
+    else {
+        struct epoll_event ev = {
+            .data.fd = sfd,
+            .events = EPOLLOUT
+        };
+        if (epoll_ctl(efd, EPOLL_CTL_ADD, sfd, &ev) == -1) {
+            perror("epoll_ctl");
+        }
+        return 1;
+    }
 }

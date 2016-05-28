@@ -13,7 +13,6 @@ struct Tracker
 
 struct MetaInfo
 {
-    long size;                    // torrent 文件大小
     int nr_trackers;              // tracker 数量
     struct Tracker *trackers;     // tracker 数组
     long file_size;               // 数据文件大小

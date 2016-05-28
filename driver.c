@@ -1,15 +1,19 @@
 #include "bparser.h"
 #include "butil.h"
 #include "util.h"
+#include "peer.h"
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
-
+#include <sys/epoll.h>
+void bp() {}
 struct HttpRequest;
 struct HttpRequest *create_http_request(const char *method, const char *host);
 void add_http_request_attr(struct HttpRequest *req, const char *key, const char *fmt, ...);
 int send_http_request(struct HttpRequest *req, int sfd);
 void parse_url(const char *url, char *method, char *host, char *port, char *request);
+int async_connect(int efd, int sfd, const struct sockaddr *addr, socklen_t addrlen);
+int make_blocking(int sfd);
 
 /**
  * @brief 提取 tracker 列表
@@ -122,6 +126,22 @@ free_metainfo(struct MetaInfo **pmi)
 int
 connect_to_tracker(const char *host, const char *port);
 
+void
+send_handshake(int sfd, struct MetaInfo *mi)
+{
+    PeerHandShake handshake = { .hs_pstrlen = PSTRLEN_DEFAULT };
+    strncpy(handshake.hs_pstr, PSTR_DEFAULT, PSTRLEN_DEFAULT);
+    memset(handshake.hs_reserved, 0, sizeof(handshake.hs_reserved));
+    memcpy(handshake.hs_info_hash, mi->info_hash, sizeof(mi->info_hash));
+    memcpy(handshake.hs_peer_id, "-Test-Test-Test-Test", 20);
+
+    if (write(sfd, &handshake, sizeof(handshake)) < sizeof(handshake)) {
+        perror("handshake");
+    }
+    puts("written");
+
+};
+
 #define BUF_SIZE 4096
 /**
  * @brief 处理与 tracker 的交互
@@ -177,8 +197,7 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
         printf("%s", response);
 
         if (!strncmp(response, "Content-Length", 14)) {
-            char *p = response + 16;
-            size = strtol(p, &p, 10);
+            size = strtol(response + 16, NULL, 10);
         }
         else if (!strcmp(response, "\r\n")) {
             break;
@@ -197,20 +216,75 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
     struct BNode *bcode = bparser(data);
     print_bcode(bcode, 0, 0);
     const struct BNode *peers = dfs_bcode(bcode, "peers");
+
+    int efd = epoll_create1(0);
+    if (efd == -1) {
+        perror("epoll_create1");
+        exit(EXIT_FAILURE);
+    }
+    struct epoll_event *events = calloc(100, sizeof(*events));
+
     struct {
         unsigned char ip[4];
         short port;
     } *p;
+
     for (int i = 0; i < peers->s_size; i += 6) {
         p = (void *)&peers->s_data[i];
-        printf("%d.%d.%d.%d:%d\n", p->ip[0], p->ip[1], p->ip[2], p->ip[3], htons(p->port));
         int fd = socket(AF_INET, SOCK_STREAM, 0);
+        printf("fd %d <> %d.%d.%d.%d:%d\n", fd, p->ip[0], p->ip[1], p->ip[2], p->ip[3], htons(p->port));
         struct sockaddr_in sa;
         sa.sin_family = AF_INET;
         memcpy(&sa.sin_addr.s_addr, p->ip, 4);
         memcpy(&sa.sin_port, &p->port, 2);
-        if (connect(fd, (void *)&sa, sizeof(sa))) {
-            perror("connect");
+        if (async_connect(efd, fd, (void *)&sa, sizeof(sa))) {
+            perror("async");
+        }
+        else {
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    while (1) {
+        int n = epoll_wait(efd, events, 100, -1);
+        for (int i = 0; i < n; i++) {
+            if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {
+
+                int result;
+                socklen_t result_len = sizeof(result);
+                if (getsockopt(events[i].data.fd, SOL_SOCKET, SO_ERROR, &result, &result_len) < 0) {
+                    perror("getsockopt");
+                }
+                fprintf(stderr, "%d: %s\n", events[i].data.fd, strerror(result));
+
+                epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+            }
+            else if (events[i].events & EPOLLOUT) {
+                printf("%d is connected\n", events[i].data.fd);
+                make_blocking(events[i].data.fd);
+                send_handshake(events[i].data.fd, mi);
+                events[i].events = EPOLLIN;
+                epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &events[i]);
+            }
+            else if (events[i].events & EPOLLIN) {
+                PeerHandShake handshake = {};
+                printf("read fd %d\n", events[i].data.fd);
+                ssize_t nr_read = read(events[i].data.fd, &handshake, sizeof(handshake));
+                if (nr_read < 0) {
+                    perror("read");
+                }
+                else if (nr_read == 0) {
+                    printf("%d disconnected\n", events[i].data.fd);
+                }
+                else {
+                    puts("read");
+                    printf("peer-id: %.20s\n", handshake.hs_peer_id);
+                }
+                epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+            }
+        }
+        if (n == 0) {
+            break;
         }
     }
 
