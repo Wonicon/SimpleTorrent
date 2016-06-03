@@ -165,6 +165,27 @@ get_bit(unsigned char *bytes, unsigned bit_offset)
 }
 
 void
+print_bit_in_byte(unsigned char byte, unsigned bit_len)
+{
+    bit_len = (bit_len < 8) ? bit_len : 8;
+
+    for (unsigned offset = 0; offset < bit_len; offset++) {
+        char ch = (byte & in_byte_mask_of_(offset)) ? '.' : 'X';
+        putchar(ch);
+    }
+}
+
+void
+print_bit(unsigned char *bytes, unsigned bit_len)
+{
+    unsigned byte_len = (bit_len - 1) / 8 + 1;  // (bit_len / 8) 上取整
+    for (unsigned i = 0; i < byte_len; i++) {
+        print_bit_in_byte(bytes[i], bit_len);
+        bit_len -= 8;
+    }
+}
+
+void
 peer_set_bit(struct Peer *peer, unsigned bit_offset)
 {
     set_bit(peer->bitfield, bit_offset);

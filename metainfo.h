@@ -35,6 +35,7 @@ struct MetaInfo
     long piece_size;              // 分片大小
     int nr_pieces;                // 分片数量，由上两者计算得出，上取整
     unsigned char (*pieces)[20];  // 分片 hash 数组，每项对应每个分片 sha1 摘要
+    int bitfield_size;            // bitfield 的字节大小
     unsigned char *bitfield;      // 分片完成情况位图
     unsigned char **subpieces;    // 子分片完成情况
     unsigned char info_hash[20];  // 整个 info 字典的 sha1 摘要

@@ -79,6 +79,27 @@ send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
     return sfd;
 }
 
+void
+handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
+{
+    switch (msg->id) {
+    case BT_BITFIELD:
+        print_bit(msg->bitfield, mi->nr_pieces);
+        putchar('\n');
+        memcpy(peer->bitfield, msg->bitfield, mi->bitfield_size);
+        // TODO 根据 bitfield 增加 piece 持有者数量(首先...).
+        break;
+    case BT_HAVE:
+        msg->have.piece_index = ntohl(msg->have.piece_index);
+        log("%s:%d has a new piece %d", peer->ip, peer->port, msg->have.piece_index);
+        peer_set_bit(peer, msg->have.piece_index);
+        // TODO 根据 piece_index 增加 piece 持有者数量(首先...).
+        print_bit(peer->bitfield, mi->nr_pieces);
+        putchar('\n');
+        break;
+    }
+}
+
 /**
  * @brief 处理与 tracker 的交互
  * @param mi 种子文件元信息
@@ -239,6 +260,8 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                         close(peer->fd);
                         del_peer_by_fd(mi, peer->fd);
                     }
+                    handle_msg(mi, peer, msg);
+                    free(msg);
                 }
             }
 

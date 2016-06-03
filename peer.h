@@ -105,4 +105,13 @@ struct Peer *peer_new(int fd, int nr_pieces);
  */
 void peer_free(struct Peer **peer);
 
+/**
+ * @brief 向标准输出打印 bitfield
+ * @param bytes bitfield 缓冲区
+ * @param bit_len bit 数, 一般对应分片数量
+ */
+void print_bit(unsigned char *bytes, unsigned bit_len);
+
+void peer_set_bit(struct Peer *peer, unsigned bit_offset);
+
 #endif  // PEER_H

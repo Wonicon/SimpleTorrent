@@ -85,9 +85,11 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
 
     if (mi->file_size && mi->piece_size) {
         mi->nr_pieces = (mi->file_size - 1) / mi->piece_size + 1;
+        mi->bitfield_size = (mi->nr_pieces - 1) / 8 + 1;
     }
 
-    log("filesz %ld, piecesz %ld, nr pieces %d", mi->file_size, mi->piece_size, mi->nr_pieces);
+    log("filesz %ld, piecesz %ld, nr pieces %d, bitfield len %d",
+            mi->file_size, mi->piece_size, mi->nr_pieces, mi->bitfield_size);
 
     const struct BNode *pieces_node = dfs_bcode(ast, "pieces");
     if (pieces_node) {
