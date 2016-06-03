@@ -2,138 +2,19 @@
 #include "butil.h"
 #include "util.h"
 #include "peer.h"
+#include "connect.h"
+#include "metainfo.h"
 #include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/epoll.h>
-#include <errno.h>
-void bp() {}
-struct HttpRequest;
-struct HttpRequest *create_http_request(const char *method, const char *host);
-void add_http_request_attr(struct HttpRequest *req, const char *key, const char *fmt, ...);
-int send_http_request(struct HttpRequest *req, int sfd);
-void parse_url(const char *url, char *method, char *host, char *port, char *request);
-int async_connect(int efd, int sfd, const struct sockaddr *addr, socklen_t addrlen);
-int make_blocking(int sfd);
+#include <unistd.h>     // read(), write()
+#include <errno.h>      // EINPROGRESS
+#include <sys/epoll.h>  // epoll_create1(), epoll_ctl(), epoll_wait(), epoll_event
+#include <arpa/inet.h>  // inet_ntoa()
+
+#define BUF_SIZE 4096
 
 /**
- * @brief 提取 tracker 列表
- * @param mi 全局信息
- * @param ast B 编码语法树
+ * @brief 发送握手信息
  */
-static void
-extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
-{
-    // 提取 tracker 列表
-
-    const struct BNode *announce_list = dfs_bcode(ast, "announce-list");
-
-    if (!announce_list) {
-        // 没有 announce-list, 那么就使用 announce
-        const struct BNode *announce = dfs_bcode(ast, "announce");
-        mi->nr_trackers = 1;
-        mi->trackers = calloc(mi->nr_trackers, sizeof(*mi->trackers));
-        parse_url(announce->s_data,
-                  mi->trackers[0].method,
-                  mi->trackers[0].host,
-                  mi->trackers[0].port,
-                  mi->trackers[0].request);
-    }
-    else {
-        mi->nr_trackers = 0;
-
-        for (const struct BNode *iter = announce_list; iter; iter = iter->l_next) {
-            mi->nr_trackers++;
-        }
-
-        log("%d trackers", mi->nr_trackers);
-
-        mi->trackers = calloc(mi->nr_trackers, sizeof(*mi->trackers));
-        struct Tracker *tracker = &mi->trackers[0];
-        for (const struct BNode *iter = announce_list; iter; iter = iter->l_next) {
-            parse_url(iter->l_item->l_item->s_data,
-                      tracker->method,
-                      tracker->host,
-                      tracker->port,
-                      tracker->request);
-            tracker++;
-        }
-    }
-}
-
-/**
- * @brief 提取分片 hash
- * @param mi 全局信息
- * @param ast B 编码语法树
- */
-static void
-extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
-{
-    // 提取分片信息
-
-    const struct BNode *length_node = dfs_bcode(ast, "length");
-    if (length_node) {
-        mi->file_size = length_node->i;
-    }
-
-    const struct BNode *piece_length_node = dfs_bcode(ast, "piece length");
-    if (piece_length_node) {
-        mi->piece_size = piece_length_node->i;
-    }
-
-    if (mi->file_size && mi->piece_size) {
-        mi->nr_pieces = (mi->file_size - 1) / mi->piece_size + 1;
-    }
-
-    log("filesz %ld, piecesz %ld, nr pieces %d", mi->file_size, mi->piece_size, mi->nr_pieces);
-
-    const struct BNode *pieces_node = dfs_bcode(ast, "pieces");
-    if (pieces_node) {
-        mi->pieces = calloc(mi->nr_pieces, sizeof(*mi->pieces));
-        const char *hash = pieces_node->s_data;
-        for (int i = 0; i < mi->nr_pieces; i++) {
-            memcpy(mi->pieces[i], hash, sizeof(*mi->pieces));
-            hash += sizeof(*mi->pieces);
-        }
-    }
-}
-
-char *
-get_torrent_data_from_file(const char *torrent)
-{
-    FILE *fp = fopen(torrent, "rb");
-
-    fseek(fp, 0, SEEK_END);
-    long size = ftell(fp);
-    char *bcode = calloc(size, sizeof(*bcode));
-
-    rewind(fp);
-    if (fread(bcode, 1, size, fp) < size) {
-        panic("reading is not sufficient");
-    }
-
-    fclose(fp);
-
-    return bcode;
-}
-
-void
-free_metainfo(struct MetaInfo **pmi)
-{
-    struct MetaInfo *mi = *pmi;
-    *pmi = NULL;
-    if (mi->trackers) {
-        free(mi->trackers);
-    }
-    if (mi->pieces) {
-        free(mi->pieces);
-    }
-    free(mi);
-}
-
-int
-connect_to_tracker(const char *host, const char *port);
-
 void
 send_handshake(int sfd, struct MetaInfo *mi)
 {
@@ -146,54 +27,13 @@ send_handshake(int sfd, struct MetaInfo *mi)
     if (write(sfd, &handshake, sizeof(handshake)) < sizeof(handshake)) {
         perror("handshake");
     }
-    log("handshaking with %d", sfd);
 };
 
-void
-add_peer(struct MetaInfo *mi, struct Peer *p)
+int
+send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
 {
-    mi->peers = realloc(mi->peers, sizeof(*p) * (mi->nr_peers + 1));
-    mi->peers[mi->nr_peers] = p;
-    mi->nr_peers++;
-}
-
-void
-del_peer_by_fd(struct MetaInfo *mi, int fd)
-{
-    for (int fast = 0, slow = 0; fast < mi->nr_peers; fast++, slow++) {
-        if (fd == mi->peers[fast]->fd) {
-            peer_free(&mi->peers[fast]);
-            fast++;
-        }
-        mi->peers[slow] = mi->peers[fast];
-    }
-    mi->nr_peers--;
-}
-
-struct Peer *
-get_peer_by_fd(struct MetaInfo *mi, int fd)
-{
-    for (int i = 0; i < mi->nr_peers; i++) {
-        if (mi->peers[i]->fd == fd) {
-            return mi->peers[i];
-        }
-    }
-    return NULL;
-}
-
-#define BUF_SIZE 4096
-/**
- * @brief 处理与 tracker 的交互
- * @param sfd 与tracker 的连接的套接字
- * @param mi 种子文件元信息
- * @param tracker_idx tracker 在元信息中的下标
- *
- * 本函数不主动关闭套接字。
- */
-void
-tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
-{
-    struct Tracker *tracker = &mi->trackers[tracker_idx];
+    struct Tracker *tracker = &mi->trackers[no];
+    int sfd = connect_to_tracker(tracker->host, tracker->port);
 
     // 请求头
     struct HttpRequest *req = create_http_request("GET", tracker->request);
@@ -208,6 +48,7 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
         add_http_request_attr(req, "info_hash", "%s", infohash);
     }
 
+    // TODO 错误做法
     // 获取嵌入请求的侦听端口号
     {
         struct sockaddr_in sockaddr;
@@ -224,8 +65,28 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
     add_http_request_attr(req, "downloaded", "0");
     add_http_request_attr(req, "left"      , "%ld", mi->file_size);
 
+    if (event != NULL) {
+        add_http_request_attr(req, "event", "%s", event);
+    }
+
     send_http_request(req, sfd);
 
+    return sfd;
+}
+
+/**
+ * @brief 处理与 tracker 的交互
+ * @param mi 种子文件元信息
+ * @param tracker_idx tracker 在元信息中的下标
+ *
+ * 本函数不主动关闭套接字。
+ */
+void
+tracker_handler(struct MetaInfo *mi, int tracker_idx)
+{
+    int sfd = send_msg_to_tracker(mi, tracker_idx, NULL);
+
+    // 解析 HTTP 响应报文
     char response[BUF_SIZE] = { 0 };
     char *curr = response;
     long size = 0;
@@ -252,6 +113,12 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
         perror("read");
     }
 
+    close(sfd);  // 对 tracker 来说, 没必要维持长连接.
+
+    /*
+     * 解析 peers 列表, 异步连接 peer.
+     */
+
     struct BNode *bcode = bparser(data);
     print_bcode(bcode, 0, 0);
     const struct BNode *peers = dfs_bcode(bcode, "peers");
@@ -277,15 +144,24 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
         memcpy(&sa.sin_addr.s_addr, p->ip, 4);
         memcpy(&sa.sin_port, &p->port, 2);
         if (async_connect(efd, fd, (void *)&sa, sizeof(sa)) != EINPROGRESS) {
-            log("EINPROGRESS: %d", EINPROGRESS);
             perror("async");
         }
     }
+
+    free_bnode(&bcode);
+    free(data);
+
+    /*
+     * 报文处理状态机
+     */
 
     while (1) {
         int n = epoll_wait(efd, events, 100, -1);
         for (int i = 0; i < n; i++) {
             if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {
+                /*
+                 * 异步 connect 错误处理
+                 */
                 int result;
                 socklen_t result_len = sizeof(result);
                 if (getsockopt(events[i].data.fd, SOL_SOCKET, SO_ERROR, &result, &result_len) < 0) {
@@ -296,46 +172,101 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
                 epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
             }
             else if (events[i].events & EPOLLOUT) {
-                log("%d is connected", events[i].data.fd);
+                /*
+                 * connect 完成
+                 * EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲,
+                 * 即意味着连接成功建立.
+                 */
+                struct sockaddr_in addr;
+                socklen_t addrlen = sizeof(addr);
+                getpeername(events[i].data.fd, (struct sockaddr *)&addr, &addrlen);
+                log("%s is connected at %u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
                 send_handshake(events[i].data.fd, mi);
+                log("handshaking with %s:%d", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
                 events[i].events = EPOLLIN;
                 epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &events[i]);
             }
             else if (events[i].events & EPOLLIN) {
+                /*
+                 * 接受并处理 BT 报文
+                 *
+                 * 关于握手报文与 BT 报文的区分方法:
+                 *
+                 *   握手报文和 BT 报文无法从数据格式上进行区分, 但是一个没有完成
+                 *   握手的 peer 是不会发送 BT 报文的. 我们将完成握手的 peer 记录
+                 *   在一个集合 peers 中(抽象). 对于当前的可读套接字, 如果它不在
+                 *   peers 集合里, 则是没有完成握手的 peer, 那么它送来的数据, 只
+                 *   可能是握手信息或者 FIN 报文.
+                 */
                 struct Peer *peer;
                 if ((peer = get_peer_by_fd(mi, events[i].data.fd)) == NULL) {
+                    /*
+                     * 完成握手过程
+                     */
                     PeerHandShake handshake = {};
-                    log("receive packet from fd %d", events[i].data.fd);
                     ssize_t nr_read = read(events[i].data.fd, &handshake, sizeof(handshake));
                     if (nr_read == 0) {
-                        log("%d disconnected", events[i].data.fd);
+                        struct sockaddr_in addr;
+                        socklen_t addrlen = sizeof(addr);
+                        getpeername(events[i].data.fd, (struct sockaddr *)&addr, &addrlen);
+                        log("handshaking failed, disconnect %s:%u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
                         epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
                         close(events[i].data.fd);
                     }
                     else {
-                        log("peer-id: %.20s", handshake.hs_peer_id);
-                        add_peer(mi, peer_new(events[i].data.fd, mi->nr_pieces));
+                        struct Peer *peer = peer_new(events[i].data.fd, mi->nr_pieces);
+                        add_peer(mi, peer);
+                        log("successfully handshake with %s:%u", peer->ip, peer->port);
                     }
                 }
                 else {
-                    log("fd %d", peer->fd);
-                    struct PeerMsg *msg = peer_get_packet(peer->fd);
+                    /*
+                     * 处理具体的 BT 报文
+                     *
+                     * 虽然有多个 BT 报文凑到一个 TCP 报文段里的情况, 但是这里只处理一个报文.
+                     * 由于报文变长, 所以要注意保持数据的一致性.
+                     */
+                    log("handling %s:%u :", peer->ip, peer->port);
+                    struct PeerMsg *msg = peer_get_packet(peer);
                     if (msg == NULL) {
-                        log("remove peer with fd %d", peer->fd);
+                        log("remove peer %s:%d", peer->ip, peer->port);
                         epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
                         close(peer->fd);
                         del_peer_by_fd(mi, peer->fd);
                     }
                 }
             }
+
+            puts("===============================================================");
         }
         if (n == 0) {
             break;
         }
     }
+}
 
-    free_bnode(&bcode);
-    free(data);
+/**
+ * @brief 将种子文件完全载入内存
+ * @param torrent 种子文件名
+ * @return 种子文件数据 [动态缓冲区]
+ */
+char *
+get_torrent_data_from_file(const char *torrent)
+{
+    FILE *fp = fopen(torrent, "rb");
+
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+    char *bcode = calloc(size, sizeof(*bcode));
+
+    rewind(fp);
+    if (fread(bcode, 1, size, fp) < size) {
+        panic("reading is not sufficient");
+    }
+
+    fclose(fp);
+
+    return bcode;
 }
 
 int
@@ -366,11 +297,7 @@ main(int argc, char *argv[])
     fflush(stdout);
     int no;
     scanf("%d", &no);
-    int sfd = connect_to_tracker(mi->trackers[no].host, mi->trackers[no].port);
-    if (sfd != -1) {
-        tracker_handler(sfd, mi, no);
-        close(sfd);
-    }
+    tracker_handler(mi, no);
 
     free(bcode);
     free_bnode(&ast);

@@ -8,12 +8,6 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 
-/**
- * @brief 与 tracker 建立连接
- * @param host 主机名（域名或 IPv4 地址字符串）
- * @param port 端口号
- * @return 连接套接字，连接失败返回 -1
- */
 int
 connect_to_tracker(const char *host, const char *port)
 {
@@ -38,11 +32,10 @@ connect_to_tracker(const char *host, const char *port)
     }
 
     int sfd = -1;  // socket file descriptor
-    struct addrinfo *rp;  // iterator for result list
-    for (rp = result; rp != NULL; rp = rp->ai_next) {
+    for (struct addrinfo *rp = result; rp != NULL; rp = rp->ai_next) {
         sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (sfd == -1) {
-            perror("");
+            perror("socket");
             continue;
         }
 
@@ -55,12 +48,13 @@ connect_to_tracker(const char *host, const char *port)
         close(sfd);
     }
 
-    if (rp == NULL) {
+    freeaddrinfo(result);
+
+    if (sfd == -1) {
         fprintf(stderr, "Could not connect.\n");
         return -1;
     }
 
-    freeaddrinfo(result);
     return sfd;
 }
 
@@ -203,17 +197,6 @@ make_blocking(int sfd)
     return 0;
 }
 
-/**
- * @brief 异步 connect
- * @param efd epoll 描述符
- * @param sfd 连接套接字
- * @param addr 连接地址
- * @param addrlen 地址结构体长度
- * @return 如果立即 connect 返回 0，异步连接时应该返回 errno，应当是 EINPROGRESS
- *
- * 如果 connect 能够立即完成，直接返回；否则，将描述符加入 epoll,
- * 侦听 EPOLLOUT 事件，同时要关注 EPOLLERR 和 EPOLLHUP 处理实际错误。
- */
 int
 async_connect(int efd, int sfd, const struct sockaddr *addr, socklen_t addrlen)
 {

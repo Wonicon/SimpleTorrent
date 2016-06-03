@@ -9,6 +9,8 @@
 struct Peer
 {
     int fd;                   // 连接套接字
+    char ip[16];              // ip 地址字符串, 最长不过 |255.255.255.255| + '\0' = 16
+    unsigned short port;      // 端口, 本地字节序
     unsigned char *bitfield;  // piece 拥有情况
     int is_choked;            // 是否阻塞 peer
     int is_interested;        // 是否对 peer 感兴趣
@@ -39,6 +41,11 @@ enum {
     BT_PIECE,
     BT_CANCEL,
 };
+
+/**
+ * @brief 对应 BT 报文类型的字符串
+ */
+extern const char *bt_types[];
 
 // 构造模式：
 // uint32_t len;
@@ -80,10 +87,10 @@ struct PeerMsg {
 
 /**
  * @brief 获取 BT 报文
- * @param fd 连接套接字
+ * @param peer 指向 peer 对象
  * @return 输出动态分配的指向 packet 的指针
  */
-struct PeerMsg *peer_get_packet(int fd);
+struct PeerMsg *peer_get_packet(struct Peer *peer);
 
 /**
  * @brief peer 构造
