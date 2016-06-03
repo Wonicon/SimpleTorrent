@@ -21,7 +21,7 @@ struct Peer
     int contribution;         // 检查周期内的数据贡献
 };
 
-#pragma pack(0)
+#pragma pack(1)
 typedef struct {
     uint8_t hs_pstrlen;       // BitTorrent 1.0: 19
     char    hs_pstr[19];      // BitTorrent 1.0: "BitTorrent protocol"
