@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <sys/epoll.h>
+#include <errno.h>
 void bp() {}
 struct HttpRequest;
 struct HttpRequest *create_http_request(const char *method, const char *host);
@@ -17,10 +18,11 @@ int make_blocking(int sfd);
 
 /**
  * @brief 提取 tracker 列表
- * @param mi 存储 tracker 列表
+ * @param mi 全局信息
  * @param ast B 编码语法树
  */
-void extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
+static void
+extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
 {
     // 提取 tracker 列表
 
@@ -44,7 +46,7 @@ void extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
             mi->nr_trackers++;
         }
 
-        printf("%d trackers\n", mi->nr_trackers);
+        log("%d trackers", mi->nr_trackers);
 
         mi->trackers = calloc(mi->nr_trackers, sizeof(*mi->trackers));
         struct Tracker *tracker = &mi->trackers[0];
@@ -59,7 +61,13 @@ void extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
     }
 }
 
-void extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
+/**
+ * @brief 提取分片 hash
+ * @param mi 全局信息
+ * @param ast B 编码语法树
+ */
+static void
+extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
 {
     // 提取分片信息
 
@@ -77,7 +85,7 @@ void extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
         mi->nr_pieces = (mi->file_size - 1) / mi->piece_size + 1;
     }
 
-    printf("filesz %ld, piecesz %ld, nr pieces %d\n", mi->file_size, mi->piece_size, mi->nr_pieces);
+    log("filesz %ld, piecesz %ld, nr pieces %d", mi->file_size, mi->piece_size, mi->nr_pieces);
 
     const struct BNode *pieces_node = dfs_bcode(ast, "pieces");
     if (pieces_node) {
@@ -138,9 +146,40 @@ send_handshake(int sfd, struct MetaInfo *mi)
     if (write(sfd, &handshake, sizeof(handshake)) < sizeof(handshake)) {
         perror("handshake");
     }
-    puts("written");
-
+    log("handshaking with %d", sfd);
 };
+
+void
+add_peer(struct MetaInfo *mi, struct Peer *p)
+{
+    mi->peers = realloc(mi->peers, sizeof(*p) * (mi->nr_peers + 1));
+    mi->peers[mi->nr_peers] = p;
+    mi->nr_peers++;
+}
+
+void
+del_peer_by_fd(struct MetaInfo *mi, int fd)
+{
+    for (int fast = 0, slow = 0; fast < mi->nr_peers; fast++, slow++) {
+        if (fd == mi->peers[fast]->fd) {
+            peer_free(&mi->peers[fast]);
+            fast++;
+        }
+        mi->peers[slow] = mi->peers[fast];
+    }
+    mi->nr_peers--;
+}
+
+struct Peer *
+get_peer_by_fd(struct MetaInfo *mi, int fd)
+{
+    for (int i = 0; i < mi->nr_peers; i++) {
+        if (mi->peers[i]->fd == fd) {
+            return mi->peers[i];
+        }
+    }
+    return NULL;
+}
 
 #define BUF_SIZE 4096
 /**
@@ -232,16 +271,14 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
     for (int i = 0; i < peers->s_size; i += 6) {
         p = (void *)&peers->s_data[i];
         int fd = socket(AF_INET, SOCK_STREAM, 0);
-        printf("fd %d <> %d.%d.%d.%d:%d\n", fd, p->ip[0], p->ip[1], p->ip[2], p->ip[3], htons(p->port));
+        log("fd %d is assigned for %d.%d.%d.%d:%d", fd, p->ip[0], p->ip[1], p->ip[2], p->ip[3], htons(p->port));
         struct sockaddr_in sa;
         sa.sin_family = AF_INET;
         memcpy(&sa.sin_addr.s_addr, p->ip, 4);
         memcpy(&sa.sin_port, &p->port, 2);
-        if (async_connect(efd, fd, (void *)&sa, sizeof(sa))) {
+        if (async_connect(efd, fd, (void *)&sa, sizeof(sa)) != EINPROGRESS) {
+            log("EINPROGRESS: %d", EINPROGRESS);
             perror("async");
-        }
-        else {
-            exit(EXIT_FAILURE);
         }
     }
 
@@ -249,38 +286,47 @@ tracker_handler(int sfd, struct MetaInfo *mi, int tracker_idx)
         int n = epoll_wait(efd, events, 100, -1);
         for (int i = 0; i < n; i++) {
             if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {
-
                 int result;
                 socklen_t result_len = sizeof(result);
                 if (getsockopt(events[i].data.fd, SOL_SOCKET, SO_ERROR, &result, &result_len) < 0) {
                     perror("getsockopt");
                 }
-                fprintf(stderr, "%d: %s\n", events[i].data.fd, strerror(result));
-
+                err("%d: %s", events[i].data.fd, strerror(result));
+                close(events[i].data.fd);
                 epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
             }
             else if (events[i].events & EPOLLOUT) {
-                printf("%d is connected\n", events[i].data.fd);
-                make_blocking(events[i].data.fd);
+                log("%d is connected", events[i].data.fd);
                 send_handshake(events[i].data.fd, mi);
                 events[i].events = EPOLLIN;
                 epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &events[i]);
             }
             else if (events[i].events & EPOLLIN) {
-                PeerHandShake handshake = {};
-                printf("read fd %d\n", events[i].data.fd);
-                ssize_t nr_read = read(events[i].data.fd, &handshake, sizeof(handshake));
-                if (nr_read < 0) {
-                    perror("read");
-                }
-                else if (nr_read == 0) {
-                    printf("%d disconnected\n", events[i].data.fd);
+                struct Peer *peer;
+                if ((peer = get_peer_by_fd(mi, events[i].data.fd)) == NULL) {
+                    PeerHandShake handshake = {};
+                    log("receive packet from fd %d", events[i].data.fd);
+                    ssize_t nr_read = read(events[i].data.fd, &handshake, sizeof(handshake));
+                    if (nr_read == 0) {
+                        log("%d disconnected", events[i].data.fd);
+                        epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+                        close(events[i].data.fd);
+                    }
+                    else {
+                        log("peer-id: %.20s", handshake.hs_peer_id);
+                        add_peer(mi, peer_new(events[i].data.fd, mi->nr_pieces));
+                    }
                 }
                 else {
-                    puts("read");
-                    printf("peer-id: %.20s\n", handshake.hs_peer_id);
+                    log("fd %d", peer->fd);
+                    struct PeerMsg *msg = peer_get_packet(peer->fd);
+                    if (msg == NULL) {
+                        log("remove peer with fd %d", peer->fd);
+                        epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+                        close(peer->fd);
+                        del_peer_by_fd(mi, peer->fd);
+                    }
                 }
-                epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
             }
         }
         if (n == 0) {
@@ -299,34 +345,31 @@ main(int argc, char *argv[])
 
     char *bcode = get_torrent_data_from_file(argv[1]);
     struct BNode *ast = bparser(bcode);
+
+    puts("Parsed Bencode:");
     print_bcode(ast, 0, 0);
 
     extract_trackers(mi, ast);
     extract_pieces(mi, ast);
     make_info_hash(ast, mi->info_hash);
+
     printf("info_hash: ");
     print_hash(mi->info_hash, "\n");
 
-    char cmd[128];
+    puts("Tracker list:");
     for (int i = 0; i < mi->nr_trackers; i++) {
-        printf("Use tracker %s://%s:%s%s ? (y/N/q): ",
+        printf("%d. %s://%s:%s%s\n", i,
                mi->trackers[i].method, mi->trackers[i].host, mi->trackers[i].port, mi->trackers[i].request);
-        fflush(stdout);
-        fgets(cmd, sizeof(cmd), stdin);
+    }
 
-        if (!strcmp(cmd, "q\n")) {
-            break;
-        }
-
-        if (strcmp(cmd, "y\n")) {  // not "y"
-            continue;
-        }
-
-        int sfd = connect_to_tracker(mi->trackers[i].host, mi->trackers[i].port);
-        if (sfd != -1) {
-            tracker_handler(sfd, mi, i);
-            close(sfd);
-        }
+    printf("input the tracker number: ");
+    fflush(stdout);
+    int no;
+    scanf("%d", &no);
+    int sfd = connect_to_tracker(mi->trackers[no].host, mi->trackers[no].port);
+    if (sfd != -1) {
+        tracker_handler(sfd, mi, no);
+        close(sfd);
     }
 
     free(bcode);
