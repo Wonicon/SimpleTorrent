@@ -6,6 +6,8 @@
 #ifndef METAINFO_H
 #define METAINFO_H
 
+#include <time.h>
+
 struct BNode;
 
 /**
@@ -17,6 +19,9 @@ struct Tracker
     char host[128];               // 主机名（域名）
     char port[10];                // 端口（默认 80）
     char request[128];            // 请求 url （一般是 /announce, 默认 / ）
+    int sfd;                      // socket file descriptor, 默认为 -1. 主要用于搜索, 会频繁重置.
+    time_t interval;              // tracker 约定的再查询时间
+    time_t last_query_time;       // 上次查询的时间
 };
 
 /**

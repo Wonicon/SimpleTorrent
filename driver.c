@@ -29,6 +29,11 @@ send_handshake(int sfd, struct MetaInfo *mi)
     }
 };
 
+/**
+ * 建立连接, 发送请求一条龙. 可以通过 event 指定发送的具体时间,
+ * 其余信息完全通过 mi 自动填写. 使用返回的套接字读取响应, 读完
+ * 了就可以直接关闭套接字了.
+ */
 int
 send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
 {
