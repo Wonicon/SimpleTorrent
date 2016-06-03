@@ -1,3 +1,7 @@
+/** @brief 顶层驱动模块
+ *  @file driver.c
+ */
+
 #include "bparser.h"
 #include "butil.h"
 #include "util.h"
@@ -22,7 +26,7 @@ send_handshake(int sfd, struct MetaInfo *mi)
     strncpy(handshake.hs_pstr, PSTR_DEFAULT, PSTRLEN_DEFAULT);
     memset(handshake.hs_reserved, 0, sizeof(handshake.hs_reserved));
     memcpy(handshake.hs_info_hash, mi->info_hash, sizeof(mi->info_hash));
-    memcpy(handshake.hs_peer_id, "-Test-Test-Test-Test", 20);
+    memcpy(handshake.hs_peer_id, "-Test-Test-Test-Test", HASH_SIZE);
 
     if (write(sfd, &handshake, sizeof(handshake)) < sizeof(handshake)) {
         perror("handshake");
@@ -45,9 +49,9 @@ send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
 
     // info_hash
     {
-        char infohash[3 * 20 + 1] = { 0 };
+        char infohash[3 * HASH_SIZE + 1] = { 0 };
         char *curr = infohash;
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < HASH_SIZE; i++) {
             curr += sprintf(curr, "%%%02x", mi->info_hash[i]);
         }
         add_http_request_attr(req, "info_hash", "%s", infohash);
@@ -313,7 +317,10 @@ main(int argc, char *argv[])
     make_info_hash(ast, mi->info_hash);
 
     printf("info_hash: ");
-    print_hash(mi->info_hash, "\n");
+    for (int i = 0; i < HASH_SIZE; i++) {
+        printf("%02x", mi->info_hash[i]);
+    }
+    printf("\n");
 
     puts("Tracker list:");
     for (int i = 0; i < mi->nr_trackers; i++) {

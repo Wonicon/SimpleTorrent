@@ -88,7 +88,7 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
         mi->bitfield_size = (mi->nr_pieces - 1) / 8 + 1;
     }
 
-    log("filesz %ld, piecesz %ld, nr pieces %d, bitfield len %d",
+    log("filesz %ld, piecesz %d, nr pieces %d, bitfield len %d",
             mi->file_size, mi->piece_size, mi->nr_pieces, mi->bitfield_size);
 
     const struct BNode *pieces_node = dfs_bcode(ast, "pieces");
@@ -96,7 +96,7 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
         mi->pieces = calloc(mi->nr_pieces, sizeof(*mi->pieces));
         const char *hash = pieces_node->s_data;
         for (int i = 0; i < mi->nr_pieces; i++) {
-            memcpy(mi->pieces[i], hash, sizeof(*mi->pieces));
+            memcpy(mi->pieces[i].hash, hash, HASH_SIZE);
             hash += sizeof(*mi->pieces);
         }
     }

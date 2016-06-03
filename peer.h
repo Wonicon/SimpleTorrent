@@ -1,6 +1,7 @@
 #ifndef PEER_H
 #define PEER_H
 
+#include "metainfo.h"
 #include <inttypes.h>
 
 #define PSTR_DEFAULT "BitTorrent protocol"
@@ -8,17 +9,17 @@
 
 struct Peer
 {
-    int fd;                   // 连接套接字
-    char ip[16];              // ip 地址字符串, 最长不过 |255.255.255.255| + '\0' = 16
-    unsigned short port;      // 端口, 本地字节序
-    unsigned char *bitfield;  // piece 拥有情况
-    int is_choked;            // 是否阻塞 peer
-    int is_interested;        // 是否对 peer 感兴趣
-    int get_choked;           // 是否被 peer 阻塞
-    int get_interested;       // peer 是否感兴趣
-    int *requested_pieces;    // -1 terminated
-    int *requested_subpieces; // -1 terminated
-    int contribution;         // 检查周期内的数据贡献
+    int fd;                   ///< 连接套接字
+    char ip[16];              ///< ip 地址字符串, 最长不过 |255.255.255.255| + '\0' = 16
+    unsigned short port;      ///< 端口, 本地字节序
+    unsigned char *bitfield;  ///< piece 拥有情况
+    int is_choked;            ///< 是否阻塞 peer
+    int is_interested;        ///< 是否对 peer 感兴趣
+    int get_choked;           ///< 是否被 peer 阻塞
+    int get_interested;       ///< peer 是否感兴趣
+    int *requested_pieces;    ///< -1 terminated
+    int *requested_subpieces; ///< -1 terminated
+    int contribution;         ///< 检查周期内的数据贡献
 };
 
 #pragma pack(1)
@@ -26,8 +27,8 @@ typedef struct {
     uint8_t hs_pstrlen;       // BitTorrent 1.0: 19
     char    hs_pstr[19];      // BitTorrent 1.0: "BitTorrent protocol"
     uint8_t hs_reserved[8];
-    uint8_t hs_info_hash[20];
-    char    hs_peer_id[20];
+    uint8_t hs_info_hash[HASH_SIZE];
+    char    hs_peer_id[HASH_SIZE];
 } PeerHandShake;
 
 enum {

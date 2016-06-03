@@ -1,5 +1,5 @@
-/**
- * @file connect.c
+/** 
+ * @file connect.h
  * @brief 网络连接相关 API 声明
  */
 

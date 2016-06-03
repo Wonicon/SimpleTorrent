@@ -1,3 +1,4 @@
+#include "metainfo.h"
 #include "bparser.h"
 #include <stdio.h>
 #include <string.h>
@@ -27,7 +28,7 @@ print_str(const struct BNode *b, int indent, int flags)
 {
     if (flags & PIECE_HASH) {
         put_indent(indent);
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < HASH_SIZE; i++) {
             printf("%02x", (unsigned char)b->s_data[i]);
         }
         puts("...");
