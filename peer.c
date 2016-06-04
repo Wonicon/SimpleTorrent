@@ -25,44 +25,53 @@ const char *bt_types[] =
 struct PeerMsg *
 peer_get_packet(struct Peer *peer)
 {
-    int len;
-    ssize_t s = recv(peer->fd, &len, 4, MSG_WAITALL);
-    len = htonl(len);
-    if (s < 0) {
-        perror("read phase 1");
-        return NULL;
+    ssize_t s;
+
+    if (peer->wanted == 0) {  // 从头开始的一次 BT 报文读取
+        // 至少有多长的载荷是一定要读满的
+        s = recv(peer->fd, &peer->wanted, 4, MSG_WAITALL);
+        peer->wanted = htonl(peer->wanted);
+        if (s < 0) {
+            perror("read phase 1");
+            return NULL;
+        }
+        else if (s == 0) {
+            log("%s:%u disconnected at recv pkt phase 1", peer->ip, peer->port);
+            return NULL;
+        }
+
+        assert(s == 4);
+
+        peer->msg = malloc(4 + peer->wanted);
+        peer->msg->len = peer->wanted;
+
+        if (peer->msg->len == 0) {  // KEEP-ALIVE
+            log("KEEP_ALIVE");
+            // 投机报活 :)
+            write(peer->fd, peer->msg, 4);
+            return peer->msg;
+        }
+
+        log("want to receive %d bytes payload from %s:%d", peer->wanted, peer->ip, peer->port);
     }
-    else if (s == 0) {
-        log("%s:%u disconnected at recv pkt phase 1", peer->ip, peer->port);
-        return NULL;
-    }
 
-    assert(s == 4);
+    // 异步连续读取
 
-    struct PeerMsg *msg = malloc(4 + len);
-    msg->len = len;
-
-    if (len == 0) {  // KEEP-ALIVE
-        log("KEEP_ALIVE");
-        return msg;
-    }
-
-    s = recv(peer->fd, &msg->id, len, MSG_WAITALL);
+    s = read(peer->fd, (char *)&peer->msg->id + peer->msg->len - peer->wanted, peer->wanted);
     if (s < 0) {
         perror("read phase 2");
-        free(msg);
+        free(peer->msg);
         return NULL;
     }
     else if (s == 0) {
         log("%s:%u disconnected at recv pkt phase 2", peer->ip, peer->port);
-        free(msg);
+        free(peer->msg);
         return NULL;
     }
-    else {
-        log("recv %s (%zd bytes)", bt_types[msg->id], s);
-    }
 
-    return msg;
+    log("read %zd / %d", s, peer->wanted);
+    peer->wanted -= s;
+    return peer->msg;
 }
 
 /**
@@ -80,6 +89,9 @@ peer_new(int fd, int nr_pieces)
     getpeername(fd, (struct sockaddr *)&addr, &addrlen);
     strcpy(p->ip, inet_ntoa(addr.sin_addr));
     p->port = ntohs(addr.sin_port);
+
+    p->requesting_index = -1;
+    p->requesting_begin = -1;
 
     int bitfield_capacity = (nr_pieces - 1) / 8 + 1;  // upbound
     p->bitfield = calloc(bitfield_capacity, sizeof(*p->bitfield));
@@ -102,8 +114,7 @@ peer_free(struct Peer **p)
     free(peer);
 }
 
-/**
- * @brief 获取位域的字节内掩码
+/** @brief 获取位域的字节内掩码
  * @param off 位偏移
  * @return 字节掩码, 独热
  */
@@ -117,8 +128,7 @@ in_byte_mask_of_(unsigned off)
     return (1 << (7 - off));
 }
 
-/**
- * @brief 获取位域的字节
+/** @brief 获取位域的字节
  * @param off 位偏移
  * @return 字节下标
  */
@@ -128,8 +138,7 @@ byte_index_of_(unsigned off)
     return off >> 3;
 }
 
-/**
- * @brief 获取位域的字节内偏移
+/** @brief 获取位域的字节内偏移
  * @param off 位域偏移
  * @return 字节内偏移
  *
@@ -201,4 +210,10 @@ unsigned char
 peer_get_bit(struct Peer *peer, unsigned bit_offset)
 {
     return get_bit(peer->bitfield, bit_offset);
+}
+
+void
+peer_send_msg(struct Peer *peer, struct PeerMsg *msg)
+{
+    write(peer->fd, msg, 4 + msg->len);
 }

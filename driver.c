@@ -9,6 +9,7 @@
 #include "connect.h"
 #include "metainfo.h"
 #include <string.h>
+#include <assert.h>
 #include <unistd.h>     // read(), write()
 #include <errno.h>      // EINPROGRESS
 #include <sys/epoll.h>  // epoll_create1(), epoll_ctl(), epoll_wait(), epoll_event
@@ -84,14 +85,143 @@ send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
 }
 
 void
+send_request(struct MetaInfo *mi, struct Peer *peer)
+{
+    // 保证当前 peer 已经没有下载任务
+    assert(peer->requesting_index == -1);
+
+    // 找到一个没有完成的子分片
+    // @todo 应用优化策略
+
+    int index = 0;
+    int begin = 0;
+    int length = mi->sub_size;
+
+    // 最简单的最前最优先策略
+    for (; index < mi->nr_pieces; index++) {
+        if (!mi->pieces[index].is_downloaded) {
+            break;
+        }
+    }
+
+    if (index == mi->nr_pieces) {
+        log("all pieces have been downloaded");
+        return;
+    }
+
+    struct PieceInfo *piece = &mi->pieces[index];
+
+    // 处理最后一个分片的子分片数量
+    int piece_sz = mi->piece_size;
+    int sub_cnt = mi->sub_count;
+    if (index + 1 == mi->nr_pieces) {
+        piece_sz = mi->file_size % mi->piece_size;
+        sub_cnt = (piece_sz - 1) / mi->sub_size + 1;
+    }
+
+    int sub_idx = 0;
+    for (; sub_idx < sub_cnt; sub_idx++) {
+        if (piece->substate[sub_idx] == SUB_NA) {
+            break;
+        }
+    }
+
+    if (sub_idx == sub_cnt) {
+        log("all subpieces of piece %d have been downloaded", index);
+        return;
+    }
+
+    begin = sub_idx * mi->sub_size;
+
+    // 处理最后一个子分片的长度
+    // 之前已经默认初始化统一大小了
+    if (sub_idx + 1 == sub_cnt && (piece_sz % mi->sub_size) != 0) {
+        length = piece_sz % mi->sub_size;
+    }
+
+    int req_len = 13;
+    struct PeerMsg msg = {
+        .len = htonl(req_len),
+        .id = BT_REQUEST,
+        .request.index = htonl(index),
+        .request.begin = htonl(begin),
+        .request.length = htonl(length)
+    };
+
+    // 在 peer 中记录任务信息，用于可能的撤销操作
+    peer->requesting_index = index;
+    peer->requesting_begin = begin;
+
+    assert(piece->substate[sub_idx] == SUB_NA);
+    piece->substate[sub_idx] = SUB_DOWNLOAD;
+
+    if (write(peer->fd, &msg, 4 + req_len) < 4 + req_len) {
+        perror("send request");
+    }
+
+    log("send %s [piece %d sub %d len %d] to %s:%d",
+        bt_types[msg.id], index, begin, length, peer->ip, peer->port);
+}
+
+/** @brief 处理分片消息
+ *
+ * 收到分片消息后，期望调用者处理字节序。
+ * 会将子分片写入到对应的分片文件中，如果一个子分片已经被写入过，则抛弃。
+ * 出于简单实现的考虑，子分片采取固定大小，使用位图管理完成进度，
+ * 最后一个分片不会在这里进行特殊处理，由发送过程保证最后一个分片的正确性。
+ */
+void
+handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
+{
+    struct PieceInfo *piece = &mi->pieces[msg->piece.index];
+
+    if (piece->tmp_file == NULL) {
+        char tmp_name[1024];
+        sprintf(tmp_name, "tmp.%d", msg->piece.index);
+        piece->tmp_file = fopen(tmp_name, "wb");
+        log("create piece file %s", tmp_name);
+    }
+
+    // 保证一致性
+    assert(peer->requesting_index == msg->piece.index);
+    assert(peer->requesting_begin == msg->piece.begin);
+
+    int sub_idx = msg->piece.begin / mi->sub_size;
+
+    if (piece->substate[sub_idx] != SUB_FINISH) {
+        fseek(piece->tmp_file, msg->piece.begin, SEEK_SET);
+        fwrite(msg->piece.block, 1, msg->len - 9, piece->tmp_file);  // 9 是 id, index, begin 的冗余长度。
+        piece->substate[sub_idx] = SUB_FINISH;
+        print_substate(mi, msg->piece.index);
+    }
+    else {
+        log("discard piece %d subpiece %d from %s:%d due to previous accomplishment",
+            msg->piece.index, msg->piece.begin, peer->ip, peer->port);
+    }
+
+    // 重置下载状态
+    peer->requesting_index = -1;
+    peer->requesting_begin = -1;
+
+    // 发送一个新的 piece 请求
+    send_request(mi, peer);
+}
+
+void
 handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
 {
+    // 忽略 KEEP-ALIVE
+    if (msg->len == 0) {
+        return;
+    }
+
     switch (msg->id) {
     case BT_BITFIELD:
         print_bit(msg->bitfield, mi->nr_pieces);
         putchar('\n');
         memcpy(peer->bitfield, msg->bitfield, mi->bitfield_size);
         // TODO 根据 bitfield 增加 piece 持有者数量(首先...).
+        send_request(mi, peer);
         break;
     case BT_HAVE:
         msg->have.piece_index = ntohl(msg->have.piece_index);
@@ -100,6 +230,18 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         // TODO 根据 piece_index 增加 piece 持有者数量(首先...).
         print_bit(peer->bitfield, mi->nr_pieces);
         putchar('\n');
+        break;
+    case BT_PIECE:
+        msg->piece.index = htonl(msg->piece.index);
+        msg->piece.begin = htonl(msg->piece.begin);
+        log("receive a subpiece at piece %d, begin %d, len %d",
+            msg->piece.index, msg->piece.begin, msg->len - 9);
+        handle_piece(mi, peer, msg);
+        break;
+    case BT_UNCHOKE:
+        // 投机地发送 KEEP-ALIVE
+        msg->len = htonl(0);
+        write(peer->fd, msg, 4);
         break;
     }
 }
@@ -187,11 +329,11 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
 
     while (1) {
         int n = epoll_wait(efd, events, 100, -1);
+
+        // 处理接收逻辑
         for (int i = 0; i < n; i++) {
-            if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {
-                /*
-                 * 异步 connect 错误处理
-                 */
+            puts("===============================================================");
+            if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {  // 异步 connect 错误处理
                 int result;
                 socklen_t result_len = sizeof(result);
                 if (getsockopt(events[i].data.fd, SOL_SOCKET, SO_ERROR, &result, &result_len) < 0) {
@@ -201,12 +343,9 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                 close(events[i].data.fd);
                 epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
             }
-            else if (events[i].events & EPOLLOUT) {
-                /*
-                 * connect 完成
-                 * EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲,
-                 * 即意味着连接成功建立.
-                 */
+            else if (events[i].events & EPOLLOUT) {  // connect 完成
+                // EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲,
+                // 即意味着连接成功建立.
                 struct sockaddr_in addr;
                 socklen_t addrlen = sizeof(addr);
                 getpeername(events[i].data.fd, (struct sockaddr *)&addr, &addrlen);
@@ -216,10 +355,8 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                 events[i].events = EPOLLIN;
                 epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &events[i]);
             }
-            else if (events[i].events & EPOLLIN) {
+            else if (events[i].events & EPOLLIN) {  // 接受并处理 BT 报文
                 /*
-                 * 接受并处理 BT 报文
-                 *
                  * 关于握手报文与 BT 报文的区分方法:
                  *
                  *   握手报文和 BT 报文无法从数据格式上进行区分, 但是一个没有完成
@@ -229,17 +366,15 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                  *   可能是握手信息或者 FIN 报文.
                  */
                 struct Peer *peer;
-                if ((peer = get_peer_by_fd(mi, events[i].data.fd)) == NULL) {
-                    /*
-                     * 完成握手过程
-                     */
+                if ((peer = get_peer_by_fd(mi, events[i].data.fd)) == NULL) {  // 完成握手过程
                     PeerHandShake handshake = {};
-                    ssize_t nr_read = read(events[i].data.fd, &handshake, sizeof(handshake));
+                    ssize_t nr_read = recv(events[i].data.fd, &handshake, sizeof(handshake), MSG_WAITALL);
                     if (nr_read == 0) {
                         struct sockaddr_in addr;
                         socklen_t addrlen = sizeof(addr);
                         getpeername(events[i].data.fd, (struct sockaddr *)&addr, &addrlen);
                         log("handshaking failed, disconnect %s:%u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+
                         epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
                         close(events[i].data.fd);
                     }
@@ -247,33 +382,60 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                         struct Peer *peer = peer_new(events[i].data.fd, mi->nr_pieces);
                         add_peer(mi, peer);
                         log("successfully handshake with %s:%u", peer->ip, peer->port);
+
+                        // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
+
+                        // UNCHOKE 和 INTERESTED 都没有数据载荷，区别只有 id.
+                        // 故我们使用同一块缓冲区，修改 id 后进行发送.
+                        // 数据结构本身的大小超过 5 字节，但是有意义的报文内容只占 5 字节。
+                        struct PeerMsg msg = { .len = htonl(1) };
+                        int msg_type[] = { BT_UNCHOKE, BT_INTERESTED };
+
+                        for (int k = 0; k < sizeof(msg_type) / sizeof(msg_type[0]); k++) {
+                            msg.id = msg_type[k];
+                            if (write(peer->fd, &msg, 5) < 5) {
+                                perror("send msg");
+                            }
+                            log("send %s to %s:%d", bt_types[msg.id], peer->ip, peer->port);
+                        }
                     }
                 }
-                else {
-                    /*
-                     * 处理具体的 BT 报文
-                     *
-                     * 虽然有多个 BT 报文凑到一个 TCP 报文段里的情况, 但是这里只处理一个报文.
-                     * 由于报文变长, 所以要注意保持数据的一致性.
-                     */
+                else {  // 处理具体的 BT 报文
+                    // 虽然有多个 BT 报文凑到一个 TCP 报文段里的情况, 但是这里只处理一个报文.
+                    // 由于报文变长, 所以要注意保持数据的一致性.
                     log("handling %s:%u :", peer->ip, peer->port);
                     struct PeerMsg *msg = peer_get_packet(peer);
                     if (msg == NULL) {
                         log("remove peer %s:%d", peer->ip, peer->port);
                         epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
                         close(peer->fd);
+
+                        // 尝试撤销 peer 的下载请求
+                        if (peer->requesting_index != -1) {
+                            assert(mi->pieces[peer->requesting_index].substate[peer->requesting_begin / mi->sub_size]
+                                    == SUB_DOWNLOAD);
+                            mi->pieces[peer->requesting_index].substate[peer->requesting_begin / mi->sub_size]
+                                = SUB_NA;
+                        }
+
                         del_peer_by_fd(mi, peer->fd);
+                        log("%d peers left", mi->nr_peers);
                     }
-                    handle_msg(mi, peer, msg);
-                    free(msg);
+                    else if (peer->wanted == 0) {  // 读取了完整的 BT 消息
+                        handle_msg(mi, peer, msg);
+                        free(msg);
+                    }
+                    else {  // 尚未读取完整
+                        continue;
+                    }
                 }
             }
-
-            puts("===============================================================");
         }
+
         if (n == 0) {
             break;
         }
+
     }
 }
 
@@ -321,6 +483,8 @@ main(int argc, char *argv[])
         printf("%02x", mi->info_hash[i]);
     }
     printf("\n");
+
+    sleep(1);
 
     puts("Tracker list:");
     for (int i = 0; i < mi->nr_trackers; i++) {

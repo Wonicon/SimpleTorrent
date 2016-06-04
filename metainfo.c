@@ -86,10 +86,14 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
     if (mi->file_size && mi->piece_size) {
         mi->nr_pieces = (mi->file_size - 1) / mi->piece_size + 1;
         mi->bitfield_size = (mi->nr_pieces - 1) / 8 + 1;
+        mi->sub_size = 0x4000;
+        mi->sub_count = (mi->piece_size - 1) / mi->sub_size + 1;
     }
 
     log("filesz %ld, piecesz %d, nr pieces %d, bitfield len %d",
             mi->file_size, mi->piece_size, mi->nr_pieces, mi->bitfield_size);
+
+    log("sub_size %d, sub_count %d", mi->sub_size, mi->sub_count);
 
     const struct BNode *pieces_node = dfs_bcode(ast, "pieces");
     if (pieces_node) {
@@ -98,6 +102,8 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
         for (int i = 0; i < mi->nr_pieces; i++) {
             memcpy(mi->pieces[i].hash, hash, HASH_SIZE);
             hash += sizeof(*mi->pieces);
+            // 最后一个分片可能会造成空间冗余，即子分片不足 sub_count, 但是没有副作用。
+            mi->pieces[i].substate = calloc(mi->sub_count, sizeof(*mi->pieces[i].substate));
         }
     }
 }
@@ -137,4 +143,24 @@ get_peer_by_fd(struct MetaInfo *mi, int fd)
         }
     }
     return NULL;
+}
+
+void
+print_substate(struct MetaInfo *mi, int index)
+{
+    int sub_cnt = (index != mi->nr_pieces) ? mi->sub_count :
+        (((mi->file_size % mi->piece_size) - 1) / mi->sub_size + 1);
+
+    char ch;
+    for (int i = 0; i < sub_cnt; i++) {
+        switch (mi->pieces[index].substate[i]) {
+        case SUB_NA:       ch = 'X'; break;
+        case SUB_DOWNLOAD: ch = 'O'; break;
+        case SUB_FINISH:   ch = '.'; break;
+        default:           ch = '#'; break;
+        }
+        putchar(ch);
+    }
+
+    putchar('\n');
 }
