@@ -90,6 +90,11 @@ peer_new(int fd, int nr_pieces)
     strcpy(p->ip, inet_ntoa(addr.sin_addr));
     p->port = ntohs(addr.sin_port);
 
+    // 初始化状态
+    p->get_choked = 1;         // 对方一开始不响应我的请求
+    p->get_interested = 0;     // 对方不会请求我
+    p->is_choked = 0;          // 我要响应对方的请求（虽然目前不会让对方对我感兴趣）
+    p->is_interested = 1;      // 我会请求对方
     p->requesting_index = -1;
     p->requesting_begin = -1;
 

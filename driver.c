@@ -84,12 +84,18 @@ send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
     return sfd;
 }
 
-void
-send_request(struct MetaInfo *mi, struct Peer *peer)
+/** @brief 选择需要请求的分片
+ *
+ * 采取最简单的前面的先下载策略。
+ * 使用输出参数 msg 是因为这种 msg 一般都是栈上生成的，用完就丢。
+ *
+ * @param mi 全局信息
+ * @param msg 要发送的请求
+ * @return 0 - 成功，-1 - 失败
+ */
+int
+select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
 {
-    // 保证当前 peer 已经没有下载任务
-    assert(peer->requesting_index == -1);
-
     // 找到一个没有完成的子分片
     // @todo 应用优化策略
 
@@ -106,7 +112,7 @@ send_request(struct MetaInfo *mi, struct Peer *peer)
 
     if (index == mi->nr_pieces) {
         log("all pieces have been downloaded");
-        return;
+        return -1;
     }
 
     struct PieceInfo *piece = &mi->pieces[index];
@@ -127,8 +133,8 @@ send_request(struct MetaInfo *mi, struct Peer *peer)
     }
 
     if (sub_idx == sub_cnt) {
-        log("all subpieces of piece %d have been downloaded", index);
-        return;
+        log("all subpieces of piece %d have been considered", index);
+        return -1;
     }
 
     begin = sub_idx * mi->sub_size;
@@ -140,27 +146,68 @@ send_request(struct MetaInfo *mi, struct Peer *peer)
     }
 
     int req_len = 13;
-    struct PeerMsg msg = {
+    struct PeerMsg temp = {
         .len = htonl(req_len),
         .id = BT_REQUEST,
-        .request.index = htonl(index),
-        .request.begin = htonl(begin),
-        .request.length = htonl(length)
+        .request.index = index,
+        .request.begin = begin,
+        .request.length = length
     };
+
+    *msg = temp;
+
+    log("select index %d piece %d length %d", index, begin, length);
+
+    return 0;
+}
+
+/** @brief 选择可以发送请求的 peer
+ * 
+ * msg 不要转换字节序
+ */
+struct Peer *
+select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
+{
+    int i;
+
+    for (i = 0; i < mi->nr_peers; i++) {
+        struct Peer *peer = mi->peers[i];
+        if (!peer->get_choked && peer->requesting_index == -1 && peer_get_bit(peer, msg->request.index)) {
+            // 可以响应的，没有下载任务的，有分片的
+            return peer;
+        }
+    }
+
+    return NULL;
+}
+
+void
+send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
+{
+    int index = msg->request.index;
+    int begin = msg->request.begin;
+    int length = msg->request.length;
+
+    int sub_idx = begin / mi->sub_size;
 
     // 在 peer 中记录任务信息，用于可能的撤销操作
     peer->requesting_index = index;
     peer->requesting_begin = begin;
 
+    struct PieceInfo *piece = &mi->pieces[index];
     assert(piece->substate[sub_idx] == SUB_NA);
     piece->substate[sub_idx] = SUB_DOWNLOAD;
 
-    if (write(peer->fd, &msg, 4 + req_len) < 4 + req_len) {
+    msg->request.index = htonl(index);
+    msg->request.begin = htonl(begin);
+    msg->request.length = htonl(length);
+
+    if (write(peer->fd, msg, 4 + 13) < 4 + 13) {
         perror("send request");
     }
 
-    log("send %s [piece %d sub %d len %d] to %s:%d",
-        bt_types[msg.id], index, begin, length, peer->ip, peer->port);
+    log("send %s [index %d begin %d length %d] to %s:%d",
+        bt_types[msg->id], index, begin, length, peer->ip, peer->port);
 }
 
 /** @brief 处理分片消息
@@ -202,9 +249,6 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     // 重置下载状态
     peer->requesting_index = -1;
     peer->requesting_begin = -1;
-
-    // 发送一个新的 piece 请求
-    send_request(mi, peer);
 }
 
 void
@@ -215,13 +259,14 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         return;
     }
 
+    log("recv %s msg from %s:%d", bt_types[msg->id], peer->ip, peer->port);
+
     switch (msg->id) {
     case BT_BITFIELD:
         print_bit(msg->bitfield, mi->nr_pieces);
         putchar('\n');
         memcpy(peer->bitfield, msg->bitfield, mi->bitfield_size);
         // TODO 根据 bitfield 增加 piece 持有者数量(首先...).
-        send_request(mi, peer);
         break;
     case BT_HAVE:
         msg->have.piece_index = ntohl(msg->have.piece_index);
@@ -239,9 +284,10 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         handle_piece(mi, peer, msg);
         break;
     case BT_UNCHOKE:
-        // 投机地发送 KEEP-ALIVE
-        msg->len = htonl(0);
-        write(peer->fd, msg, 4);
+        peer->get_choked = 0;
+        break;
+    case BT_CHOKE:
+        peer->get_choked = 1;
         break;
     }
 }
@@ -328,11 +374,12 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
      */
 
     while (1) {
-        int n = epoll_wait(efd, events, 100, -1);
+        puts("===============================================================");
+        int n = epoll_wait(efd, events, 100, 5000);  // 超时限制 5s
 
         // 处理接收逻辑
         for (int i = 0; i < n; i++) {
-            puts("===============================================================");
+            puts("---------------------------------------------------------------");
             if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {  // 异步 connect 错误处理
                 int result;
                 socklen_t result_len = sizeof(result);
@@ -432,9 +479,22 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
             }
         }
 
-        if (n == 0) {
-            break;
+        int len = htonl(0);
+        for (int i = 0; i < mi->nr_peers; i++) {
+            write(mi->peers[i]->fd, &len, 4);
         }
+
+        // 处理发送逻辑
+        struct PeerMsg msg;
+        struct Peer *peer;
+        if (select_piece(mi, &msg) == -1) {
+            continue;
+        }
+        if ((peer = select_peer(mi, &msg)) == NULL) {
+            log("no candidate");
+            continue;
+        }
+        send_request(mi, peer, &msg);
 
     }
 }

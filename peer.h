@@ -135,6 +135,8 @@ unsigned char get_bit(unsigned char *bytes, unsigned bit_offset);
 
 void peer_set_bit(struct Peer *peer, unsigned bit_offset);
 
+unsigned char peer_get_bit(struct Peer *peer, unsigned bit_offset);
+
 /** @brief 向 peer 发送 BT 消息
  *
  * 提前构造好 msg 并将其发送给指定的 peer，
