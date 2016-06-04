@@ -156,8 +156,6 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
 
     *msg = temp;
 
-    log("select index %d piece %d length %d", index, begin, length);
-
     return 0;
 }
 
@@ -373,13 +371,14 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
      * 报文处理状态机
      */
 
+    char *bar = "---------------------------------------------------------------";
+
     while (1) {
-        puts("===============================================================");
         int n = epoll_wait(efd, events, 100, 5000);  // 超时限制 5s
 
         // 处理接收逻辑
         for (int i = 0; i < n; i++) {
-            puts("---------------------------------------------------------------");
+            puts(bar);
             if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {  // 异步 connect 错误处理
                 int result;
                 socklen_t result_len = sizeof(result);
@@ -479,6 +478,7 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
             }
         }
 
+
         int len = htonl(0);
         for (int i = 0; i < mi->nr_peers; i++) {
             write(mi->peers[i]->fd, &len, 4);
@@ -491,7 +491,6 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
             continue;
         }
         if ((peer = select_peer(mi, &msg)) == NULL) {
-            log("no candidate");
             continue;
         }
         send_request(mi, peer, &msg);
