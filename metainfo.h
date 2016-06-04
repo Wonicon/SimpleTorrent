@@ -113,6 +113,6 @@ void del_peer_by_fd(struct MetaInfo *mi, int fd);
  */
 struct Peer *get_peer_by_fd(struct MetaInfo *mi, int fd);
 
-void print_substate(struct MetaInfo *mi, int index);
+int check_substate(struct MetaInfo *mi, int index);
 
 #endif  // METAINFO_H

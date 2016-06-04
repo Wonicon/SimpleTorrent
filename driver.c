@@ -103,37 +103,40 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
     int begin = 0;
     int length = mi->sub_size;
 
+    int sub_idx = 0;
+    int piece_sz = mi->piece_size;
+    int sub_cnt = mi->sub_count;
+
     // 最简单的最前最优先策略
     for (; index < mi->nr_pieces; index++) {
-        if (!mi->pieces[index].is_downloaded) {
+        if (mi->pieces[index].is_downloaded) {
+            continue;
+        }
+
+        struct PieceInfo *piece = &mi->pieces[index];
+
+        // 处理最后一个分片的子分片数量
+        if (index + 1 == mi->nr_pieces) {
+            piece_sz = mi->file_size % mi->piece_size;
+            sub_cnt = (piece_sz - 1) / mi->sub_size + 1;
+        }
+
+        for (sub_idx = 0; sub_idx < sub_cnt; sub_idx++) {
+            if (piece->substate[sub_idx] == SUB_NA) {
+                break;
+            }
+        }
+
+        if (sub_idx == sub_cnt) {
+            log("all subpieces of piece %d have been / is being downloaded", index);
+        }
+        else {
             break;
         }
     }
 
     if (index == mi->nr_pieces) {
-        log("all pieces have been downloaded");
-        return -1;
-    }
-
-    struct PieceInfo *piece = &mi->pieces[index];
-
-    // 处理最后一个分片的子分片数量
-    int piece_sz = mi->piece_size;
-    int sub_cnt = mi->sub_count;
-    if (index + 1 == mi->nr_pieces) {
-        piece_sz = mi->file_size % mi->piece_size;
-        sub_cnt = (piece_sz - 1) / mi->sub_size + 1;
-    }
-
-    int sub_idx = 0;
-    for (; sub_idx < sub_cnt; sub_idx++) {
-        if (piece->substate[sub_idx] == SUB_NA) {
-            break;
-        }
-    }
-
-    if (sub_idx == sub_cnt) {
-        log("all subpieces of piece %d have been considered", index);
+        log("all pieces have been / is being downloaded");
         return -1;
     }
 
@@ -237,7 +240,9 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         fseek(piece->tmp_file, msg->piece.begin, SEEK_SET);
         fwrite(msg->piece.block, 1, msg->len - 9, piece->tmp_file);  // 9 是 id, index, begin 的冗余长度。
         piece->substate[sub_idx] = SUB_FINISH;
-        print_substate(mi, msg->piece.index);
+        if (check_substate(mi, msg->piece.index)) {
+            piece->is_downloaded = 1;
+        }
     }
     else {
         log("discard piece %d subpiece %d from %s:%d due to previous accomplishment",

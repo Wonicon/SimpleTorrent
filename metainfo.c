@@ -145,22 +145,24 @@ get_peer_by_fd(struct MetaInfo *mi, int fd)
     return NULL;
 }
 
-void
-print_substate(struct MetaInfo *mi, int index)
+int
+check_substate(struct MetaInfo *mi, int index)
 {
     int sub_cnt = (index != mi->nr_pieces) ? mi->sub_count :
         (((mi->file_size % mi->piece_size) - 1) / mi->sub_size + 1);
 
+    int is_finished = 1;
     char ch;
     for (int i = 0; i < sub_cnt; i++) {
         switch (mi->pieces[index].substate[i]) {
-        case SUB_NA:       ch = 'X'; break;
-        case SUB_DOWNLOAD: ch = 'O'; break;
+        case SUB_NA:       ch = 'X'; is_finished = 0; break;
+        case SUB_DOWNLOAD: ch = 'O'; is_finished = 0; break;
         case SUB_FINISH:   ch = '.'; break;
         default:           ch = '#'; break;
         }
         putchar(ch);
     }
-
     putchar('\n');
+
+    return is_finished;
 }
