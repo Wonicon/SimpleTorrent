@@ -316,26 +316,24 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     }
 }
 
-/**
- * @brief 处理与 tracker 的交互
- * @param mi 种子文件元信息
- * @param tracker_idx tracker 在元信息中的下标
+/** @brief 处理 tracker 响应的 HTTP 报文，将数据载荷读取到动态空间供上层使用，在内部关闭套接字
  *
- * 本函数不主动关闭套接字。
+ * 考虑到 tracker 的响应数据量不大，内部全部使用 recv + MSG_WAITALL 防止 read 读取不足。
+ *
+ * @param sfd 与 tracker 的连接套接字
  */
-void
-tracker_handler(struct MetaInfo *mi, int tracker_idx)
+void *
+handle_tracker_response(int sfd)
 {
-    int sfd = send_msg_to_tracker(mi, tracker_idx, NULL);
-
     // 解析 HTTP 响应报文
     char response[BUF_SIZE] = { 0 };
     char *curr = response;
     size_t size = 0;
-    while (read(sfd, curr, 1) == 1) {
+    while (recv(sfd, curr, 1, MSG_WAITALL) == 1) {
         if (*curr++ != '\n') {
             continue;
         }
+
         printf("%s", response);
 
         if (!strncmp(response, "Content-Length", 14)) {
@@ -350,35 +348,45 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
         curr = response;
     }
 
-    char *data = calloc(size, sizeof(*data));
-    if (read(sfd, data, size) < size) {
+    uint8_t *data = malloc(size);
+    if (recv(sfd, data, size, MSG_WAITALL) < size) {
         perror("read");
     }
 
     close(sfd);  // 对 tracker 来说, 没必要维持长连接.
 
-    /*
-     * 解析 peers 列表, 异步连接 peer.
-     */
+    return data;
+}
 
+/** @brief 将 tracker 返回的 peers 异步 connect 并加入 epoll 队列
+ *
+ * @param efd epoll 描述符
+ * @param data B 编码数据
+ */
+void
+handle_peer_list(int efd, void *data)
+{
+    // 解析 peers 列表, 异步连接 peer.
     struct BNode *bcode = bparser(data);
+
+    if (bcode == NULL) {
+        log("it is not bcode data");
+        return;
+    }
+
     print_bcode(bcode, 0, 0);
     const struct BNode *peers = dfs_bcode(bcode, "peers");
 
-    int efd = epoll_create1(0);
-    if (efd == -1) {
-        perror("epoll_create1");
-        exit(EXIT_FAILURE);
+    if (peers == NULL) {
+        log("no peers are found");
+        return;
     }
-    struct epoll_event *events = calloc(100, sizeof(*events));
-
-    struct {
-        unsigned char ip[4];
-        unsigned short port;
-    } *p;
 
     for (int i = 0; i < peers->s_size; i += 6) {
-        p = (void *)&peers->s_data[i];
+        struct {
+            uint8_t ip[4];
+            uint16_t port;
+        } *p = (void *)&peers->s_data[i];
         int fd = socket(AF_INET, SOCK_STREAM, 0);
         log("fd %d is assigned for %d.%d.%d.%d:%d", fd, p->ip[0], p->ip[1], p->ip[2], p->ip[3], htons(p->port));
         struct sockaddr_in sa;
@@ -392,13 +400,35 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
 
     free_bnode(&bcode);
     free(data);
+}
+
+/** @brief 处理与 tracker 的交互
+ * @param mi 种子文件元信息
+ * @param tracker_idx tracker 在元信息中的下标
+ *
+ * 本函数不主动关闭套接字。
+ */
+void
+tracker_handler(struct MetaInfo *mi, int tracker_idx)
+{
+    int efd = epoll_create1(0);
+    if (efd == -1) {
+        perror("epoll_create1");
+        exit(EXIT_FAILURE);
+    }
+
+    int sfd = send_msg_to_tracker(mi, tracker_idx, NULL);
+
+    char *data = handle_tracker_response(sfd);
+
+    handle_peer_list(efd, data);
 
     /*
      * 报文处理状态机
      */
 
     char *bar = "---------------------------------------------------------------";
-
+    struct epoll_event *events = calloc(100, sizeof(*events));
     while (1) {
         int n = epoll_wait(efd, events, 100, 5000);  // 超时限制 5s
 
