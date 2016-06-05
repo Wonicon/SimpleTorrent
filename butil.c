@@ -1,6 +1,5 @@
 #include "metainfo.h"
 #include "bparser.h"
-#include <stdio.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <openssl/sha.h>
@@ -18,7 +17,7 @@ put_indent(int indent)
     printf("%*s" fmt, indent, "", ## __VA_ARGS__)
 
 static void
-print_int(const struct BNode *bi, int indent, int flags)
+print_int(const struct BNode *bi, int indent)
 {
     print_with_indent(indent, "%ld\n", bi->i);
 }
@@ -35,13 +34,13 @@ print_str(const struct BNode *b, int indent, int flags)
     }
     else if (flags & PEERS) {
         put_indent(indent);
-        int n = b->s_size / 6;
-        printf("size %ld, n %d\n", b->s_size, n);
+        size_t n = b->s_size / 6;
+        printf("size %ld, n %lu\n", b->s_size, n);
         for (int i = 0; i < n; i++) {
             put_indent(indent + 4);
             struct {
                 unsigned char ip[4];
-                short port;
+                unsigned short port;
             } *peer = (void *)(b->s_data + i * 6);
             printf("%u.%u.%u.%u:%u\n", peer->ip[0], peer->ip[1], peer->ip[2], peer->ip[3], ntohs(peer->port));
         }
@@ -84,7 +83,7 @@ print_dict(const struct BNode *dict, int indent, int flags)
         case B_LIST: puts(""); print_list(dict->d_val, indent + 2, flags_new); break;
         case B_DICT: puts(""); print_dict(dict->d_val, indent + 2, flags_new); break;
         case B_STR:  print_str(dict->d_val, 1, flags_new); break;
-        default:     print_int(dict->d_val, 1, flags_new); break;
+        default:     print_int(dict->d_val, 1); break;
         }
         dict = dict->d_next;
     }
@@ -99,7 +98,7 @@ print_bcode(const struct BNode *node, int indent, int flags)
     case B_LIST: print_list(node, indent, flags);   break;
     case B_DICT: print_dict(node, indent, flags);   break;
     case B_STR:  print_str(node, indent, flags);    break;
-    default:     print_int(node, indent, flags); break;
+    default:     print_int(node, indent); break;
     }
 }
 
@@ -139,7 +138,7 @@ dfs_bcode(const struct BNode *node, const char *key)
 }
 
 void
-make_info_hash(const struct BNode *root, void *md)
+make_info_hash(const struct BNode *root, unsigned char *md)
 {
     const struct BNode *val = dfs_bcode(root, "info");
     SHA1((void *)val->start, val->end - val->start, md);  // avoid the last 'e' for the top-level dict

@@ -24,10 +24,10 @@ struct state
  * @param st 指向状态记录
  * @return 返回匹配的长整型
  */
-static inline long
+static inline size_t
 parse_get_int(struct state *st)
 {
-    return strtol(st->curr, &st->curr, 10);
+    return strtoul(st->curr, &st->curr, 10);
 }
 
 /**
@@ -37,7 +37,7 @@ parse_get_int(struct state *st)
  * @return 动态分配的字符数组指针
  */
 static inline char *
-parse_get_str(struct state *st, long length)
+parse_get_str(struct state *st, size_t length)
 {
     char *s = calloc(length + 1, sizeof(*s));
     memcpy(s, st->curr, length);  // 有时候会需要拷贝字节流
@@ -94,9 +94,9 @@ new_bnode(enum BNodeType type)
 static struct BNode *parse_bcode(struct state *st);
 
 static char *
-parse_bcode_is_key(struct state *st, long *len_o)
+parse_bcode_is_key(struct state *st, size_t *len_o)
 {
-    long len = parse_get_int(st);
+    size_t len = parse_get_int(st);
 
     char delim = parse_get_char(st);
     if (DELIM != delim) {

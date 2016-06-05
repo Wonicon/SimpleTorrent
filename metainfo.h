@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <inttypes.h>
 
 #define HASH_SIZE 20
 
@@ -58,15 +59,15 @@ struct PieceInfo
  */
 struct MetaInfo
 {
-    long file_size;                     ///< 数据文件大小
+    size_t file_size;                   ///< 数据文件大小
     FILE *file;                         ///< 下载文件
     unsigned char info_hash[HASH_SIZE]; ///< 整个 info 字典的 sha1 摘要
 
-    int piece_size;                     ///< 分片大小
-    int nr_pieces;                      ///< 分片数量，由 file_size 和 piece_size 计算得出，上取整
-    int bitfield_size;                  ///< bitfield 的字节大小，即 nr_pieces / 8 上取整
-    int sub_size;                       ///< 子分片的大小，使用统一大小的子分片以简化实现
-    int sub_count;                      ///< 子分片的数量
+    uint32_t piece_size;                ///< 分片大小
+    size_t nr_pieces;                   ///< 分片数量，由 file_size 和 piece_size 计算得出，上取整
+    size_t bitfield_size;               ///< bitfield 的字节大小，即 nr_pieces / 8 上取整
+    uint32_t sub_size;                  ///< 子分片的大小，使用统一大小的子分片以简化实现
+    size_t sub_count;                   ///< 子分片的数量
     struct PieceInfo *pieces;           ///< 分片信息数组
 
     unsigned short port;                ///< 侦听端口
@@ -75,7 +76,7 @@ struct MetaInfo
     int nr_peers;                       ///< peers 数组的大小 == 已握手 peer 的数量
     struct Peer **peers;                ///< 已握手 peer 的集合
 
-    int nr_trackers;                    ///< tracker 数量
+    size_t nr_trackers;                 ///< tracker 数量
     struct Tracker *trackers;           ///< tracker 数组
 };
 

@@ -7,7 +7,6 @@
 #include "util.h"
 #include "peer.h"
 #include "connect.h"
-#include "metainfo.h"
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>     // read(), write()
@@ -99,13 +98,13 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
     // 找到一个没有完成的子分片
     // @todo 应用优化策略
 
-    int index = 0;
-    int begin = 0;
-    int length = mi->sub_size;
+    uint32_t index = 0;
+    uint32_t begin = 0;
+    uint32_t length = mi->sub_size;
 
     int sub_idx = 0;
-    int piece_sz = mi->piece_size;
-    int sub_cnt = mi->sub_count;
+    size_t piece_sz = mi->piece_size;
+    size_t sub_cnt = mi->sub_count;
 
     time_t curr_time = time(NULL);
 
@@ -159,10 +158,10 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
     // 处理最后一个子分片的长度
     // 之前已经默认初始化统一大小了
     if (sub_idx + 1 == sub_cnt && (piece_sz % mi->sub_size) != 0) {
-        length = piece_sz % mi->sub_size;
+        length = (uint32_t)(piece_sz % mi->sub_size);
     }
 
-    int req_len = 13;
+    unsigned int req_len = 13;
     struct PeerMsg temp = {
         .len = htonl(req_len),
         .id = BT_REQUEST,
@@ -199,9 +198,9 @@ select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
 void
 send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
 {
-    int index = msg->request.index;
-    int begin = msg->request.begin;
-    int length = msg->request.length;
+    uint32_t index = msg->request.index;
+    uint32_t begin = msg->request.begin;
+    uint32_t length = msg->request.length;
 
     int sub_idx = begin / mi->sub_size;
 
@@ -300,6 +299,8 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     case BT_CHOKE:
         peer->get_choked = 1;
         break;
+    default:
+        break;
     }
 }
 
@@ -318,7 +319,7 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
     // 解析 HTTP 响应报文
     char response[BUF_SIZE] = { 0 };
     char *curr = response;
-    long size = 0;
+    size_t size = 0;
     while (read(sfd, curr, 1) == 1) {
         if (*curr++ != '\n') {
             continue;
@@ -326,7 +327,7 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
         printf("%s", response);
 
         if (!strncmp(response, "Content-Length", 14)) {
-            size = strtol(response + 16, NULL, 10);
+            size = strtoul(response + 16, NULL, 10);
         }
         else if (!strcmp(response, "\r\n")) {
             break;
@@ -361,7 +362,7 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
 
     struct {
         unsigned char ip[4];
-        short port;
+        unsigned short port;
     } *p;
 
     for (int i = 0; i < peers->s_size; i += 6) {
@@ -438,7 +439,7 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                         close(events[i].data.fd);
                     }
                     else {
-                        struct Peer *peer = peer_new(events[i].data.fd, mi->nr_pieces);
+                        peer = peer_new(events[i].data.fd, mi->nr_pieces);
                         add_peer(mi, peer);
                         log("successfully handshake with %s:%u", peer->ip, peer->port);
 
@@ -448,7 +449,7 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                         // 故我们使用同一块缓冲区，修改 id 后进行发送.
                         // 数据结构本身的大小超过 5 字节，但是有意义的报文内容只占 5 字节。
                         struct PeerMsg msg = { .len = htonl(1) };
-                        int msg_type[] = { BT_UNCHOKE, BT_INTERESTED };
+                        uint8_t msg_type[] = { BT_UNCHOKE, BT_INTERESTED };
 
                         for (int k = 0; k < sizeof(msg_type) / sizeof(msg_type[0]); k++) {
                             msg.id = msg_type[k];
@@ -522,11 +523,11 @@ get_torrent_data_from_file(const char *torrent)
     FILE *fp = fopen(torrent, "rb");
 
     fseek(fp, 0, SEEK_END);
-    long size = ftell(fp);
-    char *bcode = calloc(size, sizeof(*bcode));
+    ssize_t size = ftell(fp);
+    char *bcode = calloc((size_t)size, sizeof(*bcode));
 
     rewind(fp);
-    if (fread(bcode, 1, size, fp) < size) {
+    if (fread(bcode, 1, (size_t)size, fp) < size) {
         panic("reading is not sufficient");
     }
 

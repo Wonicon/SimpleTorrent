@@ -34,7 +34,7 @@ struct Peer
     int requesting_index;     ///< 请求的分片号，-1 为无效。
     int requesting_begin;     ///< 请求的子分片偏移量（固定长度）
     int contribution;         ///< 检查周期内的数据贡献
-    int wanted;               ///< 期望接受的字节数
+    unsigned wanted;          ///< 期望接受的字节数
     struct PeerMsg *msg;      ///< 记录尚未读完的 msg
 };
 
@@ -115,7 +115,7 @@ struct PeerMsg *peer_get_packet(struct Peer *peer);
  * @param nr_pieces 分片大小
  * @return 动态分配的 peer 指针
  */
-struct Peer *peer_new(int fd, int nr_pieces);
+struct Peer *peer_new(int fd, size_t nr_pieces);
 
 /**
  * @brief 释放 peer
@@ -127,7 +127,7 @@ void peer_free(struct Peer **peer);
  * @param bytes bitfield 缓冲区
  * @param bit_len bit 数, 一般对应分片数量
  */
-void print_bit(unsigned char *bytes, unsigned bit_len);
+void print_bit(unsigned char *bytes, size_t bit_len);
 
 void set_bit(unsigned char *bytes, unsigned bit_offset);
 

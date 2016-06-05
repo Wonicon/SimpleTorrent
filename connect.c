@@ -1,11 +1,9 @@
 #include "util.h"
 #include <string.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <errno.h>
 #include <netdb.h>
 #include <fcntl.h>
-#include <sys/socket.h>
 #include <sys/epoll.h>
 
 int

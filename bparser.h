@@ -1,6 +1,9 @@
 #ifndef BPARSER_H
 #define BPARSER_H
 
+#include <stddef.h>
+#include <inttypes.h>
+
 struct BNode;
 
 // 解析 B 编码数据获取抽象语法树
@@ -44,7 +47,7 @@ struct BNode
             struct BNode *d_next;
         };
         struct {
-            long s_size;
+            size_t s_size;
             char *s_data;
         };
         long i;

@@ -4,8 +4,6 @@
 #include "peer.h"
 #include "connect.h"
 #include "util.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <openssl/sha.h>
 
@@ -54,7 +52,7 @@ extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
             mi->nr_trackers++;
         }
 
-        log("%d trackers", mi->nr_trackers);
+        log("%lu trackers", mi->nr_trackers);
 
         mi->trackers = calloc(mi->nr_trackers, sizeof(*mi->trackers));
         struct Tracker *tracker = &mi->trackers[0];
@@ -89,7 +87,7 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
             SHA1(piece, nr_read, md);
 
             // log
-            printf("piece %d: %zu bytes, sha1: ", piece_index, nr_read);
+            printf("piece %d: %lu bytes, sha1: ", piece_index, nr_read);
             for (int i = 0; i < HASH_SIZE; i++) printf("%02x", md[i]);
 
             if (memcmp(md, mi->pieces[piece_index].hash, HASH_SIZE) == 0) {  // 分片正确
@@ -125,12 +123,12 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
 
     const struct BNode *length_node = dfs_bcode(ast, "length");
     if (length_node) {
-        mi->file_size = length_node->i;
+        mi->file_size = (size_t)length_node->i;
     }
 
     const struct BNode *piece_length_node = dfs_bcode(ast, "piece length");
     if (piece_length_node) {
-        mi->piece_size = piece_length_node->i;
+        mi->piece_size = (uint32_t)piece_length_node->i;
     }
 
     if (mi->file_size && mi->piece_size) {
@@ -140,10 +138,10 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
         mi->sub_count = (mi->piece_size - 1) / mi->sub_size + 1;
     }
 
-    log("filesz %ld, piecesz %d, nr pieces %d, bitfield len %d",
+    log("filesz %ld, piecesz %d, nr pieces %lu, bitfield len %lu",
             mi->file_size, mi->piece_size, mi->nr_pieces, mi->bitfield_size);
 
-    log("sub_size %d, sub_count %d", mi->sub_size, mi->sub_count);
+    log("sub_size %d, sub_count %lu", mi->sub_size, mi->sub_count);
 
     const struct BNode *pieces_node = dfs_bcode(ast, "pieces");
     if (pieces_node) {
@@ -199,7 +197,7 @@ get_peer_by_fd(struct MetaInfo *mi, int fd)
 int
 check_substate(struct MetaInfo *mi, int index)
 {
-    int sub_cnt = (index != mi->nr_pieces) ? mi->sub_count :
+    size_t sub_cnt = (index != mi->nr_pieces) ? mi->sub_count :
         (((mi->file_size % mi->piece_size) - 1) / mi->sub_size + 1);
 
     int is_finished = 1;

@@ -13,7 +13,7 @@ const struct BNode *dfs_bcode(const struct BNode *tree, const char *key);
  * @brief 计算 torrent 文件的 info hash
  * @param data 完整的种子文件数据
  * @param size 种子文件大小
- * @param md sha1 输出缓冲区（至少 HAHS_SIZE 字节）
+ * @param md sha1 输出缓冲区（至少 HASH_SIZE 字节）
  */
 void make_info_hash(const struct BNode *root, unsigned char *md);
 

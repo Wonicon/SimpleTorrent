@@ -1,6 +1,5 @@
 #include "peer.h"
 #include "util.h"
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
@@ -69,7 +68,7 @@ peer_get_packet(struct Peer *peer)
         return NULL;
     }
 
-    log("read %zd / %d", s, peer->wanted);
+    log("read %ld / %d", s, peer->wanted);
     peer->wanted -= s;
     return peer->msg;
 }
@@ -78,7 +77,7 @@ peer_get_packet(struct Peer *peer)
  * bitfield 的大小是对 nr_pieces / 8 的上取整.
  */
 struct Peer *
-peer_new(int fd, int nr_pieces)
+peer_new(int fd, size_t nr_pieces)
 {
     struct Peer *p = calloc(1, sizeof(*p));
     p->fd = fd;
@@ -98,7 +97,7 @@ peer_new(int fd, int nr_pieces)
     p->requesting_index = -1;
     p->requesting_begin = -1;
 
-    int bitfield_capacity = (nr_pieces - 1) / 8 + 1;  // upbound
+    size_t bitfield_capacity = (nr_pieces - 1) / 8 + 1;  // 上取整
     p->bitfield = calloc(bitfield_capacity, sizeof(*p->bitfield));
     return p;
 }
@@ -124,13 +123,13 @@ peer_free(struct Peer **p)
  * @return 字节掩码, 独热
  */
 static inline unsigned
-in_byte_mask_of_(unsigned off)
+in_byte_mask_of_(size_t off)
 {
     /**
      * 8 元组内, 最高位是对应组内偏移 0.
      */
     off = off & 0x7;
-    return (1 << (7 - off));
+    return (1U << (7 - off));
 }
 
 /** @brief 获取位域的字节
@@ -175,25 +174,25 @@ get_bit(unsigned char *bytes, unsigned bit_offset)
 {
     int byte_index = byte_index_of_(bit_offset);
     int in_byte_offset = in_byte_offset_of_(bit_offset);
-    return (bytes[byte_index] & in_byte_mask_of_(bit_offset)) >> in_byte_offset;
+    return (unsigned char)((bytes[byte_index] & in_byte_mask_of_(bit_offset)) >> in_byte_offset);
 }
 
 void
-print_bit_in_byte(unsigned char byte, unsigned bit_len)
+print_bit_in_byte(unsigned char byte, size_t bit_len)
 {
     bit_len = (bit_len < 8) ? bit_len : 8;
 
-    for (unsigned offset = 0; offset < bit_len; offset++) {
-        char ch = (byte & in_byte_mask_of_(offset)) ? '.' : 'X';
+    for (size_t offset = 0; offset < bit_len; offset++) {
+        char ch = (char)((byte & in_byte_mask_of_(offset)) ? '.' : 'X');
         putchar(ch);
     }
 }
 
 void
-print_bit(unsigned char *bytes, unsigned bit_len)
+print_bit(unsigned char *bytes, size_t bit_len)
 {
-    unsigned byte_len = (bit_len - 1) / 8 + 1;  // (bit_len / 8) 上取整
-    for (unsigned i = 0; i < byte_len; i++) {
+    size_t byte_len = (bit_len - 1) / 8 + 1;  // (bit_len / 8) 上取整
+    for (size_t i = 0; i < byte_len; i++) {
         print_bit_in_byte(bytes[i], bit_len);
         bit_len -= 8;
     }
