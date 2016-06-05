@@ -22,8 +22,7 @@ struct Tracker
     char port[10];          ///< 端口（默认 80）
     char request[128];      ///< 请求 url （一般是 /announce, 默认 / ）
     int sfd;                ///< socket file descriptor, 默认为 -1. 主要用于搜索, 会频繁重置.
-    time_t interval;        ///< tracker 约定的再查询时间
-    time_t last_query_time; ///< 上次查询的时间
+    int timerfd;            ///< 定时器描述符，用于在 epoll 里处理定时事件。
 };
 
 /** @brief 分片信息
@@ -130,5 +129,15 @@ int check_substate(struct MetaInfo *mi, int index);
  * @return 对应的 tracker 指针，没找到返回 NULL
  */
 struct Tracker *get_tracker_by_fd(struct MetaInfo *mi, int sfd);
+
+/** @brief 根据定时器描述符找 tracker
+ *
+ * 定时事件是一个低频事件，所以这个函数在 EPOLLIN 事件里排在最后
+ *
+ * @param mi 全局信息
+ * @param timerfd 定时器描述符
+ * @return 对应的 tracker 指针，没找到返回 NULL
+ */
+struct Tracker *get_tracker_by_timer(struct MetaInfo *mi, int timerfd);
 
 #endif  // METAINFO_H

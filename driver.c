@@ -13,6 +13,7 @@
 #include <errno.h>      // EINPROGRESS
 #include <sys/epoll.h>  // epoll_create1(), epoll_ctl(), epoll_wait(), epoll_event
 #include <arpa/inet.h>  // inet_ntoa()
+#include <sys/timerfd.h>  // timerfd_settime()
 
 #define BUF_SIZE 4096
 
@@ -302,13 +303,14 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     }
 }
 
-/** @brief 处理 tracker 响应的 HTTP 报文，将数据载荷读取到动态空间供上层使用，在内部关闭套接字
+/** @brief 处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字
  *
  * 考虑到 tracker 的响应数据量不大，内部全部使用 recv + MSG_WAITALL 防止 read 读取不足。
  *
  * @param sfd 与 tracker 的连接套接字
+ * @return 解析后的语法树，非法时返回 NULL
  */
-void *
+struct BNode *
 handle_tracker_response(int sfd)
 {
     // 解析 HTTP 响应报文
@@ -338,14 +340,18 @@ handle_tracker_response(int sfd)
         return NULL;
     }
 
-    uint8_t *data = malloc(size);
+    void *data = malloc(size);
     if (recv(sfd, data, size, MSG_WAITALL) < size) {
         perror("read");
     }
 
     close(sfd);  // 对 tracker 来说, 没必要维持长连接.
 
-    return data;
+    struct BNode *bcode = bparser(data);
+
+    free(data);
+
+    return bcode;
 }
 
 /** @brief 将 tracker 返回的 peers 异步 connect 并加入 epoll 队列
@@ -354,17 +360,8 @@ handle_tracker_response(int sfd)
  * @param data B 编码数据
  */
 void
-handle_peer_list(int efd, void *data)
+handle_peer_list(int efd, struct BNode *bcode)
 {
-    // 解析 peers 列表, 异步连接 peer.
-    struct BNode *bcode = bparser(data);
-
-    if (bcode == NULL) {
-        log("it is not bcode data");
-        return;
-    }
-
-    print_bcode(bcode, 0, 0);
     const struct BNode *peers = dfs_bcode(bcode, "peers");
 
     if (peers == NULL) {
@@ -387,8 +384,26 @@ handle_peer_list(int efd, void *data)
             perror("async");
         }
     }
+}
 
-    free_bnode(&bcode);
+/** @brief 提取 interval 信息并设置定时 */
+void
+handle_interval(struct Tracker *tracker, struct BNode *bcode)
+{
+    const struct BNode *interval = dfs_bcode(bcode, "interval");
+    if (interval == NULL) {
+        fprintf(stderr, "interval not found\n");
+        return;
+    }
+
+    struct itimerspec ts = {
+            .it_interval = { .tv_sec = interval->i, .tv_nsec = 0 },
+            .it_value = { .tv_sec = 0, .tv_nsec = 0 }
+    };
+
+    if (timerfd_settime(tracker->timerfd, 0, &ts, NULL) == -1) {
+        perror("settime");
+    }
 }
 
 /** @brief 处理与 tracker 的交互
@@ -469,14 +484,20 @@ bt_handler(struct MetaInfo *mi, int efd)
                 if ((peer = get_peer_by_fd(mi, events[i].data.fd)) == NULL) {  // 非正式 peer 的消息
                     struct Tracker *tracker;
                     if ((tracker = get_tracker_by_fd(mi, events[i].data.fd)) != NULL) {  // tracker 的响应
-                        void *data = handle_tracker_response(tracker->sfd);
-                        if (data != NULL) {
-                            handle_peer_list(efd, data);
-                            free(data);
+                        struct BNode *bcode = handle_tracker_response(tracker->sfd);
+                        if (bcode != NULL) {
+                            print_bcode(bcode, 0, 0);
+                            handle_peer_list(efd, bcode);
+                            handle_interval(tracker, bcode);
+                            free_bnode(&bcode);
                         }
                         epoll_ctl(efd, EPOLL_CTL_DEL, tracker->sfd, NULL);
                         close(tracker->sfd);  // tracker 的连接只用一次
                         tracker->sfd = -1;
+                    }
+                    else if ((tracker = get_tracker_by_timer(mi, events[i].data.fd)) != NULL) {  // 定时回访
+                        log("timer event for %s:%s%s", tracker->host, tracker->port, tracker->request);
+                        async_connect_to_tracker(tracker, efd);
                     }
                     else {  // peer 握手消息
                         PeerHandShake handshake = {};
@@ -563,9 +584,9 @@ bt_handler(struct MetaInfo *mi, int efd)
         log("%d / %d peers working", work_cnt, mi->nr_peers);
         for (int i = 0; i < mi->nr_peers; i++) {
             struct Peer *pr = mi->peers[i];
-            printf("%s:%d %s %s %d %d %lf\n", pr->ip, pr->port,
+            printf("%16s:%5d %7s %s %9d  %5d  %lf\n", pr->ip, pr->port,
                    pr->get_choked ? "choke" : "unchoke",
-                   pr->get_interested ? "interest" : "not",
+                   pr->get_interested ? "int" : "not",
                    pr->contribution, pr->wanted, pr->speed);
         }
     }

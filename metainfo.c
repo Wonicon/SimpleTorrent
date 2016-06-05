@@ -6,6 +6,7 @@
 #include "util.h"
 #include <string.h>
 #include <openssl/sha.h>
+#include <sys/timerfd.h>
 
 void
 free_metainfo(struct MetaInfo **pmi)
@@ -64,6 +65,10 @@ extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
                       tracker->request);
             tracker++;
         }
+    }
+
+    for (int i = 0; i < mi->nr_trackers; i++) {
+        mi->trackers[i].timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
     }
 }
 
@@ -225,6 +230,18 @@ get_tracker_by_fd(struct MetaInfo *mi, int sfd)
 
     for (int i = 0; i < mi->nr_trackers; i++) {
         if (mi->trackers[i].sfd == sfd) {
+            return &mi->trackers[i];
+        }
+    }
+
+    return NULL;
+}
+
+struct Tracker *
+get_tracker_by_timer(struct MetaInfo *mi, int timerfd)
+{
+    for (int i = 0; i < mi->nr_trackers; i++) {
+        if (mi->trackers[i].timerfd == timerfd) {
             return &mi->trackers[i];
         }
     }
