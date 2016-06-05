@@ -1,60 +1,12 @@
 #include "util.h"
+#include "metainfo.h"
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <netdb.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
-
-int
-connect_to_tracker(const char *host, const char *port)
-{
-    printf("connecting to %s:%s\n", host, port);
-
-    // 过滤出 IPv4 地址，只使用 TCP 连接。
-    // 如果通过 DNS 查询，会有 IPv6 地址占据前列，浪费时间等待 connect 失败。
-    struct addrinfo hints = {
-        .ai_family = AF_INET,
-        .ai_socktype = SOCK_STREAM,
-        .ai_flags = 0,
-        .ai_protocol = 0,
-        .ai_addr = NULL,
-        .ai_addrlen = 0
-    };
-
-    struct addrinfo *result;
-    int s = getaddrinfo(host, port, &hints, &result);
-    if (s != 0) {
-        fprintf(stderr, "getaddrinfo(%s:%s): %s\n", host, port, gai_strerror(s));
-        return -1;
-    }
-
-    int sfd = -1;  // socket file descriptor
-    for (struct addrinfo *rp = result; rp != NULL; rp = rp->ai_next) {
-        sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (sfd == -1) {
-            perror("socket");
-            continue;
-        }
-
-        if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1) {
-            printf("connected to %s:%s\n", host, port);
-            break;
-        }
-
-        perror("connect");
-        close(sfd);
-    }
-
-    freeaddrinfo(result);
-
-    if (sfd == -1) {
-        fprintf(stderr, "Could not connect.\n");
-        return -1;
-    }
-
-    return sfd;
-}
+#include <pthread.h>
 
 /**
  * @brief 解析 url 获取应用层协议、主机名、端口号
@@ -214,4 +166,74 @@ async_connect(int efd, int sfd, const struct sockaddr *addr, socklen_t addrlen)
         }
         return errno;
     }
+}
+
+/** @brief 异步连接线程
+ *
+ * 本函数主要是为了规避 getaddrinfo 的阻塞，一个重要的隐含前提是通过 tracker 的 sfd 来传递 efd。
+ * 毕竟 sfd 作为连接套接字在调用时是没有意义的。
+ *
+ * @param arg 实际上是指向 tracker 的指针
+ * @return NULL
+ */
+void *
+async_connect_to_tracker_non_block(void *arg)
+{
+    struct Tracker *tracker = arg;
+    const char *host = tracker->host;
+    const char *port = tracker->port;
+    int efd = tracker->sfd;
+
+    // 过滤出 IPv4 地址，只使用 TCP 连接。
+    // 如果通过 DNS 查询，会有 IPv6 地址占据前列，浪费时间等待 connect 失败。
+    struct addrinfo hints = {
+            .ai_family = AF_INET,
+            .ai_socktype = SOCK_STREAM,
+            .ai_flags = 0,
+            .ai_protocol = 0,
+            .ai_addr = NULL,
+            .ai_addrlen = 0
+    };
+
+    struct addrinfo *result;
+    int s = getaddrinfo(host, port, &hints, &result);
+    if (s != 0) {
+        fprintf(stderr, "getaddrinfo(%s:%s): %s\n", host, port, gai_strerror(s));
+        return NULL;
+    }
+
+    int sfd = -1;  // socket file descriptor
+    for (struct addrinfo *rp = result; rp != NULL; rp = rp->ai_next) {
+        sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (sfd == -1) {
+            perror("socket");
+            continue;
+        }
+
+        if (async_connect(efd, sfd, rp->ai_addr, rp->ai_addrlen) == EINPROGRESS) {
+            break;
+        }
+
+        perror("connect to tracker");
+        close(sfd);
+    }
+
+    freeaddrinfo(result);
+
+    if (sfd == -1) {
+        fprintf(stderr, "Could not connect.\n");
+        return NULL;
+    }
+
+    tracker->sfd = sfd;
+    return NULL;
+}
+
+void
+async_connect_to_tracker(struct Tracker *tracker, int efd)
+{
+    printf("connecting to %s:%s\n", tracker->host, tracker->port);
+    pthread_t tid;
+    tracker->sfd = efd;  // 隐含前提，简化参数传递
+    pthread_create(&tid, NULL, async_connect_to_tracker_non_block, tracker);
 }

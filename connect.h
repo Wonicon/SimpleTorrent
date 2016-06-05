@@ -60,12 +60,10 @@ void parse_url(const char *url, char *method, char *host, char *port, char *requ
  */
 int async_connect(int efd, int sfd, const struct sockaddr *addr, socklen_t addrlen);
 
-/**
- * @brief 与 tracker 建立连接
+/** @brief 异步地与 tracker 建立连接，调用后连接并不立即建立
  * @param host 主机名（域名或 IPv4 地址字符串）
  * @param port 端口号
- * @return 连接套接字，连接失败返回 -1
  */
-int connect_to_tracker(const char *host, const char *port);
+void async_connect_to_tracker(struct Tracker *tracker, int efd);
 
 #endif  // CONNECT_H

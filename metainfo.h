@@ -121,4 +121,14 @@ struct Peer *get_peer_by_fd(struct MetaInfo *mi, int fd);
 
 int check_substate(struct MetaInfo *mi, int index);
 
+/** @brief 根据连接套接字找 tracker
+ *
+ * 适用于第一手信息是套接字的场合: epoll
+ *
+ * @param mi 全局信息
+ * @param sfd 连接套接字
+ * @return 对应的 tracker 指针，没找到返回 NULL
+ */
+struct Tracker *get_tracker_by_fd(struct MetaInfo *mi, int sfd);
+
 #endif  // METAINFO_H

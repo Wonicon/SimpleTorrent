@@ -34,16 +34,12 @@ send_handshake(int sfd, struct MetaInfo *mi)
 };
 
 /**
- * 建立连接, 发送请求一条龙. 可以通过 event 指定发送的具体时间,
- * 其余信息完全通过 mi 自动填写. 使用返回的套接字读取响应, 读完
- * 了就可以直接关闭套接字了.
+ * 向 tracker 发送 HTTP GET 请求. 可以通过 event 指定发送的具体时间,
+ * 其余信息完全通过 mi 填写.
  */
-int
-send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
+void
+send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker, const char *event)
 {
-    struct Tracker *tracker = &mi->trackers[no];
-    int sfd = connect_to_tracker(tracker->host, tracker->port);
-
     // 请求头
     struct HttpRequest *req = create_http_request("GET", tracker->request);
 
@@ -57,16 +53,8 @@ send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
         add_http_request_attr(req, "info_hash", "%s", infohash);
     }
 
-    // TODO 错误做法
     // 获取嵌入请求的侦听端口号
-    {
-        struct sockaddr_in sockaddr;
-        socklen_t socklen = sizeof(sockaddr);
-        if (getsockname(sfd, (struct sockaddr *)&sockaddr, &socklen) == -1) {
-            perror("getsockname");
-        }
-        add_http_request_attr(req, "port", "%d", sockaddr.sin_port);
-    }
+    add_http_request_attr(req, "port", "%d", mi->port);
 
     // 其他一些请求信息
     add_http_request_attr(req, "peer_id"   , "-Test-Test-Test-Test");
@@ -78,9 +66,7 @@ send_msg_to_tracker(struct MetaInfo *mi, int no, const char *event)
         add_http_request_attr(req, "event", "%s", event);
     }
 
-    send_http_request(req, sfd);
-
-    return sfd;
+    send_http_request(req, tracker->sfd);
 }
 
 /** @brief 选择需要请求的分片
@@ -348,6 +334,10 @@ handle_tracker_response(int sfd)
         curr = response;
     }
 
+    if (size == 0) {
+        return NULL;
+    }
+
     uint8_t *data = malloc(size);
     if (recv(sfd, data, size, MSG_WAITALL) < size) {
         perror("read");
@@ -399,7 +389,6 @@ handle_peer_list(int efd, void *data)
     }
 
     free_bnode(&bcode);
-    free(data);
 }
 
 /** @brief 处理与 tracker 的交互
@@ -409,20 +398,8 @@ handle_peer_list(int efd, void *data)
  * 本函数不主动关闭套接字。
  */
 void
-tracker_handler(struct MetaInfo *mi, int tracker_idx)
+bt_handler(struct MetaInfo *mi, int efd)
 {
-    int efd = epoll_create1(0);
-    if (efd == -1) {
-        perror("epoll_create1");
-        exit(EXIT_FAILURE);
-    }
-
-    int sfd = send_msg_to_tracker(mi, tracker_idx, NULL);
-
-    char *data = handle_tracker_response(sfd);
-
-    handle_peer_list(efd, data);
-
     /*
      * 报文处理状态机
      */
@@ -445,21 +422,38 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                 if (getsockopt(events[i].data.fd, SOL_SOCKET, SO_ERROR, &result, &result_len) < 0) {
                     perror("getsockopt");
                 }
-                err("%d: %s", events[i].data.fd, strerror(result));
+                struct Tracker *tracker;
+                if ((tracker = get_tracker_by_fd(mi, events[i].data.fd)) != NULL) {
+                    err("%s:%s%s: %s", tracker->host, tracker->port, tracker->request, strerror(result));
+                }
+                else {
+                    err("%d: %s", events[i].data.fd, strerror(result));
+                }
                 close(events[i].data.fd);
                 epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
             }
             else if (events[i].events & EPOLLOUT) {  // connect 完成
                 // EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲,
                 // 即意味着连接成功建立.
+
                 struct sockaddr_in addr;
                 socklen_t addrlen = sizeof(addr);
                 getpeername(events[i].data.fd, (struct sockaddr *)&addr, &addrlen);
-                log("%s is connected at %u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-                send_handshake(events[i].data.fd, mi);
-                log("handshaking with %s:%d", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-                events[i].events = EPOLLIN;
-                epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &events[i]);
+
+                struct Tracker *tracker;
+                if ((tracker = get_tracker_by_fd(mi, events[i].data.fd)) != NULL) {
+                    log("connected to %s:%s%s", tracker->host, tracker->port, tracker->request);
+                    send_msg_to_tracker(mi, tracker, NULL);
+                    events[i].events = EPOLLIN;  // 等待 tracker 的响应
+                    epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &events[i]);
+                }
+                else {
+                    log("%s is connected at %u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+                    send_handshake(events[i].data.fd, mi);
+                    log("handshaking with %s:%d", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+                    events[i].events = EPOLLIN;
+                    epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &events[i]);
+                }
             }
             else if (events[i].events & EPOLLIN) {  // 接受并处理 BT 报文
                 /*
@@ -472,37 +466,50 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                  *   可能是握手信息或者 FIN 报文.
                  */
                 struct Peer *peer;
-                if ((peer = get_peer_by_fd(mi, events[i].data.fd)) == NULL) {  // 完成握手过程
-                    PeerHandShake handshake = {};
-                    ssize_t nr_read = recv(events[i].data.fd, &handshake, sizeof(handshake), MSG_WAITALL);
-                    if (nr_read == 0) {
-                        struct sockaddr_in addr;
-                        socklen_t addrlen = sizeof(addr);
-                        getpeername(events[i].data.fd, (struct sockaddr *)&addr, &addrlen);
-                        log("handshaking failed, disconnect %s:%u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-
-                        epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
-                        close(events[i].data.fd);
+                if ((peer = get_peer_by_fd(mi, events[i].data.fd)) == NULL) {  // 非正式 peer 的消息
+                    struct Tracker *tracker;
+                    if ((tracker = get_tracker_by_fd(mi, events[i].data.fd)) != NULL) {  // tracker 的响应
+                        void *data = handle_tracker_response(tracker->sfd);
+                        if (data != NULL) {
+                            handle_peer_list(efd, data);
+                            free(data);
+                        }
+                        epoll_ctl(efd, EPOLL_CTL_DEL, tracker->sfd, NULL);
+                        close(tracker->sfd);  // tracker 的连接只用一次
+                        tracker->sfd = -1;
                     }
-                    else {
-                        peer = peer_new(events[i].data.fd, mi->nr_pieces);
-                        add_peer(mi, peer);
-                        log("successfully handshake with %s:%u", peer->ip, peer->port);
+                    else {  // peer 握手消息
+                        PeerHandShake handshake = {};
+                        ssize_t nr_read = recv(events[i].data.fd, &handshake, sizeof(handshake), MSG_WAITALL);
+                        if (nr_read == 0) {
+                            struct sockaddr_in addr;
+                            socklen_t addrlen = sizeof(addr);
+                            getpeername(events[i].data.fd, (struct sockaddr *)&addr, &addrlen);
+                            log("handshaking failed, disconnect %s:%u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-                        // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
+                            epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+                            close(events[i].data.fd);
+                        }
+                        else {
+                            peer = peer_new(events[i].data.fd, mi->nr_pieces);
+                            add_peer(mi, peer);
+                            log("successfully handshake with %s:%u", peer->ip, peer->port);
 
-                        // UNCHOKE 和 INTERESTED 都没有数据载荷，区别只有 id.
-                        // 故我们使用同一块缓冲区，修改 id 后进行发送.
-                        // 数据结构本身的大小超过 5 字节，但是有意义的报文内容只占 5 字节。
-                        struct PeerMsg msg = { .len = htonl(1) };
-                        uint8_t msg_type[] = { BT_UNCHOKE, BT_INTERESTED };
+                            // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
 
-                        for (int k = 0; k < sizeof(msg_type) / sizeof(msg_type[0]); k++) {
-                            msg.id = msg_type[k];
-                            if (write(peer->fd, &msg, 5) < 5) {
-                                perror("send msg");
+                            // UNCHOKE 和 INTERESTED 都没有数据载荷，区别只有 id.
+                            // 故我们使用同一块缓冲区，修改 id 后进行发送.
+                            // 数据结构本身的大小超过 5 字节，但是有意义的报文内容只占 5 字节。
+                            struct PeerMsg msg = { .len = htonl(1) };
+                            uint8_t msg_type[] = { BT_UNCHOKE, BT_INTERESTED };
+
+                            for (int k = 0; k < sizeof(msg_type) / sizeof(msg_type[0]); k++) {
+                                msg.id = msg_type[k];
+                                if (write(peer->fd, &msg, 5) < 5) {
+                                    perror("send msg");
+                                }
+                                log("send %s to %s:%d", bt_types[msg.id], peer->ip, peer->port);
                             }
-                            log("send %s to %s:%d", bt_types[msg.id], peer->ip, peer->port);
                         }
                     }
                 }
@@ -556,10 +563,10 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
         log("%d / %d peers working", work_cnt, mi->nr_peers);
         for (int i = 0; i < mi->nr_peers; i++) {
             struct Peer *pr = mi->peers[i];
-            printf("%s:%d %s %s %d\n", pr->ip, pr->port,
+            printf("%s:%d %s %s %d %d %lf\n", pr->ip, pr->port,
                    pr->get_choked ? "choke" : "unchoke",
                    pr->get_interested ? "interest" : "not",
-                   pr->contribution);
+                   pr->contribution, pr->wanted, pr->speed);
         }
     }
 }
@@ -618,11 +625,19 @@ main(int argc, char *argv[])
                mi->trackers[i].method, mi->trackers[i].host, mi->trackers[i].port, mi->trackers[i].request);
     }
 
-    printf("input the tracker number: ");
-    fflush(stdout);
-    int no;
-    scanf("%d", &no);
-    tracker_handler(mi, no);
+    int efd = epoll_create1(0);
+    if (efd == -1) {
+        perror("epoll_create1");
+        exit(EXIT_FAILURE);
+    }
+
+    // 异步连接 tracker
+    for (int i = 0; i < mi->nr_trackers; i++) {
+        struct Tracker *tracker = &mi->trackers[i];
+        async_connect_to_tracker(tracker, efd);
+    }
+
+    bt_handler(mi, efd);
 
     free(bcode);
     free_bnode(&ast);

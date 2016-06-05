@@ -81,7 +81,7 @@ pos(struct state *st)
 /**
  * @brief 较为常用的错误类型
  */
-#define error_unexpected_char(st, ch, expect) panic("ERROR: unexpected '%c', expect '%c' at %lu", ch, expect, pos(st));
+#define error_unexpected_char(st, ch, expect) log("ERROR: unexpected '%c', expect '%c' at %lu", ch, expect, pos(st));
 
 static struct BNode *
 new_bnode(enum BNodeType type)
@@ -221,6 +221,10 @@ parse_bcode(struct state *st)
 struct BNode *
 bparser(char *bcode)
 {
+    if (bcode == NULL) {
+        return NULL;
+    }
+
     struct state st = {
         .start = bcode,
         .curr = bcode,

@@ -215,3 +215,19 @@ check_substate(struct MetaInfo *mi, int index)
 
     return is_finished;
 }
+
+struct Tracker *
+get_tracker_by_fd(struct MetaInfo *mi, int sfd)
+{
+    if (sfd == -1) {
+        return NULL;
+    }
+
+    for (int i = 0; i < mi->nr_trackers; i++) {
+        if (mi->trackers[i].sfd == sfd) {
+            return &mi->trackers[i];
+        }
+    }
+
+    return NULL;
+}
