@@ -71,7 +71,7 @@ struct MetaInfo
 
     unsigned short port;                ///< 侦听端口
     int listen_fd;                      ///< 侦听套接字
-
+    int timerfd;                        ///< 发送 KEEP-ALIVE 的定时器
     int nr_peers;                       ///< peers 数组的大小 == 已握手 peer 的数量
     struct Peer **peers;                ///< 已握手 peer 的集合
 

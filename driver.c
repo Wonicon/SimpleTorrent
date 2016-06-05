@@ -499,6 +499,13 @@ bt_handler(struct MetaInfo *mi, int efd)
                         log("timer event for %s:%s%s", tracker->host, tracker->port, tracker->request);
                         async_connect_to_tracker(tracker, efd);
                     }
+                    else if (events[i].data.fd == mi->timerfd) {  // 定时发送 KEEP ALIVE
+                        int len = htonl(0);
+                        log("keep-alive");
+                        for (int k = 0; k < mi->nr_peers; k++) {
+                            write(mi->peers[k]->fd, &len, 4);
+                        }
+                    }
                     else {  // peer 握手消息
                         PeerHandShake handshake = {};
                         ssize_t nr_read = recv(events[i].data.fd, &handshake, sizeof(handshake), MSG_WAITALL);
@@ -560,12 +567,6 @@ bt_handler(struct MetaInfo *mi, int efd)
             }
         }
 
-
-        int len = htonl(0);
-        for (int i = 0; i < mi->nr_peers; i++) {
-            write(mi->peers[i]->fd, &len, 4);
-        }
-
         // 处理发送逻辑
         struct PeerMsg msg;
         struct Peer *peer;
@@ -620,6 +621,10 @@ int
 main(int argc, char *argv[])
 {
     struct MetaInfo *mi = calloc(1, sizeof(*mi));
+
+    mi->timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
+    struct itimerspec ts = { { 120, 0 }, { 0, 0} };
+    timerfd_settime(mi->timerfd, 0, &ts, NULL);
 
     char *bcode = get_torrent_data_from_file(argv[1]);
     struct BNode *ast = bparser(bcode);
