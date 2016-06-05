@@ -257,6 +257,7 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         if (check_substate(mi, msg->piece.index)) {
             piece->is_downloaded = 1;
         }
+        peer->contribution += msg->len - 9;
     }
     else {
         log("discard piece %d subpiece %d from %s:%d due to previous accomplishment",
@@ -510,13 +511,11 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
         // 处理发送逻辑
         struct PeerMsg msg;
         struct Peer *peer;
-        if (select_piece(mi, &msg) == -1) {
-            continue;
+        if (select_piece(mi, &msg) != -1) {
+            if ((peer = select_peer(mi, &msg)) != NULL) {
+                send_request(mi, peer, &msg);
+            }
         }
-        if ((peer = select_peer(mi, &msg)) == NULL) {
-            continue;
-        }
-        send_request(mi, peer, &msg);
 
         int work_cnt = 0;
         for (int i = 0; i < mi->nr_peers; i++) {
@@ -525,6 +524,13 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
             }
         }
         log("%d / %d peers working", work_cnt, mi->nr_peers);
+        for (int i = 0; i < mi->nr_peers; i++) {
+            struct Peer *pr = mi->peers[i];
+            printf("%s:%d %s %s %d\n", pr->ip, pr->port,
+                   pr->get_choked ? "choke" : "unchoke",
+                   pr->get_interested ? "interest" : "not",
+                   pr->contribution);
+        }
     }
 }
 
