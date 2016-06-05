@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <openssl/sha.h>
 
 void
 free_metainfo(struct MetaInfo **pmi)
@@ -69,6 +70,55 @@ extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
 }
 
 void
+metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
+{
+    const struct BNode *name = dfs_bcode(ast, "name");
+
+    log("filename: %s", name->s_data);
+
+    FILE *fp = fopen(name->s_data, "rb");
+
+    if (fp != NULL) {  // 已有下载文件，检查分片 SHA1
+        uint8_t *piece = malloc(mi->piece_size);  // piece data buffer
+        uint8_t md[HASH_SIZE];  // sha1 buffer
+
+        size_t nr_read;
+        int piece_index = 0;
+        int corrent_piece_count = 0;
+        while ((nr_read = fread(piece, 1, mi->piece_size, fp)) != 0) {  // EOF 退出，容许不足
+            SHA1(piece, nr_read, md);
+
+            // log
+            printf("piece %d: %zu bytes, sha1: ", piece_index, nr_read);
+            for (int i = 0; i < HASH_SIZE; i++) printf("%02x", md[i]);
+
+            if (memcmp(md, mi->pieces[piece_index].hash, HASH_SIZE) == 0) {  // 分片正确
+                mi->pieces[piece_index].is_downloaded = 1;
+                corrent_piece_count++;
+                printf(" ok");
+            }
+
+            printf("\n");
+
+            piece_index++;
+        }
+
+        if (corrent_piece_count == mi->nr_pieces) {
+            log("file has been downloaded");
+            mi->file = fp;
+            return;
+        }
+        else {  // 有不正确的分片，或者文件不完整，重新以可写方式打开。
+            fclose(fp);
+            mi->file = fopen(name->s_data, "rb+");  // read, write, no trunc
+        }
+    }
+    else {  // 没有下载文件，放心 trunc
+        mi->file = fopen(name->s_data, "wb");
+    }
+}
+
+void
 extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
 {
     // 提取分片信息
@@ -101,7 +151,7 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
         const char *hash = pieces_node->s_data;
         for (int i = 0; i < mi->nr_pieces; i++) {
             memcpy(mi->pieces[i].hash, hash, HASH_SIZE);
-            hash += sizeof(*mi->pieces);
+            hash += HASH_SIZE;
             // 最后一个分片可能会造成空间冗余，即子分片不足 sub_count, 但是没有副作用。
             mi->pieces[i].substate = calloc(mi->sub_count, sizeof(*mi->pieces[i].substate));
         }

@@ -44,7 +44,6 @@ struct PieceInfo
 #define SUB_DOWNLOAD 1
 #define SUB_FINISH 2
     unsigned char *substate;        ///< 标记子分片完成情况： SUB_NA - 未下载，SUB_DOWNLOAD - 下载中，SUB_FINISH - 下载完成。
-    FILE          *tmp_file;        ///< 用于保存分片数据的临时文件。
 };
 
 /** @brief 描述一次运行的全局信息
@@ -58,6 +57,7 @@ struct PieceInfo
 struct MetaInfo
 {
     long file_size;                     ///< 数据文件大小
+    FILE *file;                         ///< 下载文件
     unsigned char info_hash[HASH_SIZE]; ///< 整个 info 字典的 sha1 摘要
 
     int piece_size;                     ///< 分片大小
@@ -85,6 +85,9 @@ void free_metainfo(struct MetaInfo **pmi);
  * @param ast B 编码语法树
  */
 void extract_trackers(struct MetaInfo *mi, const struct BNode *ast);
+
+/** @brief 获取文件名，读取文件，分析已经完成的块 */
+void metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast);
 
 /** @brief 提取分片 hash
  * @param mi 全局信息

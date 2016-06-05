@@ -223,13 +223,6 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
 {
     struct PieceInfo *piece = &mi->pieces[msg->piece.index];
 
-    if (piece->tmp_file == NULL) {
-        char tmp_name[1024];
-        sprintf(tmp_name, "tmp.%d", msg->piece.index);
-        piece->tmp_file = fopen(tmp_name, "wb");
-        log("create piece file %s", tmp_name);
-    }
-
     // 保证一致性
     assert(peer->requesting_index == msg->piece.index);
     assert(peer->requesting_begin == msg->piece.begin);
@@ -237,8 +230,8 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     int sub_idx = msg->piece.begin / mi->sub_size;
 
     if (piece->substate[sub_idx] != SUB_FINISH) {
-        fseek(piece->tmp_file, msg->piece.begin, SEEK_SET);
-        fwrite(msg->piece.block, 1, msg->len - 9, piece->tmp_file);  // 9 是 id, index, begin 的冗余长度。
+        fseek(mi->file, msg->piece.index * mi->piece_size + msg->piece.begin, SEEK_SET);
+        fwrite(msg->piece.block, 1, msg->len - 9, mi->file);  // 9 是 id, index, begin 的冗余长度。
         piece->substate[sub_idx] = SUB_FINISH;
         if (check_substate(mi, msg->piece.index)) {
             piece->is_downloaded = 1;
@@ -540,6 +533,7 @@ main(int argc, char *argv[])
 
     extract_trackers(mi, ast);
     extract_pieces(mi, ast);
+    metainfo_load_file(mi, ast);
     make_info_hash(ast, mi->info_hash);
 
     printf("info_hash: ");
