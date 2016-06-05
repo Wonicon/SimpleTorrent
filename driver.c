@@ -182,17 +182,21 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
 struct Peer *
 select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
 {
-    int i;
+    double max_speed = -1.0;
+    struct Peer *fastest_peer = NULL;
 
-    for (i = 0; i < mi->nr_peers; i++) {
+    for (int i = 0; i < mi->nr_peers; i++) {
         struct Peer *peer = mi->peers[i];
         if (!peer->get_choked && peer->requesting_index == -1 && peer_get_bit(peer, msg->request.index)) {
             // 可以响应的，没有下载任务的，有分片的
-            return peer;
+            if (peer->speed > max_speed) {
+                max_speed = peer->speed;
+                fastest_peer = peer;
+            }
         }
     }
 
-    return NULL;
+    return fastest_peer;
 }
 
 void
@@ -212,6 +216,7 @@ send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     assert(piece->substate[sub_idx] == SUB_NA);
     piece->substate[sub_idx] = SUB_DOWNLOAD;
     piece->subtimer[sub_idx] = time(NULL);
+    peer->start_time = piece->subtimer[sub_idx];
 
     msg->request.index = htonl(index);
     msg->request.begin = htonl(begin);
@@ -230,7 +235,9 @@ send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
  * 收到分片消息后，期望调用者处理字节序。
  * 会将子分片写入到对应的分片文件中，如果一个子分片已经被写入过，则抛弃。
  * 出于简单实现的考虑，子分片采取固定大小，使用位图管理完成进度，
- * 最后一个分片不会在这里进行特殊处理，由发送过程保证最后一个分片的正确性。
+ * 最后一个分片不会在这里进行特殊处理，由发送过程保证最后一个分片长度的正确性。
+ *
+ * 在这里结算一个子分片的下载速度。
  */
 void
 handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
@@ -259,6 +266,10 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     // 重置下载状态
     peer->requesting_index = -1;
     peer->requesting_begin = -1;
+
+    // 结算下载速度
+    peer->speed = (msg->len - 9) / difftime(time(NULL), peer->start_time);
+    log("%s:%d's speed %lfB/s", peer->ip, peer->port, peer->speed);
 }
 
 void
@@ -390,6 +401,10 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
     while (1) {
         int n = epoll_wait(efd, events, 100, 5000);  // 超时限制 5s
 
+        if (n < 0) {
+            break;
+        }
+
         // 处理接收逻辑
         for (int i = 0; i < n; i++) {
             puts(bar);
@@ -470,13 +485,7 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
                         epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
                         close(peer->fd);
 
-                        // 尝试撤销 peer 的下载请求
-                        if (peer->requesting_index != -1) {
-                            assert(mi->pieces[peer->requesting_index].substate[peer->requesting_begin / mi->sub_size]
-                                    == SUB_DOWNLOAD);
-                            mi->pieces[peer->requesting_index].substate[peer->requesting_begin / mi->sub_size]
-                                = SUB_NA;
-                        }
+                        // 不需要撤销分片的下载状态，因为超时后自会重置下载状态
 
                         del_peer_by_fd(mi, peer->fd);
                         log("%d peers left", mi->nr_peers);
@@ -509,6 +518,13 @@ tracker_handler(struct MetaInfo *mi, int tracker_idx)
         }
         send_request(mi, peer, &msg);
 
+        int work_cnt = 0;
+        for (int i = 0; i < mi->nr_peers; i++) {
+            if (mi->peers[i]->requesting_index != -1) {
+                work_cnt++;
+            }
+        }
+        log("%d / %d peers working", work_cnt, mi->nr_peers);
     }
 }
 

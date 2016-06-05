@@ -36,6 +36,8 @@ struct Peer
     int contribution;         ///< 检查周期内的数据贡献
     unsigned wanted;          ///< 期望接受的字节数
     struct PeerMsg *msg;      ///< 记录尚未读完的 msg
+    time_t start_time;        ///< 记录发送请求的时刻，用于计算分片下载速度，不使用分片的 time 是因为后者可能因超时被更新。
+    double speed;             ///< 下载速度
 };
 
 #pragma pack(1)

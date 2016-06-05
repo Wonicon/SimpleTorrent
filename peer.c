@@ -96,6 +96,7 @@ peer_new(int fd, size_t nr_pieces)
     p->is_interested = 1;      // 我会请求对方
     p->requesting_index = -1;
     p->requesting_begin = -1;
+    p->speed = 0.0;
 
     size_t bitfield_capacity = (nr_pieces - 1) / 8 + 1;  // 上取整
     p->bitfield = calloc(bitfield_capacity, sizeof(*p->bitfield));
