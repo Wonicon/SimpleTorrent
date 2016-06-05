@@ -44,6 +44,8 @@ struct PieceInfo
 #define SUB_DOWNLOAD 1
 #define SUB_FINISH 2
     unsigned char *substate;        ///< 标记子分片完成情况： SUB_NA - 未下载，SUB_DOWNLOAD - 下载中，SUB_FINISH - 下载完成。
+#define WAIT_THRESHOLD 60.0         ///< 子分片最长等待时间 60s
+    time_t        *subtimer;        ///< 标记子分片下载等待时间
 };
 
 /** @brief 描述一次运行的全局信息

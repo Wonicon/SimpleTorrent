@@ -154,6 +154,7 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
             hash += HASH_SIZE;
             // 最后一个分片可能会造成空间冗余，即子分片不足 sub_count, 但是没有副作用。
             mi->pieces[i].substate = calloc(mi->sub_count, sizeof(*mi->pieces[i].substate));
+            mi->pieces[i].subtimer = calloc(mi->sub_count, sizeof(*mi->pieces[i].subtimer));
         }
     }
 }

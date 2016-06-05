@@ -107,6 +107,8 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
     int piece_sz = mi->piece_size;
     int sub_cnt = mi->sub_count;
 
+    time_t curr_time = time(NULL);
+
     // 最简单的最前最优先策略
     for (; index < mi->nr_pieces; index++) {
         if (mi->pieces[index].is_downloaded) {
@@ -128,7 +130,19 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
         }
 
         if (sub_idx == sub_cnt) {
-            log("all subpieces of piece %d have been / is being downloaded", index);
+            log("some subpieces of piece %d is being downloaded", index);
+            check_substate(mi, index);
+            for (sub_idx = 0; sub_idx < sub_cnt; sub_idx++) {
+                if (piece->substate[sub_idx] == SUB_DOWNLOAD && difftime(curr_time, piece->subtimer[sub_idx]) > WAIT_THRESHOLD) {
+                    log("index %d begin %d exceeds time limit, re-request", index, sub_idx * mi->sub_size);
+                    piece->substate[sub_idx] = SUB_NA;
+                    break;
+                }
+            }
+        }
+
+        if (sub_idx == sub_cnt) {
+            log("none exceeds time limit");
         }
         else {
             break;
@@ -198,6 +212,7 @@ send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     struct PieceInfo *piece = &mi->pieces[index];
     assert(piece->substate[sub_idx] == SUB_NA);
     piece->substate[sub_idx] = SUB_DOWNLOAD;
+    piece->subtimer[sub_idx] = time(NULL);
 
     msg->request.index = htonl(index);
     msg->request.begin = htonl(begin);
