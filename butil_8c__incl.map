@@ -1,5 +1,5 @@
 <map id="butil.c" name="butil.c">
 <area shape="rect" id="node2" href="$butil_8h.html" title="基于 B 编码语法树的工具函数声明 " alt="" coords="46,80,103,107"/>
-<area shape="rect" id="node6" href="$metainfo_8h.html" title="操作全局信息的相关 API " alt="" coords="152,80,235,107"/>
+<area shape="rect" id="node6" href="$metainfo_8h.html" title="操作全局信息的相关 API 声明 " alt="" coords="152,80,235,107"/>
 <area shape="rect" id="node3" href="$bparser_8h.html" title="B 编码 parser 的 API 声明 " alt="" coords="25,155,101,181"/>
 </map>

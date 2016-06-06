@@ -1,5 +1,5 @@
 <map id="metainfo.c" name="metainfo.c">
-<area shape="rect" id="node2" href="$metainfo_8h.html" title="操作全局信息的相关 API " alt="" coords="120,155,203,181"/>
+<area shape="rect" id="node2" href="$metainfo_8h.html" title="操作全局信息的相关 API 声明 " alt="" coords="120,155,203,181"/>
 <area shape="rect" id="node6" href="$bparser_8h.html" title="B 编码 parser 的 API 声明 " alt="" coords="230,155,306,181"/>
 <area shape="rect" id="node8" href="$butil_8h.html" title="基于 B 编码语法树的工具函数声明 " alt="" coords="222,80,279,107"/>
 <area shape="rect" id="node9" href="$peer_8h.html" title="单个 peer 相关操作 API 声明 " alt="" coords="88,80,147,107"/>

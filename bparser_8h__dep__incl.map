@@ -1,7 +1,7 @@
 <map id="bparser.h" name="bparser.h">
-<area shape="rect" id="node2" href="$bparser_8c.html" title="bparser.c" alt="" coords="5,80,81,107"/>
+<area shape="rect" id="node2" href="$bparser_8c.html" title="B 编码 parser 的 API 实现 " alt="" coords="5,80,81,107"/>
 <area shape="rect" id="node3" href="$butil_8h.html" title="基于 B 编码语法树的工具函数声明 " alt="" coords="105,80,163,107"/>
-<area shape="rect" id="node6" href="$metainfo_8c.html" title="metainfo.c" alt="" coords="183,155,266,181"/>
-<area shape="rect" id="node4" href="$butil_8c.html" title="butil.c" alt="" coords="12,155,69,181"/>
+<area shape="rect" id="node6" href="$metainfo_8c.html" title="操作全局信息的相关 API 实现 " alt="" coords="183,155,266,181"/>
+<area shape="rect" id="node4" href="$butil_8c.html" title="基于 B 编码语法树的工具函数实现 " alt="" coords="12,155,69,181"/>
 <area shape="rect" id="node5" href="$driver_8c.html" title="顶层驱动模块 " alt="" coords="93,155,159,181"/>
 </map>
