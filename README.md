@@ -8,7 +8,7 @@
 
 ```
 $ make
-$ ./client <your-torrent-file>
+$ ./client <your-torrent-file> <port>
 ```
 
 下载文件保存在执行目录下。
