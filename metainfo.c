@@ -6,7 +6,6 @@
 #include "util.h"
 #include <string.h>
 #include <openssl/sha.h>
-#include <sys/timerfd.h>
 
 void
 free_metainfo(struct MetaInfo **pmi)
@@ -167,20 +166,37 @@ add_peer(struct MetaInfo *mi, struct Peer *p)
 }
 
 /**
- * 很 low 的完全拷贝法.
  * 被删除的指针空闲没有回收, 在未来增加新
  * peer 时靠 realloc 重新尾部的冗余空间.
  */
 void
 del_peer_by_fd(struct MetaInfo *mi, int fd)
 {
-    for (int fast = 0, slow = 0; fast < mi->nr_peers; fast++, slow++) {
-        if (fd == mi->peers[fast]->fd) {
-            peer_free(&mi->peers[fast]);
-            fast++;
-        }
-        mi->peers[slow] = mi->peers[fast];
+    struct Peer *peer = NULL;
+    struct Peer **peers = mi->peers;
+    int i, n = mi->nr_peers;
+
+    if (n == 0) {
+        return;
     }
+
+    for (i = 0; i < n; i++) {
+        peer = peers[i];
+        if (fd == peer->fd) {
+            break;
+        }
+    }
+
+    if (peer != NULL) {
+        free(peer);
+    }
+
+    if (i < mi->nr_peers -1) {
+        // 只把要删除的 peer 的后面的 peers 往前拷贝一个。数量计算如下：
+        // |[i + 1, n - 1]| = (n - 1) - (i + 1) + 1 = n - i - 1;
+        memmove(peers + i, peers + i + 1, sizeof(*peers) * (n - i - 1));
+    }
+
     mi->nr_peers--;
 }
 
