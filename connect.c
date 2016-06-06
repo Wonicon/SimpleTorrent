@@ -239,6 +239,7 @@ async_connect_to_tracker_non_block(void *arg)
             exit(-1);
         }
         if (async_connect(efd, sfd, rp->ai_addr, rp->ai_addrlen) == EINPROGRESS) {
+            log("tracker %s fd %d", tracker->host, sfd);
             break;
         }
 

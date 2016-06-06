@@ -77,14 +77,11 @@ struct WaitPeer
     int direction;        ///< 0: 我方主动连接, 1: 对方主动连接。
 };
 
-/** @brief 描述一次运行的全局信息
+/**
+ * @brief 描述一次运行的全局信息
  *
  * 在结构体中记录侦听套接字 listen_fd, 以方便在
  * epoll 中根据 event 的套接字判断具体事件。
- *
- * @todo 确定子分片大小，记录并保存相关信息。
- * @todo 创建套接字并绑定侦听端口。
- * @todo 创建侦听套接字，绑定给定的侦听端口并告知 tracker
  */
 struct MetaInfo
 {

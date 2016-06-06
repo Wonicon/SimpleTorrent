@@ -326,6 +326,7 @@ find_wait_peer_fd_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port)
 void
 rm_wait_peer(struct MetaInfo *mi, int index)
 {
+    printf("\n");
     if (index < mi->nr_wait_peers - 1) {
         memmove(mi->wait_peers + index, mi->wait_peers + index + 1,
                sizeof(struct WaitPeer) * (mi->nr_wait_peers - index - 1));

@@ -459,7 +459,7 @@ handle_interval(struct Tracker *tracker, struct BNode *bcode, int efd)
     }
 
     tracker->timerfd = timerfd_create(CLOCK_REALTIME, 0);
-    log("tracker timer FD %d", tracker->timerfd);
+    log("tracker %s timer FD %d", tracker->host, tracker->timerfd);
 
     // 单次定时器，靠重新获取报文来重新定时
     struct itimerspec ts = {
@@ -561,7 +561,7 @@ finish_handshake(struct MetaInfo *mi, int sfd)
     }
 
     struct WaitPeer wp = mi->wait_peers[wp_idx];  // 暂存以备后续使用
-    rm_wait_peer(mi, wp_idx);
+    rm_wait_peer(mi, wp_idx);  // 无论成功与否，都要从等待列表里删除
 
     // 更新 peers 列表
     PeerHandShake handshake = {};
@@ -570,7 +570,6 @@ finish_handshake(struct MetaInfo *mi, int sfd)
     if (nr_read == 0) {
         log("handshaking failed, disconnect %u.%u.%u.%u:%u",
             wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
-        rm_wait_peer(mi, wp_idx);
         close(sfd);
         return -1;
     }
@@ -709,6 +708,7 @@ bt_handler(struct MetaInfo *mi, int efd)
                     /// @todo 通过 accept 建立连接并监听连接套接字的 EPOLLIN 事件，加入 MetaInfo#wait_peers 队列。注意设置 WaitPeer#direction
                     // 将连接套接字加入 wait_peers 后，可以在最后的 finish_handshake 里和我方主动连接的套接字统一处理。
                     // 两种情况虽然有是否回复 handshake 的差别，但是可以通过设置 direction 进行区分。
+                    continue;
                 }
 
                 // tracker 的响应
@@ -804,18 +804,61 @@ get_torrent_data_from_file(const char *torrent)
 int
 main(int argc, char *argv[])
 {
-    struct MetaInfo *mi = calloc(1, sizeof(*mi));
+    if (argc < 3) {
+        printf("Usage: %s <torrent> <port>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
+    setbuf(stdout, NULL);
+
+    // 解析种子文件
     char *bcode = get_torrent_data_from_file(argv[1]);
     struct BNode *ast = bparser(bcode);
-
     puts("Parsed Bencode:");
     print_bcode(ast, 0, 0);
 
+    // 创建并初始化 MetaInfo 对象
+    struct MetaInfo *mi = calloc(1, sizeof(*mi));
+
+    // 计算 info hash, 此后不需要源数据
+    make_info_hash(ast, mi->info_hash);
+    free(bcode);
+
+    // 提取相关信息
     extract_trackers(mi, ast);
     extract_pieces(mi, ast);
     metainfo_load_file(mi, ast);
-    make_info_hash(ast, mi->info_hash);
+
+    // 不再需要种子信息
+    free_bnode(&ast);
+
+    // 创建用于定时发送 keep-alive 消息的定时器
+    mi->timerfd = timerfd_create(CLOCK_REALTIME, 0);
+    log("mi timer FD %d", mi->timerfd);
+    struct itimerspec ts = { { 60, 0 }, { 60, 0} };  // 首次超时 1min, 持续间隔 1min.
+    timerfd_settime(mi->timerfd, 0, &ts, NULL);
+
+    // 创建侦听 peer 的套接字
+    int sfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sfd == -1) {
+        perror("create listen socket");
+        exit(EXIT_FAILURE);
+    }
+    struct sockaddr_in addr = {
+        .sin_addr.s_addr = INADDR_ANY,
+        .sin_family = AF_INET,
+        .sin_port = htons((uint16_t)atoi(argv[2])),
+    };
+    if (bind(sfd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        perror("bind listen socket");
+    }
+    if (listen(sfd, 0) == -1) {
+        perror("listen socket");
+    }
+    mi->listen_fd = sfd;
+    log("listen fd %d", sfd);
+
+    // 输出相关信息
 
     printf("info_hash: ");
     for (int i = 0; i < HASH_SIZE; i++) {
@@ -826,7 +869,10 @@ main(int argc, char *argv[])
     puts("Tracker list:");
     for (int i = 0; i < mi->nr_trackers; i++) {
         printf("%d. %s://%s:%s%s\n", i,
-               mi->trackers[i].method, mi->trackers[i].host, mi->trackers[i].port, mi->trackers[i].request);
+               mi->trackers[i].method,
+               mi->trackers[i].host,
+               mi->trackers[i].port,
+               mi->trackers[i].request);
     }
 
     int efd = epoll_create1(0);
@@ -835,12 +881,17 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    mi->timerfd = timerfd_create(CLOCK_REALTIME, 0);
-    log("mi timer FD %d", mi->timerfd);
-    struct itimerspec ts = { { 120, 0 }, { 120, 0} };
-    timerfd_settime(mi->timerfd, 0, &ts, NULL);
-    struct epoll_event ev = { .data.fd = mi->timerfd, .events = EPOLLIN };
+    // 侦听定时事件
+    struct epoll_event ev = {
+        .data.fd = mi->timerfd,
+        .events = EPOLLIN
+    };
     epoll_ctl(efd, EPOLL_CTL_ADD, mi->timerfd, &ev);
+
+    // 侦听连接请求
+    ev.data.fd = mi->listen_fd;
+    ev.events = EPOLLIN;
+    epoll_ctl(efd, EPOLL_CTL_ADD, mi->listen_fd, &ev);
 
     // 异步连接 tracker
     for (int i = 0; i < mi->nr_trackers; i++) {
@@ -848,9 +899,10 @@ main(int argc, char *argv[])
         async_connect_to_tracker(tracker, efd);
     }
 
+    // 开始侦听，处理事件
     bt_handler(mi, efd);
 
-    free(bcode);
-    free_bnode(&ast);
     free_metainfo(&mi);
+
+    return 0;
 }
