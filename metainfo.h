@@ -48,6 +48,16 @@ struct PieceInfo
     time_t        *subtimer;        ///< 标记子分片下载等待时间
 };
 
+struct WaitPeer
+{
+    int fd;
+    union {
+        uint32_t addr;
+        uint8_t ip[4];
+    };
+    uint16_t port;
+};
+
 /** @brief 描述一次运行的全局信息
  *
  * 在结构体中记录侦听套接字 listen_fd, 以方便在
@@ -74,7 +84,8 @@ struct MetaInfo
     int timerfd;                        ///< 发送 KEEP-ALIVE 的定时器
     int nr_peers;                       ///< peers 数组的大小 == 已握手 peer 的数量
     struct Peer **peers;                ///< 已握手 peer 的集合
-
+    int nr_wait_peers;                  ///< 已发出 connect 的 peer 数量
+    struct WaitPeer *wait_peers;        ///< 已发出 connect 的 peer 集合
     size_t nr_trackers;                 ///< tracker 数量
     struct Tracker *trackers;           ///< tracker 数组
 };
@@ -139,5 +150,23 @@ struct Tracker *get_tracker_by_fd(struct MetaInfo *mi, int sfd);
  * @return 对应的 tracker 指针，没找到返回 NULL
  */
 struct Tracker *get_tracker_by_timer(struct MetaInfo *mi, int timerfd);
+
+/** @brief 添加等待 peer, 网络字节序 */
+void add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port);
+
+/** @brief 根据套接字找到 peer 下标
+ *
+ * @return 对应的下标，没找到则 -1.
+ */
+int get_wait_peer_index_by_fd(struct MetaInfo *mi, int fd);
+
+/** @brief 根据地址找到 peer 的套接字，网络字节序
+ *
+ * @return 对应的套接字，没找到则 -1.
+ */
+int find_wait_peer_fd_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port);
+
+/** @brief 删除等待 peer */
+void rm_wait_peer(struct MetaInfo *mi, int index);
 
 #endif  // METAINFO_H

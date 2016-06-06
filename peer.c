@@ -88,6 +88,7 @@ peer_new(int fd, size_t nr_pieces)
     getpeername(fd, (struct sockaddr *)&addr, &addrlen);
     strcpy(p->ip, inet_ntoa(addr.sin_addr));
     p->port = ntohs(addr.sin_port);
+    p->addr = addr.sin_addr.s_addr;
 
     // 初始化状态
     p->get_choked = 1;         // 对方一开始不响应我的请求

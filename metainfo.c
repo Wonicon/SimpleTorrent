@@ -244,3 +244,51 @@ get_tracker_by_timer(struct MetaInfo *mi, int timerfd)
 
     return NULL;
 }
+
+void
+add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port)
+{
+    mi->wait_peers = realloc(mi->wait_peers, (mi->nr_wait_peers + 1) * sizeof(struct WaitPeer));
+    struct WaitPeer *p = &mi->wait_peers[mi->nr_wait_peers];
+    p->fd = fd;
+    p->addr = addr;
+    p->port = port;
+    mi->nr_wait_peers++;
+}
+
+int
+get_wait_peer_index_by_fd(struct MetaInfo *mi, int fd)
+{
+    for (int i = 0; i < mi->nr_wait_peers; i++) {
+        if (mi->wait_peers[i].fd == fd) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int
+find_wait_peer_fd_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port)
+{
+    for (int i = 0; i < mi->nr_wait_peers; i++) {
+        struct WaitPeer *p = &mi->wait_peers[i];
+        if (p->addr == addr && p->port == port) {
+            return p->fd;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * 如果要删除的元素刚好是最后一个，只需要减少总数量就行了。
+ */
+void
+rm_wait_peer(struct MetaInfo *mi, int index)
+{
+    if (index < mi->nr_wait_peers - 1) {
+        memmove(mi->wait_peers + index, mi->wait_peers + index + 1,
+               sizeof(struct WaitPeer) * (mi->nr_wait_peers - index - 1));
+    }
+    mi->nr_wait_peers--;
+}

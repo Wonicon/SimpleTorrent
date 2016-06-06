@@ -360,7 +360,7 @@ handle_tracker_response(int sfd)
  * @param data B 编码数据
  */
 void
-handle_peer_list(int efd, struct BNode *bcode)
+handle_peer_list(struct MetaInfo *mi, int efd, struct BNode *bcode)
 {
     const struct BNode *peers = dfs_bcode(bcode, "peers");
 
@@ -371,11 +371,35 @@ handle_peer_list(int efd, struct BNode *bcode)
 
     for (int i = 0; i < peers->s_size; i += 6) {
         struct {
-            uint8_t ip[4];
+            union {
+                uint8_t ip[4];
+                uint32_t addr;
+            };
             uint16_t port;
         } *p = (void *)&peers->s_data[i];
+
+        // 防止从多个 tracker 连接同一个 peer
+        int j;
+        for (j = 0; j < mi->nr_peers; j++) {
+            if (p->addr == mi->peers[j]->addr && p->port == mi->peers[j]->port) {
+                break;
+            }
+        }
+        if (j < mi->nr_peers) {
+            log("already have peer %d.%d.%d.%d:%d", p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
+            continue;
+        }
+        if (find_wait_peer_fd_by_addr(mi, p->addr, p->port) != -1) {
+            log("already connecting to peer %d.%d.%d.%d:%d", p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
+            continue;
+        }
+
         int fd = socket(AF_INET, SOCK_STREAM, 0);
-        log("fd %d is assigned for %d.%d.%d.%d:%d", fd, p->ip[0], p->ip[1], p->ip[2], p->ip[3], htons(p->port));
+
+        // 将地址信息加入到等待 peer 集合以备之后的查重工作
+        add_wait_peer(mi, fd, p->addr, p->port);
+
+        log("fd %d is assigned for %d.%d.%d.%d:%d", fd, p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
         struct sockaddr_in sa;
         sa.sin_family = AF_INET;
         memcpy(&sa.sin_addr.s_addr, p->ip, 4);
@@ -397,6 +421,7 @@ handle_interval(struct Tracker *tracker, struct BNode *bcode, int efd)
     }
 
     tracker->timerfd = timerfd_create(CLOCK_REALTIME, 0);
+    log("tracker timer FD %d", tracker->timerfd);
 
     // 单次定时器，靠重新获取报文来重新定时
     struct itimerspec ts = {
@@ -456,6 +481,12 @@ bt_handler(struct MetaInfo *mi, int efd)
                 }
                 close(events[i].data.fd);
                 epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+
+                // 更新 wait peers 列表，将连接失败的从队列删除
+                int wp_idx = get_wait_peer_index_by_fd(mi, events[i].data.fd);
+                if (wp_idx != -1) {
+                    rm_wait_peer(mi, wp_idx);
+                }
             }
             else if (events[i].events & EPOLLOUT) {  // connect 完成
                 // EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲,
@@ -497,7 +528,7 @@ bt_handler(struct MetaInfo *mi, int efd)
                         struct BNode *bcode = handle_tracker_response(tracker->sfd);
                         if (bcode != NULL) {
                             print_bcode(bcode, 0, 0);
-                            handle_peer_list(efd, bcode);
+                            handle_peer_list(mi, efd, bcode);
                             handle_interval(tracker, bcode, efd);
                             free_bnode(&bcode);
                         }
@@ -523,21 +554,30 @@ bt_handler(struct MetaInfo *mi, int efd)
                         }
                     }
                     else {  // peer 握手消息
+
+                        // 更新 wait peers 列表，将成功连接的从队列删除
+                        int wp_idx = get_wait_peer_index_by_fd(mi, events[i].data.fd);
+                        if (wp_idx == -1) {
+                            log("unexpected fd %d for handshaking", events[i].data.fd);
+                            continue;
+                        }
+                        struct WaitPeer wp = mi->wait_peers[wp_idx];  // 暂存以备后续使用
+                        rm_wait_peer(mi, wp_idx);
+
+                        // 更新 peers 列表
                         PeerHandShake handshake = {};
                         ssize_t nr_read = recv(events[i].data.fd, &handshake, sizeof(handshake), MSG_WAITALL);
                         if (nr_read == 0) {
-                            struct sockaddr_in addr;
-                            socklen_t addrlen = sizeof(addr);
-                            getpeername(events[i].data.fd, (struct sockaddr *)&addr, &addrlen);
-                            log("handshaking failed, disconnect %s:%u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-
+                            log("handshaking failed, disconnect %u.%u.%u.%u:%u",
+                                wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
                             epoll_ctl(efd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
                             close(events[i].data.fd);
                         }
                         else {
                             peer = peer_new(events[i].data.fd, mi->nr_pieces);
                             add_peer(mi, peer);
-                            log("successfully handshake with %s:%u", peer->ip, peer->port);
+                            log("handshaking failed, disconnect %u.%u.%u.%u:%u",
+                                wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
 
                             // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
 
@@ -670,6 +710,7 @@ main(int argc, char *argv[])
     }
 
     mi->timerfd = timerfd_create(CLOCK_REALTIME, 0);
+    log("mi timer FD %d", mi->timerfd);
     struct itimerspec ts = { { 120, 0 }, { 120, 0} };
     timerfd_settime(mi->timerfd, 0, &ts, NULL);
     struct epoll_event ev = { .data.fd = mi->timerfd, .events = EPOLLIN };
