@@ -68,7 +68,6 @@ peer_get_packet(struct Peer *peer)
         return NULL;
     }
 
-    log("read %ld / %d", s, peer->wanted);
     peer->wanted -= s;
     return peer->msg;
 }

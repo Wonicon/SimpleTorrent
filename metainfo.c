@@ -6,6 +6,7 @@
 #include "util.h"
 #include <string.h>
 #include <openssl/sha.h>
+#include <netinet/in.h>
 
 void
 free_metainfo(struct MetaInfo **pmi)
@@ -82,7 +83,7 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
 
         size_t nr_read;
         int piece_index = 0;
-        int corrent_piece_count = 0;
+        int correct_piece_count = 0;
         while ((nr_read = fread(piece, 1, mi->piece_size, fp)) != 0) {  // EOF 退出，容许不足
             SHA1(piece, nr_read, md);
 
@@ -92,7 +93,7 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
 
             if (memcmp(md, mi->pieces[piece_index].hash, HASH_SIZE) == 0) {  // 分片正确
                 mi->pieces[piece_index].is_downloaded = 1;
-                corrent_piece_count++;
+                correct_piece_count++;
                 printf(" ok");
             }
 
@@ -101,7 +102,7 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
             piece_index++;
         }
 
-        if (corrent_piece_count == mi->nr_pieces) {
+        if (correct_piece_count == mi->nr_pieces) {
             log("file has been downloaded");
             mi->file = fp;
             return;
@@ -208,6 +209,24 @@ get_peer_by_fd(struct MetaInfo *mi, int fd)
             return mi->peers[i];
         }
     }
+    return NULL;
+}
+
+/**
+ * 参数的 addr 和 port 是网络字节序。
+ * peer 自己的 addr 在构造时是网络字节序，但是 port 是本机字节序。
+ */
+struct Peer *
+get_peer_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port)
+{
+    port = ntohs(port);
+    for (int i = 0; i < mi->nr_peers; i++) {
+        struct Peer *peer = mi->peers[i];
+        if (addr == mi->peers[i]->addr && port == mi->peers[i]->port) {
+            return peer;
+        }
+    }
+
     return NULL;
 }
 

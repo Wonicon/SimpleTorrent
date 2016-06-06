@@ -48,6 +48,12 @@ struct PieceInfo
     time_t        *subtimer;        ///< 标记子分片下载等待时间
 };
 
+/**
+ * @brief 描述处于等待握手状态的 peer 信息
+ *
+ * 用于记录那些已经发送 / 收到连接请求但是还没有完成握手信息的 peer,
+ * 由这个结构体构成的队列将用于回避对同一个 peer 的重复连接。
+ */
 struct WaitPeer
 {
     int fd;
@@ -56,6 +62,7 @@ struct WaitPeer
         uint8_t ip[4];
     };
     uint16_t port;
+    int direction;        ///< 0: 我方主动连接, 1: 对方主动连接。
 };
 
 /** @brief 描述一次运行的全局信息
@@ -128,6 +135,14 @@ void del_peer_by_fd(struct MetaInfo *mi, int fd);
  * 适用于 epoll 场景, 此时套接字描述符是最先确定的数据.
  */
 struct Peer *get_peer_by_fd(struct MetaInfo *mi, int fd);
+
+/**
+ * @brief 根据网络地址搜索 peer
+ * @param mi 全局信息
+ * @param addr ip 地址，网络字节序
+ * @param port 端口号，网络字节序
+ */
+struct Peer * get_peer_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port);
 
 int check_substate(struct MetaInfo *mi, int index);
 
