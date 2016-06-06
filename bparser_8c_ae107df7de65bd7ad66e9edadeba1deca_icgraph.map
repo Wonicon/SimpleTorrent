@@ -1,0 +1,11 @@
+<map id="parse_bcode_is_dict" name="parse_bcode_is_dict">
+<area shape="rect" id="node2" href="$bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="195,83,291,110"/>
+<area shape="rect" id="node3" href="$bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="339,32,427,59"/>
+<area shape="rect" id="node6" href="$bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="489,146,627,172"/>
+<area shape="rect" id="node7" href="$bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="350,208,415,235"/>
+<area shape="rect" id="node4" href="$bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="491,7,625,34"/>
+<area shape="rect" id="node5" href="$bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="491,58,625,84"/>
+<area shape="rect" id="node8" href="$driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="475,252,641,279"/>
+<area shape="rect" id="node10" href="$driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="820,227,871,254"/>
+<area shape="rect" id="node9" href="$driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="689,252,772,279"/>
+</map>

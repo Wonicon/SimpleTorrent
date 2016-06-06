@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: BNode结构体 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li class="current"><a href="annotated.html"><span>结构体</span></a></li>
+      <li><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li><a href="classes.html"><span>结构体索引</span></a></li>
+      <li><a href="functions.html"><span>成员变量</span></a></li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#pub-attribs">成员变量</a>  </div>
+  <div class="headertitle">
+<div class="title">BNode结构体 参考</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>B 编码结点  
+ <a href="structBNode.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="bparser_8h_source.html">bparser.h</a>&gt;</code></p>
+<div class="dynheader">
+BNode 的协作图:</div>
+<div class="dyncontent">
+<div class="center"><img src="structBNode__coll__graph.png" border="0" usemap="#BNode_coll__map" alt="Collaboration graph"/></div>
+<center><span class="legend">[<a href="graph_legend.html">图例</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+成员变量</h2></td></tr>
+<tr class="memitem:aaff42119a7f054871c560115fa7f76ef"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaff42119a7f054871c560115fa7f76ef"></a>
+enum <a class="el" href="bparser_8h.html#a416b65aa7f9e923c6cf461a99d456716">BNodeType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBNode.html#aaff42119a7f054871c560115fa7f76ef">type</a></td></tr>
+<tr class="memdesc:aaff42119a7f054871c560115fa7f76ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">类型标签 <br /></td></tr>
+<tr class="separator:aaff42119a7f054871c560115fa7f76ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5db86cf756d31acb93afa839bfb9fc8"><td class="memItemLeft" ><a class="anchor" id="ae5db86cf756d31acb93afa839bfb9fc8"></a>
+union {</td></tr>
+<tr class="memitem:a8358d406ae68621902e9da2486d20c85"><td class="memItemLeft" ><a class="anchor" id="a8358d406ae68621902e9da2486d20c85"></a>
+&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:a300967411a246b4d55abaf6ef486a100"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;struct <a class="el" href="structBNode.html">BNode</a> *&#160;&#160;&#160;<a class="el" href="structBNode.html#a76b4dd2db0f3f6c9c1b26f1353e2d030">l_item</a></td></tr>
+<tr class="memdesc:a300967411a246b4d55abaf6ef486a100"><td class="mdescLeft">&#160;</td><td class="mdescRight">列表项 <br /></td></tr>
+<tr class="separator:a300967411a246b4d55abaf6ef486a100"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3093dff07793a8bc41a808bfc6fd58ca"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;struct <a class="el" href="structBNode.html">BNode</a> *&#160;&#160;&#160;<a class="el" href="structBNode.html#a21d1585c38121224b42c3775f3be2a92">l_next</a></td></tr>
+<tr class="memdesc:a3093dff07793a8bc41a808bfc6fd58ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">余下列表项 <br /></td></tr>
+<tr class="separator:a3093dff07793a8bc41a808bfc6fd58ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8358d406ae68621902e9da2486d20c85"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:a8358d406ae68621902e9da2486d20c85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb037cc16040581680334c322ac0afd3"><td class="memItemLeft" ><a class="anchor" id="abb037cc16040581680334c322ac0afd3"></a>
+&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:a804b783638e3a3391c8cbdd7a047d8bd"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;char *&#160;&#160;&#160;<a class="el" href="structBNode.html#a5d2a3d1e81f4024e41cc5415a1504cff">d_key</a></td></tr>
+<tr class="memdesc:a804b783638e3a3391c8cbdd7a047d8bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">字典键（在 B 编码中是串，但是可以保证是字符串） <br /></td></tr>
+<tr class="separator:a804b783638e3a3391c8cbdd7a047d8bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60fa42f26908b5cc30e41b5587397d43"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;struct <a class="el" href="structBNode.html">BNode</a> *&#160;&#160;&#160;<a class="el" href="structBNode.html#aedcd5210f1f3f0d5cb0ea005564b4e96">d_val</a></td></tr>
+<tr class="memdesc:a60fa42f26908b5cc30e41b5587397d43"><td class="mdescLeft">&#160;</td><td class="mdescRight">字典值 <br /></td></tr>
+<tr class="separator:a60fa42f26908b5cc30e41b5587397d43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9007d07eb0f8111576fb84b789e4041"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;struct <a class="el" href="structBNode.html">BNode</a> *&#160;&#160;&#160;<a class="el" href="structBNode.html#a27cba7465ccc73b7b2a04098415d5f00">d_next</a></td></tr>
+<tr class="memdesc:ac9007d07eb0f8111576fb84b789e4041"><td class="mdescLeft">&#160;</td><td class="mdescRight">余下字典项 <br /></td></tr>
+<tr class="separator:ac9007d07eb0f8111576fb84b789e4041"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb037cc16040581680334c322ac0afd3"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:abb037cc16040581680334c322ac0afd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fdcc26d97bcb13613bd0651815a92f3"><td class="memItemLeft" ><a class="anchor" id="a8fdcc26d97bcb13613bd0651815a92f3"></a>
+&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:a9ec035b82994b7573935a6f5f7c08d8c"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;size_t&#160;&#160;&#160;<a class="el" href="structBNode.html#aa6a707c3a82ab344e08a761044e33c5f">s_size</a></td></tr>
+<tr class="memdesc:a9ec035b82994b7573935a6f5f7c08d8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">串长度 <br /></td></tr>
+<tr class="separator:a9ec035b82994b7573935a6f5f7c08d8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f3a91fc76835c08a7e7ec769662cab7"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;char *&#160;&#160;&#160;<a class="el" href="structBNode.html#a5c5fc8fb34004098bf943f5ea2aca760">s_data</a></td></tr>
+<tr class="memdesc:a9f3a91fc76835c08a7e7ec769662cab7"><td class="mdescLeft">&#160;</td><td class="mdescRight">串内容（深拷贝） <br /></td></tr>
+<tr class="separator:a9f3a91fc76835c08a7e7ec769662cab7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fdcc26d97bcb13613bd0651815a92f3"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:a8fdcc26d97bcb13613bd0651815a92f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5566c7017de46ef3b102a7a952cdf5b7"><td class="memItemLeft" >
+&#160;&#160;&#160;long&#160;&#160;&#160;<a class="el" href="structBNode.html#a52628b887a44cc54d814e35bd59bd224">i</a></td></tr>
+<tr class="memdesc:a5566c7017de46ef3b102a7a952cdf5b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">整型 <br /></td></tr>
+<tr class="separator:a5566c7017de46ef3b102a7a952cdf5b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5db86cf756d31acb93afa839bfb9fc8"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:ae5db86cf756d31acb93afa839bfb9fc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a714c4ea2fa9026f387ae24f76960bf52"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a714c4ea2fa9026f387ae24f76960bf52"></a>
+char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBNode.html#a714c4ea2fa9026f387ae24f76960bf52">start</a></td></tr>
+<tr class="memdesc:a714c4ea2fa9026f387ae24f76960bf52"><td class="mdescLeft">&#160;</td><td class="mdescRight">结点在源缓冲区的开始处 <br /></td></tr>
+<tr class="separator:a714c4ea2fa9026f387ae24f76960bf52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fc75b90c48ad7f2b746579f622c8fdc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0fc75b90c48ad7f2b746579f622c8fdc"></a>
+char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBNode.html#a0fc75b90c48ad7f2b746579f622c8fdc">end</a></td></tr>
+<tr class="memdesc:a0fc75b90c48ad7f2b746579f622c8fdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">结点在源缓冲区的结束处 <br /></td></tr>
+<tr class="separator:a0fc75b90c48ad7f2b746579f622c8fdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>B 编码结点 </p>
+<p>使用标签 type 辨别结点的具体类型。不同的类型使用不同前缀的域：</p>
+<ol type="1">
+<li>l_ 表示列表</li>
+<li>d_ 表示字典</li>
+<li>s_ 表示串（虽然串有时候是字符串可以不需要 size, 但是也有二进制串）</li>
+</ol>
+<p>start 和 end 指向源缓冲区，以记录一个结点的字节范围， 主要为准确计算 info_hash 所准备。但是结点中的实际数据 是深拷贝的，与源缓冲区脱离，只是要使用 start 和 end 时 要保证源缓冲区的有效性。 </p>
+</div><hr/>该结构体的文档由以下文件生成:<ul>
+<li><a class="el" href="bparser_8h_source.html">bparser.h</a></li>
+</ul>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<map id="query_bcode_by_key" name="query_bcode_by_key">
+<area shape="rect" id="node2" href="$butil_8h.html#adca6e84da736fbc0562166efc0af0466" title="计算 torrent 文件的 info hash " alt="" coords="367,8,485,35"/>
+<area shape="rect" id="node4" href="$driver_8c.html#a288da41ae0ddeca593e7604471ed184e" title="将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 " alt="" coords="199,33,315,60"/>
+<area shape="rect" id="node6" href="$driver_8c.html#af6fb06630b6c5402acaee4f8a5e4e8fb" title="提取 interval 信息并设置定时 " alt="" coords="202,84,311,111"/>
+<area shape="rect" id="node7" href="$metainfo_8h.html#a8859c576edfc642ef89d66984d0d531f" title="提取 tracker 列表 " alt="" coords="368,135,484,161"/>
+<area shape="rect" id="node8" href="$metainfo_8h.html#a108b01c970e97953b9430fe80cc571dd" title="获取文件名，读取文件，分析已经完成的块 " alt="" coords="363,185,489,212"/>
+<area shape="rect" id="node9" href="$metainfo_8h.html#af9920b3ee23e92c773734e1a7d1c4bc5" title="提取分片 hash " alt="" coords="203,236,310,263"/>
+<area shape="rect" id="node3" href="$driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="537,135,588,161"/>
+<area shape="rect" id="node5" href="$driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="385,84,467,111"/>
+</map>

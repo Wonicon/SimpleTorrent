@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: bparser.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li class="current"><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>文件列表</span></a></li>
+      <li><a href="globals.html"><span>全局定义</span></a></li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">结构体</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle">
+<div class="title">bparser.h 文件参考</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>B 编码 parser 的 API 声明  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
+<code>#include &lt;inttypes.h&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+bparser.h 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8h__incl.png" border="0" usemap="#bparser_8h" alt=""/></div>
+</div>
+</div><div class="textblock"><div class="dynheader">
+此图展示该文件直接或间接的被哪些文件引用了:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8h__dep__incl.png" border="0" usemap="#bparser_8hdep" alt=""/></div>
+<map name="bparser_8hdep" id="bparser_8hdep">
+<area shape="rect" id="node2" href="bparser_8c.html" title="bparser.c" alt="" coords="5,80,81,107"/>
+<area shape="rect" id="node3" href="butil_8h.html" title="基于 B 编码语法树的工具函数声明 " alt="" coords="105,80,163,107"/>
+<area shape="rect" id="node6" href="metainfo_8c.html" title="metainfo.c" alt="" coords="183,155,266,181"/>
+<area shape="rect" id="node4" href="butil_8c.html" title="butil.c" alt="" coords="12,155,69,181"/>
+<area shape="rect" id="node5" href="driver_8c.html" title="顶层驱动模块 " alt="" coords="93,155,159,181"/>
+</map>
+</div>
+</div>
+<p><a href="bparser_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+结构体</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBNode.html">BNode</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">B 编码结点  <a href="structBNode.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a416b65aa7f9e923c6cf461a99d456716"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a416b65aa7f9e923c6cf461a99d456716"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8h.html#a416b65aa7f9e923c6cf461a99d456716">BNodeType</a> { <br />
+&#160;&#160;<b>B_NA</b>, 
+<b>B_STR</b>, 
+<b>B_INT</b>, 
+<b>B_LIST</b>, 
+<br />
+&#160;&#160;<b>B_DICT</b>, 
+<b>NR_BTYPE</b>
+<br />
+ }<tr class="memdesc:a416b65aa7f9e923c6cf461a99d456716"><td class="mdescLeft">&#160;</td><td class="mdescRight">B 编码语法结点类型标签 <br /></td></tr>
+</td></tr>
+<tr class="separator:a416b65aa7f9e923c6cf461a99d456716"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:aee1be1b92903ad1538bd763772e53e46"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46">bparser</a> (char *bcode)</td></tr>
+<tr class="memdesc:aee1be1b92903ad1538bd763772e53e46"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析 B 编码  <a href="#aee1be1b92903ad1538bd763772e53e46">更多...</a><br /></td></tr>
+<tr class="separator:aee1be1b92903ad1538bd763772e53e46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f7a168bee91fc16e16a039b79c4429a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8h.html#a5f7a168bee91fc16e16a039b79c4429a">free_bnode</a> (struct <a class="el" href="structBNode.html">BNode</a> **pbnode)</td></tr>
+<tr class="memdesc:a5f7a168bee91fc16e16a039b79c4429a"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放 B 编码的抽象语法树  <a href="#a5f7a168bee91fc16e16a039b79c4429a">更多...</a><br /></td></tr>
+<tr class="separator:a5f7a168bee91fc16e16a039b79c4429a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>B 编码 parser 的 API 声明 </p>
+</div><h2 class="groupheader">函数说明</h2>
+<a class="anchor" id="aee1be1b92903ad1538bd763772e53e46"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structBNode.html">BNode</a>* bparser </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>bcode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>解析 B 编码 </p>
+<p>顶层封装，进行错误检查以及屏蔽私有结构体。</p>
+<p>用户负责释放抽象语法树。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bcode</td><td>源缓冲区 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态生成的语法树根结点 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8h_aee1be1b92903ad1538bd763772e53e46_icgraph.png" border="0" usemap="#bparser_8h_aee1be1b92903ad1538bd763772e53e46_icgraph" alt=""/></div>
+<map name="bparser_8h_aee1be1b92903ad1538bd763772e53e46_icgraph" id="bparser_8h_aee1be1b92903ad1538bd763772e53e46_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="119,5,285,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="464,31,515,57"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="333,5,416,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a5f7a168bee91fc16e16a039b79c4429a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void free_bnode </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structBNode.html">BNode</a> **&#160;</td>
+          <td class="paramname"><em>pbnode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>释放 B 编码的抽象语法树 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pbnode</td><td>指向要释放的抽象语法树的根结点 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8h_a5f7a168bee91fc16e16a039b79c4429a_icgraph.png" border="0" usemap="#bparser_8h_a5f7a168bee91fc16e16a039b79c4429a_icgraph" alt=""/></div>
+<map name="bparser_8h_a5f7a168bee91fc16e16a039b79c4429a_icgraph" id="bparser_8h_a5f7a168bee91fc16e16a039b79c4429a_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="140,5,223,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="271,31,321,57"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: butil.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li class="current"><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>文件列表</span></a></li>
+      <li><a href="globals.html"><span>全局定义</span></a></li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle">
+<div class="title">butil.c 文件参考</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="butil_8h_source.html">butil.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="metainfo_8h_source.html">metainfo.h</a>&quot;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;arpa/inet.h&gt;</code><br />
+<code>#include &lt;openssl/sha.h&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+butil.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c__incl.png" border="0" usemap="#butil_8c" alt=""/></div>
+<map name="butil_8c" id="butil_8c">
+<area shape="rect" id="node2" href="butil_8h.html" title="基于 B 编码语法树的工具函数声明 " alt="" coords="46,80,103,107"/>
+<area shape="rect" id="node6" href="metainfo_8h.html" title="操作全局信息的相关 API " alt="" coords="152,80,235,107"/>
+<area shape="rect" id="node3" href="bparser_8h.html" title="B 编码 parser 的 API 声明 " alt="" coords="25,155,101,181"/>
+</map>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a5bc0402e2c1d28eb46b69f8596a94fea"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5bc0402e2c1d28eb46b69f8596a94fea"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a5bc0402e2c1d28eb46b69f8596a94fea">PIECE_HASH</a>&#160;&#160;&#160;(1 &lt;&lt; 0)</td></tr>
+<tr class="memdesc:a5bc0402e2c1d28eb46b69f8596a94fea"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印 hash 的 flag <br /></td></tr>
+<tr class="separator:a5bc0402e2c1d28eb46b69f8596a94fea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed17b8f6527393dec83c87d40a7341dd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed17b8f6527393dec83c87d40a7341dd"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#aed17b8f6527393dec83c87d40a7341dd">PEERS</a>&#160;&#160;&#160;(1 &lt;&lt; 1)</td></tr>
+<tr class="memdesc:aed17b8f6527393dec83c87d40a7341dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印二进制 peers 列表的 flag <br /></td></tr>
+<tr class="separator:aed17b8f6527393dec83c87d40a7341dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac1e8412e850dd2290d77594c1c4f6c7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aac1e8412e850dd2290d77594c1c4f6c7"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#aac1e8412e850dd2290d77594c1c4f6c7">print_with_indent</a>(indent,  fmt, ...)&#160;&#160;&#160;printf(&quot;%*s&quot; fmt, indent, &quot;&quot;, ## __VA_ARGS__)</td></tr>
+<tr class="memdesc:aac1e8412e850dd2290d77594c1c4f6c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">带缩进的格式化打印 <br /></td></tr>
+<tr class="separator:aac1e8412e850dd2290d77594c1c4f6c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a2f3041ae49c9a72cf1e6ff77f60cb407"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a2f3041ae49c9a72cf1e6ff77f60cb407">put_indent</a> (int indent)</td></tr>
+<tr class="memdesc:a2f3041ae49c9a72cf1e6ff77f60cb407"><td class="mdescLeft">&#160;</td><td class="mdescRight">输出缩进  <a href="#a2f3041ae49c9a72cf1e6ff77f60cb407">更多...</a><br /></td></tr>
+<tr class="separator:a2f3041ae49c9a72cf1e6ff77f60cb407"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46a11004ccabe0655c9af6e9dc007174"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a46a11004ccabe0655c9af6e9dc007174">print_int</a> (const struct <a class="el" href="structBNode.html">BNode</a> *bi, int indent)</td></tr>
+<tr class="memdesc:a46a11004ccabe0655c9af6e9dc007174"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印整型  <a href="#a46a11004ccabe0655c9af6e9dc007174">更多...</a><br /></td></tr>
+<tr class="separator:a46a11004ccabe0655c9af6e9dc007174"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cb19ef0e5038e2d5532893d587cef3a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a2cb19ef0e5038e2d5532893d587cef3a">print_str</a> (const struct <a class="el" href="structBNode.html">BNode</a> *b, int indent, int flags)</td></tr>
+<tr class="memdesc:a2cb19ef0e5038e2d5532893d587cef3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印串  <a href="#a2cb19ef0e5038e2d5532893d587cef3a">更多...</a><br /></td></tr>
+<tr class="separator:a2cb19ef0e5038e2d5532893d587cef3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17017c3a5f91429a252ca86ae5df836a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a17017c3a5f91429a252ca86ae5df836a">print_list</a> (const struct <a class="el" href="structBNode.html">BNode</a> *list, int indent, int flags)</td></tr>
+<tr class="memdesc:a17017c3a5f91429a252ca86ae5df836a"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印列表  <a href="#a17017c3a5f91429a252ca86ae5df836a">更多...</a><br /></td></tr>
+<tr class="separator:a17017c3a5f91429a252ca86ae5df836a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7964229c358eeed8fe1674d1ed24035c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a7964229c358eeed8fe1674d1ed24035c">print_dict</a> (const struct <a class="el" href="structBNode.html">BNode</a> *dict, int indent, int flags)</td></tr>
+<tr class="memdesc:a7964229c358eeed8fe1674d1ed24035c"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印字典  <a href="#a7964229c358eeed8fe1674d1ed24035c">更多...</a><br /></td></tr>
+<tr class="separator:a7964229c358eeed8fe1674d1ed24035c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56fd6692c3a12ff53d71c134de5845e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a56fd6692c3a12ff53d71c134de5845e3">print_bcode</a> (const struct <a class="el" href="structBNode.html">BNode</a> *node, int indent, int flags)</td></tr>
+<tr class="memdesc:a56fd6692c3a12ff53d71c134de5845e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印以 node 为根的 bencode 树  <a href="#a56fd6692c3a12ff53d71c134de5845e3">更多...</a><br /></td></tr>
+<tr class="separator:a56fd6692c3a12ff53d71c134de5845e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b5c3cae3ac56e2627ffe708a2fb098e"><td class="memItemLeft" align="right" valign="top">static const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a8b5c3cae3ac56e2627ffe708a2fb098e">dfs_bcode</a> (const struct <a class="el" href="structBNode.html">BNode</a> *node, const char *key)</td></tr>
+<tr class="memdesc:a8b5c3cae3ac56e2627ffe708a2fb098e"><td class="mdescLeft">&#160;</td><td class="mdescRight">深度优先搜索 bencode 树中字典里的某个键 key, 返回对应的值结点  <a href="#a8b5c3cae3ac56e2627ffe708a2fb098e">更多...</a><br /></td></tr>
+<tr class="separator:a8b5c3cae3ac56e2627ffe708a2fb098e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a9471425ee2bb9f467078334056c52e"><td class="memItemLeft" align="right" valign="top">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#a6a9471425ee2bb9f467078334056c52e">query_bcode_by_key</a> (const struct <a class="el" href="structBNode.html">BNode</a> *node, const char *key)</td></tr>
+<tr class="memdesc:a6a9471425ee2bb9f467078334056c52e"><td class="mdescLeft">&#160;</td><td class="mdescRight">搜索 bencode 树中字典里的某个键 key, 返回对应的值结点  <a href="#a6a9471425ee2bb9f467078334056c52e">更多...</a><br /></td></tr>
+<tr class="separator:a6a9471425ee2bb9f467078334056c52e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adca6e84da736fbc0562166efc0af0466"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="butil_8c.html#adca6e84da736fbc0562166efc0af0466">make_info_hash</a> (const struct <a class="el" href="structBNode.html">BNode</a> *root, unsigned char *md)</td></tr>
+<tr class="memdesc:adca6e84da736fbc0562166efc0af0466"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算 torrent 文件的 info hash  <a href="#adca6e84da736fbc0562166efc0af0466">更多...</a><br /></td></tr>
+<tr class="separator:adca6e84da736fbc0562166efc0af0466"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a class="anchor" id="a8b5c3cae3ac56e2627ffe708a2fb098e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static const struct <a class="el" href="structBNode.html">BNode</a>* dfs_bcode </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>node</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>深度优先搜索 bencode 树中字典里的某个键 key, 返回对应的值结点 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">node</td><td>语法树根结点 </td></tr>
+    <tr><td class="paramname">key</td><td>要搜索的键 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>键对应的值结点，没有则返回 NULL. </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_a8b5c3cae3ac56e2627ffe708a2fb098e_icgraph.png" border="0" usemap="#butil_8c_a8b5c3cae3ac56e2627ffe708a2fb098e_icgraph" alt=""/></div>
+<map name="butil_8c_a8b5c3cae3ac56e2627ffe708a2fb098e_icgraph" id="butil_8c_a8b5c3cae3ac56e2627ffe708a2fb098e_icgraph">
+<area shape="rect" id="node2" href="butil_8h.html#ae0c6b4657159acd1ba9b2759480a1f77" title="搜索 bencode 树中字典里的某个键 key, 返回对应的值结点 " alt="" coords="136,109,281,136"/>
+<area shape="rect" id="node3" href="butil_8h.html#adca6e84da736fbc0562166efc0af0466" title="计算 torrent 文件的 info hash " alt="" coords="498,8,615,35"/>
+<area shape="rect" id="node5" href="driver_8c.html#a288da41ae0ddeca593e7604471ed184e" title="将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 " alt="" coords="329,33,445,60"/>
+<area shape="rect" id="node7" href="driver_8c.html#af6fb06630b6c5402acaee4f8a5e4e8fb" title="提取 interval 信息并设置定时 " alt="" coords="333,84,442,111"/>
+<area shape="rect" id="node8" href="metainfo_8h.html#a8859c576edfc642ef89d66984d0d531f" title="提取 tracker 列表 " alt="" coords="499,135,615,161"/>
+<area shape="rect" id="node9" href="metainfo_8h.html#a108b01c970e97953b9430fe80cc571dd" title="获取文件名，读取文件，分析已经完成的块 " alt="" coords="493,185,620,212"/>
+<area shape="rect" id="node10" href="metainfo_8h.html#af9920b3ee23e92c773734e1a7d1c4bc5" title="提取分片 hash " alt="" coords="334,236,441,263"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="668,135,719,161"/>
+<area shape="rect" id="node6" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="515,84,598,111"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="adca6e84da736fbc0562166efc0af0466"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void make_info_hash </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>root</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>md</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>计算 torrent 文件的 info hash </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">root</td><td>语法树根 </td></tr>
+    <tr><td class="paramname">md</td><td>sha1 输出缓冲区（至少 HASH_SIZE 字节） </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_adca6e84da736fbc0562166efc0af0466_icgraph.png" border="0" usemap="#butil_8c_adca6e84da736fbc0562166efc0af0466_icgraph" alt=""/></div>
+<map name="butil_8c_adca6e84da736fbc0562166efc0af0466_icgraph" id="butil_8c_adca6e84da736fbc0562166efc0af0466_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="171,5,221,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a56fd6692c3a12ff53d71c134de5845e3"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void print_bcode </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>node</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>flag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>打印以 node 为根的 bencode 树 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">node</td><td>语法树根结点 </td></tr>
+    <tr><td class="paramname">indent</td><td>起始缩进 </td></tr>
+    <tr><td class="paramname">flag</td><td>特殊打印要求 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_a56fd6692c3a12ff53d71c134de5845e3_icgraph.png" border="0" usemap="#butil_8c_a56fd6692c3a12ff53d71c134de5845e3_icgraph" alt=""/></div>
+<map name="butil_8c_a56fd6692c3a12ff53d71c134de5845e3_icgraph" id="butil_8c_a56fd6692c3a12ff53d71c134de5845e3_icgraph">
+<area shape="rect" id="node2" href="butil_8c.html#a17017c3a5f91429a252ca86ae5df836a" title="打印列表 " alt="" coords="143,68,213,95"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="521,128,604,155"/>
+<area shape="rect" id="node6" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="652,128,703,155"/>
+<area shape="rect" id="node3" href="butil_8c.html#a7964229c358eeed8fe1674d1ed24035c" title="打印字典 " alt="" coords="261,5,336,32"/>
+<area shape="rect" id="node4" href="butil_8h.html#a44ec2be41e537a8acfba8b967c01f2d5" title="打印以 node 为根的 bencode 树 " alt="" coords="384,68,473,95"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a7964229c358eeed8fe1674d1ed24035c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void print_dict </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>dict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>flags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>打印字典 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dict</td><td>字典结点 </td></tr>
+    <tr><td class="paramname">indent</td><td>缩进级别 </td></tr>
+    <tr><td class="paramname">flags</td><td>打印格式要求 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_a7964229c358eeed8fe1674d1ed24035c_icgraph.png" border="0" usemap="#butil_8c_a7964229c358eeed8fe1674d1ed24035c_icgraph" alt=""/></div>
+<map name="butil_8c_a7964229c358eeed8fe1674d1ed24035c_icgraph" id="butil_8c_a7964229c358eeed8fe1674d1ed24035c_icgraph">
+<area shape="rect" id="node2" href="butil_8h.html#a44ec2be41e537a8acfba8b967c01f2d5" title="打印以 node 为根的 bencode 树 " alt="" coords="128,56,217,83"/>
+<area shape="rect" id="node3" href="butil_8c.html#a17017c3a5f91429a252ca86ae5df836a" title="打印列表 " alt="" coords="271,5,342,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="265,56,348,83"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="396,81,447,108"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a46a11004ccabe0655c9af6e9dc007174"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void print_int </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>bi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indent</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>打印整型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bi</td><td>整型结点 </td></tr>
+    <tr><td class="paramname">indent</td><td>缩进级别 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_a46a11004ccabe0655c9af6e9dc007174_icgraph.png" border="0" usemap="#butil_8c_a46a11004ccabe0655c9af6e9dc007174_icgraph" alt=""/></div>
+<map name="butil_8c_a46a11004ccabe0655c9af6e9dc007174_icgraph" id="butil_8c_a46a11004ccabe0655c9af6e9dc007174_icgraph">
+<area shape="rect" id="node2" href="butil_8c.html#a7964229c358eeed8fe1674d1ed24035c" title="打印字典 " alt="" coords="121,5,196,32"/>
+<area shape="rect" id="node3" href="butil_8h.html#a44ec2be41e537a8acfba8b967c01f2d5" title="打印以 node 为根的 bencode 树 " alt="" coords="244,56,333,83"/>
+<area shape="rect" id="node4" href="butil_8c.html#a17017c3a5f91429a252ca86ae5df836a" title="打印列表 " alt="" coords="387,5,458,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="381,56,464,83"/>
+<area shape="rect" id="node6" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="512,81,563,108"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a17017c3a5f91429a252ca86ae5df836a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void print_list </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>list</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>flags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>打印列表 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">list</td><td>列表结点 </td></tr>
+    <tr><td class="paramname">indent</td><td>缩进级别 </td></tr>
+    <tr><td class="paramname">flags</td><td>打印格式要求 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_a17017c3a5f91429a252ca86ae5df836a_icgraph.png" border="0" usemap="#butil_8c_a17017c3a5f91429a252ca86ae5df836a_icgraph" alt=""/></div>
+<map name="butil_8c_a17017c3a5f91429a252ca86ae5df836a_icgraph" id="butil_8c_a17017c3a5f91429a252ca86ae5df836a_icgraph">
+<area shape="rect" id="node2" href="butil_8c.html#a7964229c358eeed8fe1674d1ed24035c" title="打印字典 " alt="" coords="124,5,199,32"/>
+<area shape="rect" id="node3" href="butil_8h.html#a44ec2be41e537a8acfba8b967c01f2d5" title="打印以 node 为根的 bencode 树 " alt="" coords="247,68,336,95"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="384,43,467,69"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="515,68,565,95"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a2cb19ef0e5038e2d5532893d587cef3a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void print_str </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>flags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>打印串 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">b</td><td>串结点 </td></tr>
+    <tr><td class="paramname">indent</td><td>缩进级别 </td></tr>
+    <tr><td class="paramname">flags</td><td>打印格式要求 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_a2cb19ef0e5038e2d5532893d587cef3a_icgraph.png" border="0" usemap="#butil_8c_a2cb19ef0e5038e2d5532893d587cef3a_icgraph" alt=""/></div>
+<map name="butil_8c_a2cb19ef0e5038e2d5532893d587cef3a_icgraph" id="butil_8c_a2cb19ef0e5038e2d5532893d587cef3a_icgraph">
+<area shape="rect" id="node2" href="butil_8c.html#a7964229c358eeed8fe1674d1ed24035c" title="打印字典 " alt="" coords="123,5,197,32"/>
+<area shape="rect" id="node3" href="butil_8h.html#a44ec2be41e537a8acfba8b967c01f2d5" title="打印以 node 为根的 bencode 树 " alt="" coords="245,56,335,83"/>
+<area shape="rect" id="node4" href="butil_8c.html#a17017c3a5f91429a252ca86ae5df836a" title="打印列表 " alt="" coords="389,5,459,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="383,56,465,83"/>
+<area shape="rect" id="node6" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="513,81,564,108"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a2f3041ae49c9a72cf1e6ff77f60cb407"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void put_indent </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indent</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>输出缩进 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">indent</td><td>缩进量 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_a2f3041ae49c9a72cf1e6ff77f60cb407_icgraph.png" border="0" usemap="#butil_8c_a2f3041ae49c9a72cf1e6ff77f60cb407_icgraph" alt=""/></div>
+<map name="butil_8c_a2f3041ae49c9a72cf1e6ff77f60cb407_icgraph" id="butil_8c_a2f3041ae49c9a72cf1e6ff77f60cb407_icgraph">
+<area shape="rect" id="node2" href="butil_8c.html#a2cb19ef0e5038e2d5532893d587cef3a" title="打印串 " alt="" coords="136,31,205,57"/>
+<area shape="rect" id="node3" href="butil_8c.html#a7964229c358eeed8fe1674d1ed24035c" title="打印字典 " alt="" coords="253,5,328,32"/>
+<area shape="rect" id="node4" href="butil_8h.html#a44ec2be41e537a8acfba8b967c01f2d5" title="打印以 node 为根的 bencode 树 " alt="" coords="376,56,465,83"/>
+<area shape="rect" id="node5" href="butil_8c.html#a17017c3a5f91429a252ca86ae5df836a" title="打印列表 " alt="" coords="519,5,590,32"/>
+<area shape="rect" id="node6" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="513,56,596,83"/>
+<area shape="rect" id="node7" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="644,81,695,108"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a6a9471425ee2bb9f467078334056c52e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const struct <a class="el" href="structBNode.html">BNode</a>* query_bcode_by_key </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>tree</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>搜索 bencode 树中字典里的某个键 key, 返回对应的值结点 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tree</td><td>语法树根结点 </td></tr>
+    <tr><td class="paramname">key</td><td>要搜索的键 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>键对应的值结点，没有则返回 NULL. </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="butil_8c_a6a9471425ee2bb9f467078334056c52e_icgraph.png" border="0" usemap="#butil_8c_a6a9471425ee2bb9f467078334056c52e_icgraph" alt=""/></div>
+<map name="butil_8c_a6a9471425ee2bb9f467078334056c52e_icgraph" id="butil_8c_a6a9471425ee2bb9f467078334056c52e_icgraph">
+<area shape="rect" id="node2" href="butil_8h.html#adca6e84da736fbc0562166efc0af0466" title="计算 torrent 文件的 info hash " alt="" coords="367,8,485,35"/>
+<area shape="rect" id="node4" href="driver_8c.html#a288da41ae0ddeca593e7604471ed184e" title="将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 " alt="" coords="199,33,315,60"/>
+<area shape="rect" id="node6" href="driver_8c.html#af6fb06630b6c5402acaee4f8a5e4e8fb" title="提取 interval 信息并设置定时 " alt="" coords="202,84,311,111"/>
+<area shape="rect" id="node7" href="metainfo_8h.html#a8859c576edfc642ef89d66984d0d531f" title="提取 tracker 列表 " alt="" coords="368,135,484,161"/>
+<area shape="rect" id="node8" href="metainfo_8h.html#a108b01c970e97953b9430fe80cc571dd" title="获取文件名，读取文件，分析已经完成的块 " alt="" coords="363,185,489,212"/>
+<area shape="rect" id="node9" href="metainfo_8h.html#af9920b3ee23e92c773734e1a7d1c4bc5" title="提取分片 hash " alt="" coords="203,236,310,263"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="537,135,588,161"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="385,84,467,111"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

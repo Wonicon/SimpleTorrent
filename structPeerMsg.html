@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: PeerMsg结构体 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li class="current"><a href="annotated.html"><span>结构体</span></a></li>
+      <li><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li><a href="classes.html"><span>结构体索引</span></a></li>
+      <li><a href="functions.html"><span>成员变量</span></a></li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#pub-attribs">成员变量</a>  </div>
+  <div class="headertitle">
+<div class="title">PeerMsg结构体 参考</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>BT 消息  
+ <a href="structPeerMsg.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="peer_8h_source.html">peer.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+成员变量</h2></td></tr>
+<tr class="memitem:a13cecfd68f9da87808372272ad709bcd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a13cecfd68f9da87808372272ad709bcd"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structPeerMsg.html#a13cecfd68f9da87808372272ad709bcd">len</a></td></tr>
+<tr class="memdesc:a13cecfd68f9da87808372272ad709bcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">后续消息长度（不包含 len 自身的 4 个字节） <br /></td></tr>
+<tr class="separator:a13cecfd68f9da87808372272ad709bcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27f701984d4cd08962c994ec7fa3e779"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a27f701984d4cd08962c994ec7fa3e779"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structPeerMsg.html#a27f701984d4cd08962c994ec7fa3e779">id</a></td></tr>
+<tr class="memdesc:a27f701984d4cd08962c994ec7fa3e779"><td class="mdescLeft">&#160;</td><td class="mdescRight">消息编号 <br /></td></tr>
+<tr class="separator:a27f701984d4cd08962c994ec7fa3e779"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cc5c36ce6eadb7b0dfc9850d7882185"><td class="memItemLeft" ><a class="anchor" id="a0cc5c36ce6eadb7b0dfc9850d7882185"></a>
+union {</td></tr>
+<tr class="memitem:afbe41d9386f33d986ea0f020edb0cd0b"><td class="memItemLeft" >
+&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:a0fed4a06e0a22e2ecf9986e06f350f0d"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a269055c83f41ecbfb052fc1d7a543d84">piece_index</a></td></tr>
+<tr class="memdesc:a0fed4a06e0a22e2ecf9986e06f350f0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">分片号 <br /></td></tr>
+<tr class="separator:a0fed4a06e0a22e2ecf9986e06f350f0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbe41d9386f33d986ea0f020edb0cd0b"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#aefcb5388534a31f36dd8c660f7ff2610">have</a></td></tr>
+<tr class="memdesc:afbe41d9386f33d986ea0f020edb0cd0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">HAVE 消息 <br /></td></tr>
+<tr class="separator:afbe41d9386f33d986ea0f020edb0cd0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a322ed4b6b52f2b9b57818a284cb22caa"><td class="memItemLeft" >
+&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a6577e39565170f72203cc0456275875b">bitfield</a> [0]</td></tr>
+<tr class="memdesc:a322ed4b6b52f2b9b57818a284cb22caa"><td class="mdescLeft">&#160;</td><td class="mdescRight">位域消息，变长 <br /></td></tr>
+<tr class="separator:a322ed4b6b52f2b9b57818a284cb22caa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b85ceae7cd830d632912a6abb033957"><td class="memItemLeft" >
+&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:aa4bd635d2f9efb3551f9e8606d515f56"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a5fd34af06012bca83f0ff208bd95f926">index</a></td></tr>
+<tr class="memdesc:aa4bd635d2f9efb3551f9e8606d515f56"><td class="mdescLeft">&#160;</td><td class="mdescRight">分片号 <br /></td></tr>
+<tr class="separator:aa4bd635d2f9efb3551f9e8606d515f56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54bf126ef3f646b65ae52e3f92d09f38"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#af3033419a4a321ed3bc6c693dc88e947">begin</a></td></tr>
+<tr class="memdesc:a54bf126ef3f646b65ae52e3f92d09f38"><td class="mdescLeft">&#160;</td><td class="mdescRight">子分片起始偏移量 <br /></td></tr>
+<tr class="separator:a54bf126ef3f646b65ae52e3f92d09f38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae87f09e2019d1bd13fdf72a64bcaaa94"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a66c6a58137ca954258862ced64e597d9">length</a></td></tr>
+<tr class="memdesc:ae87f09e2019d1bd13fdf72a64bcaaa94"><td class="mdescLeft">&#160;</td><td class="mdescRight">子分片长度 <br /></td></tr>
+<tr class="separator:ae87f09e2019d1bd13fdf72a64bcaaa94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b85ceae7cd830d632912a6abb033957"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#ad4578c6c7a4d5d070fe69be0f28a64b6">request</a></td></tr>
+<tr class="memdesc:a6b85ceae7cd830d632912a6abb033957"><td class="mdescLeft">&#160;</td><td class="mdescRight">REQUEST 消息 <br /></td></tr>
+<tr class="separator:a6b85ceae7cd830d632912a6abb033957"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ddf06aa1cea30bbff895ef26665b4bf"><td class="memItemLeft" >
+&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:a9df4d85e79125be3bc5b0d84e182e4d8"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a5fd34af06012bca83f0ff208bd95f926">index</a></td></tr>
+<tr class="memdesc:a9df4d85e79125be3bc5b0d84e182e4d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">分片号 <br /></td></tr>
+<tr class="separator:a9df4d85e79125be3bc5b0d84e182e4d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d2bc4e72979720877a3d764dd8ac6d8"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#af3033419a4a321ed3bc6c693dc88e947">begin</a></td></tr>
+<tr class="memdesc:a0d2bc4e72979720877a3d764dd8ac6d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">子分片起始偏移量 <br /></td></tr>
+<tr class="separator:a0d2bc4e72979720877a3d764dd8ac6d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0151eab0885363bb1ebc663fd308a16e"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a094937c288779800087ab0d89871c0f9">block</a> [0]</td></tr>
+<tr class="memdesc:a0151eab0885363bb1ebc663fd308a16e"><td class="mdescLeft">&#160;</td><td class="mdescRight">边长数据块 <br /></td></tr>
+<tr class="separator:a0151eab0885363bb1ebc663fd308a16e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ddf06aa1cea30bbff895ef26665b4bf"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a59286d166a61f44511f4c9d8051445ff">piece</a></td></tr>
+<tr class="memdesc:a9ddf06aa1cea30bbff895ef26665b4bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">PIECE 消息 <br /></td></tr>
+<tr class="separator:a9ddf06aa1cea30bbff895ef26665b4bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79603c19c33cb334fcd2caaedfa86fd2"><td class="memItemLeft" >
+&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:a0797a8f9003d9422395d7e117bd42bfa"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a5fd34af06012bca83f0ff208bd95f926">index</a></td></tr>
+<tr class="memdesc:a0797a8f9003d9422395d7e117bd42bfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">分片号 <br /></td></tr>
+<tr class="separator:a0797a8f9003d9422395d7e117bd42bfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3a7f88338437960e96fe3ffd6853450"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#af3033419a4a321ed3bc6c693dc88e947">begin</a></td></tr>
+<tr class="memdesc:ae3a7f88338437960e96fe3ffd6853450"><td class="mdescLeft">&#160;</td><td class="mdescRight">子分片起始偏移量 <br /></td></tr>
+<tr class="separator:ae3a7f88338437960e96fe3ffd6853450"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abaf13887098420559d5cf1eb4b9c4019"><td class="memItemLeft" >
+&#160;&#160;&#160;&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a66c6a58137ca954258862ced64e597d9">length</a></td></tr>
+<tr class="memdesc:abaf13887098420559d5cf1eb4b9c4019"><td class="mdescLeft">&#160;</td><td class="mdescRight">子分片长度 <br /></td></tr>
+<tr class="separator:abaf13887098420559d5cf1eb4b9c4019"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79603c19c33cb334fcd2caaedfa86fd2"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<a class="el" href="structPeerMsg.html#a2ef1c5c2b68e7f2931a67c7f5118e68d">cancel</a></td></tr>
+<tr class="memdesc:a79603c19c33cb334fcd2caaedfa86fd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">CANCEL 消息 <br /></td></tr>
+<tr class="separator:a79603c19c33cb334fcd2caaedfa86fd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cc5c36ce6eadb7b0dfc9850d7882185"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:a0cc5c36ce6eadb7b0dfc9850d7882185"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>BT 消息 </p>
+<p>构造模式 </p><div class="fragment"><div class="line">uint32_t <a class="code" href="structPeerMsg.html#a13cecfd68f9da87808372272ad709bcd">len</a>;</div><div class="line">read(<a class="code" href="structPeer.html#aaff13c1dcd4c4a80411d97aeb0fce99f">fd</a>, &amp;<a class="code" href="structPeerMsg.html#a13cecfd68f9da87808372272ad709bcd">len</a>, <span class="keyword">sizeof</span>(<a class="code" href="structPeerMsg.html#a13cecfd68f9da87808372272ad709bcd">len</a>));</div><div class="line"><a class="code" href="structPeerMsg.html">PeerMsg</a> *<a class="code" href="structPeer.html#aa0eeefeae80d6678622010ddbcab3caf">msg</a> = malloc(<a class="code" href="structPeerMsg.html#a13cecfd68f9da87808372272ad709bcd">len</a>);</div><div class="line">read(<a class="code" href="structPeer.html#aaff13c1dcd4c4a80411d97aeb0fce99f">fd</a>, &amp;msg-&gt;<a class="code" href="structPeerMsg.html#a27f701984d4cd08962c994ec7fa3e779">id</a>, <a class="code" href="structPeerMsg.html#a13cecfd68f9da87808372272ad709bcd">len</a>);</div><div class="line">msg-&gt;<a class="code" href="structPeerMsg.html#a13cecfd68f9da87808372272ad709bcd">len</a> = <a class="code" href="structPeerMsg.html#a13cecfd68f9da87808372272ad709bcd">len</a>;</div></div><!-- fragment --><p>len 大部分时候是不需要的，但是可边长的 bitfield 和 block 报文自身不带长度，只能靠 len 计算得出。 </p>
+</div><hr/>该结构体的文档由以下文件生成:<ul>
+<li><a class="el" href="peer_8h_source.html">peer.h</a></li>
+</ul>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

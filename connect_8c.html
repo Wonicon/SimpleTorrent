@@ -1,0 +1,620 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: connect.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li class="current"><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>文件列表</span></a></li>
+      <li><a href="globals.html"><span>全局定义</span></a></li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">结构体</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle">
+<div class="title">connect.c 文件参考</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="util_8h_source.html">util.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="metainfo_8h_source.html">metainfo.h</a>&quot;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
+<code>#include &lt;errno.h&gt;</code><br />
+<code>#include &lt;netdb.h&gt;</code><br />
+<code>#include &lt;fcntl.h&gt;</code><br />
+<code>#include &lt;sys/epoll.h&gt;</code><br />
+<code>#include &lt;pthread.h&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+connect.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c__incl.png" border="0" usemap="#connect_8c" alt=""/></div>
+<map name="connect_8c" id="connect_8c">
+<area shape="rect" id="node2" href="util_8h.html" title="一些工具函数（宏）声明 / 定义 " alt="" coords="92,80,143,107"/>
+<area shape="rect" id="node5" href="metainfo_8h.html" title="操作全局信息的相关 API " alt="" coords="167,80,249,107"/>
+</map>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+结构体</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structHttpRequest.html">HttpRequest</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">描述一个 HTTP 请求  <a href="structHttpRequest.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:aed167a6fd20a96a7d72a87558e1798f2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed167a6fd20a96a7d72a87558e1798f2"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#aed167a6fd20a96a7d72a87558e1798f2">REQUEST_MAX</a>&#160;&#160;&#160;1024</td></tr>
+<tr class="memdesc:aed167a6fd20a96a7d72a87558e1798f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">HTTP 报文缓冲区的最大长度 <br /></td></tr>
+<tr class="separator:aed167a6fd20a96a7d72a87558e1798f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a3536b39d569f286bfc60ad5a7374a004"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#a3536b39d569f286bfc60ad5a7374a004">parse_url</a> (const char *url, char *method, char *host, char *port, char *request)</td></tr>
+<tr class="memdesc:a3536b39d569f286bfc60ad5a7374a004"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析 url 获取应用层协议、主机名、端口号  <a href="#a3536b39d569f286bfc60ad5a7374a004">更多...</a><br /></td></tr>
+<tr class="separator:a3536b39d569f286bfc60ad5a7374a004"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af793970116cb395d164e407e4e2690dd"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structHttpRequest.html">HttpRequest</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#af793970116cb395d164e407e4e2690dd">create_http_request</a> (const char *method, const char *host)</td></tr>
+<tr class="memdesc:af793970116cb395d164e407e4e2690dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建一个 HTTP 请求  <a href="#af793970116cb395d164e407e4e2690dd">更多...</a><br /></td></tr>
+<tr class="separator:af793970116cb395d164e407e4e2690dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed6d27fd0d1872aa3f661f3ed54c1ec1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#aed6d27fd0d1872aa3f661f3ed54c1ec1">add_http_request_attr</a> (struct <a class="el" href="structHttpRequest.html">HttpRequest</a> *req, const char *key, const char *fmt,...)</td></tr>
+<tr class="memdesc:aed6d27fd0d1872aa3f661f3ed54c1ec1"><td class="mdescLeft">&#160;</td><td class="mdescRight">增加一个请求属性  <a href="#aed6d27fd0d1872aa3f661f3ed54c1ec1">更多...</a><br /></td></tr>
+<tr class="separator:aed6d27fd0d1872aa3f661f3ed54c1ec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fb50e0d96e378660189c0b47d68d53f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#a4fb50e0d96e378660189c0b47d68d53f">send_http_request</a> (struct <a class="el" href="structHttpRequest.html">HttpRequest</a> *req, int sfd)</td></tr>
+<tr class="memdesc:a4fb50e0d96e378660189c0b47d68d53f"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送一个 HTTP 请求  <a href="#a4fb50e0d96e378660189c0b47d68d53f">更多...</a><br /></td></tr>
+<tr class="separator:a4fb50e0d96e378660189c0b47d68d53f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add9224ab3979e07e52658d8ecbb9019d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#add9224ab3979e07e52658d8ecbb9019d">make_nonblocking</a> (int sfd)</td></tr>
+<tr class="memdesc:add9224ab3979e07e52658d8ecbb9019d"><td class="mdescLeft">&#160;</td><td class="mdescRight">将套接字设置成非阻塞的  <a href="#add9224ab3979e07e52658d8ecbb9019d">更多...</a><br /></td></tr>
+<tr class="separator:add9224ab3979e07e52658d8ecbb9019d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f711407b13d7f442a045a89417b8cdc"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#a6f711407b13d7f442a045a89417b8cdc">make_blocking</a> (int sfd)</td></tr>
+<tr class="memdesc:a6f711407b13d7f442a045a89417b8cdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">将套接字设置成阻塞的  <a href="#a6f711407b13d7f442a045a89417b8cdc">更多...</a><br /></td></tr>
+<tr class="separator:a6f711407b13d7f442a045a89417b8cdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af910ceb3e70e0f4024756d716a1836d4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#af910ceb3e70e0f4024756d716a1836d4">async_connect</a> (int efd, int sfd, const struct sockaddr *addr, socklen_t addrlen)</td></tr>
+<tr class="memdesc:af910ceb3e70e0f4024756d716a1836d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">异步 connect  <a href="#af910ceb3e70e0f4024756d716a1836d4">更多...</a><br /></td></tr>
+<tr class="separator:af910ceb3e70e0f4024756d716a1836d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62c2d1a7d56683549c20688922baf999"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#a62c2d1a7d56683549c20688922baf999">async_connect_to_tracker_non_block</a> (void *arg)</td></tr>
+<tr class="memdesc:a62c2d1a7d56683549c20688922baf999"><td class="mdescLeft">&#160;</td><td class="mdescRight">异步连接线程  <a href="#a62c2d1a7d56683549c20688922baf999">更多...</a><br /></td></tr>
+<tr class="separator:a62c2d1a7d56683549c20688922baf999"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab13ba46f45b4aa412e363413a2cf7280"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="connect_8c.html#ab13ba46f45b4aa412e363413a2cf7280">async_connect_to_tracker</a> (struct <a class="el" href="structTracker.html">Tracker</a> *tracker, int efd)</td></tr>
+<tr class="memdesc:ab13ba46f45b4aa412e363413a2cf7280"><td class="mdescLeft">&#160;</td><td class="mdescRight">异步地与 tracker 建立连接，调用后连接并不立即建立  <a href="#ab13ba46f45b4aa412e363413a2cf7280">更多...</a><br /></td></tr>
+<tr class="separator:ab13ba46f45b4aa412e363413a2cf7280"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a class="anchor" id="aed6d27fd0d1872aa3f661f3ed54c1ec1"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void add_http_request_attr </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structHttpRequest.html">HttpRequest</a> *&#160;</td>
+          <td class="paramname"><em>req</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>增加一个请求属性 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">req</td><td>HTTP 请求句柄 </td></tr>
+    <tr><td class="paramname">key</td><td>属性键 </td></tr>
+    <tr><td class="paramname">fmt</td><td>... 属性值 [可格式化] </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_aed6d27fd0d1872aa3f661f3ed54c1ec1_icgraph.png" border="0" usemap="#connect_8c_aed6d27fd0d1872aa3f661f3ed54c1ec1_icgraph" alt=""/></div>
+<map name="connect_8c_aed6d27fd0d1872aa3f661f3ed54c1ec1_icgraph" id="connect_8c_aed6d27fd0d1872aa3f661f3ed54c1ec1_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#ae36b6472da40f83c6b72de5452779cc4" title="send_msg_to_tracker" alt="" coords="201,5,348,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0017b9340d4b1cca06a57ab102b09034" title="执行连接建立后的相关操作 " alt="" coords="396,5,495,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="543,5,625,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="673,5,724,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="af910ceb3e70e0f4024756d716a1836d4"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int async_connect </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>efd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sfd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const struct sockaddr *&#160;</td>
+          <td class="paramname"><em>addr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">socklen_t&#160;</td>
+          <td class="paramname"><em>addrlen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>异步 connect </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">efd</td><td>epoll 描述符 </td></tr>
+    <tr><td class="paramname">sfd</td><td>连接套接字 </td></tr>
+    <tr><td class="paramname">addr</td><td>连接地址 </td></tr>
+    <tr><td class="paramname">addrlen</td><td>地址结构体长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果立即 connect 返回 0，异步连接时应该返回 errno，应当是 EINPROGRESS</dd></dl>
+<p>如果 connect 能够立即完成，直接返回；否则，将描述符加入 epoll, 侦听 EPOLLOUT 事件，同时要关注 EPOLLERR 和 EPOLLHUP 处理实际错误。 </p>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_af910ceb3e70e0f4024756d716a1836d4_icgraph.png" border="0" usemap="#connect_8c_af910ceb3e70e0f4024756d716a1836d4_icgraph" alt=""/></div>
+<map name="connect_8c_af910ceb3e70e0f4024756d716a1836d4_icgraph" id="connect_8c_af910ceb3e70e0f4024756d716a1836d4_icgraph">
+<area shape="rect" id="node2" href="connect_8c.html#a62c2d1a7d56683549c20688922baf999" title="异步连接线程 " alt="" coords="164,5,339,47"/>
+<area shape="rect" id="node6" href="driver_8c.html#a288da41ae0ddeca593e7604471ed184e" title="将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 " alt="" coords="416,67,532,94"/>
+<area shape="rect" id="node3" href="connect_8h.html#ab13ba46f45b4aa412e363413a2cf7280" title="异步地与 tracker 建立连接，调用后连接并不立即建立 " alt="" coords="387,15,561,42"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="609,66,692,93"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="740,41,791,67"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ab13ba46f45b4aa412e363413a2cf7280"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void async_connect_to_tracker </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structTracker.html">Tracker</a> *&#160;</td>
+          <td class="paramname"><em>tracker</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>efd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>异步地与 tracker 建立连接，调用后连接并不立即建立 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tracker</td><td>指向 tracker 信息的指针 </td></tr>
+    <tr><td class="paramname">efd</td><td>epoll file descriptor，创建的套接字会加入该队列中，侦听 EPOLLOUT </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_ab13ba46f45b4aa412e363413a2cf7280_icgraph.png" border="0" usemap="#connect_8c_ab13ba46f45b4aa412e363413a2cf7280_icgraph" alt=""/></div>
+<map name="connect_8c_ab13ba46f45b4aa412e363413a2cf7280_icgraph" id="connect_8c_ab13ba46f45b4aa412e363413a2cf7280_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="228,5,311,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="359,31,409,57"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a62c2d1a7d56683549c20688922baf999"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void* async_connect_to_tracker_non_block </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>arg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>异步连接线程 </p>
+<p>本函数主要是为了规避 getaddrinfo 的阻塞，一个重要的隐含前提是通过 tracker 的 sfd 来传递 efd。 毕竟 sfd 作为连接套接字在调用时是没有意义的。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">arg</td><td>实际上是指向 tracker 的指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>NULL </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_a62c2d1a7d56683549c20688922baf999_icgraph.png" border="0" usemap="#connect_8c_a62c2d1a7d56683549c20688922baf999_icgraph" alt=""/></div>
+<map name="connect_8c_a62c2d1a7d56683549c20688922baf999_icgraph" id="connect_8c_a62c2d1a7d56683549c20688922baf999_icgraph">
+<area shape="rect" id="node2" href="connect_8h.html#ab13ba46f45b4aa412e363413a2cf7280" title="异步地与 tracker 建立连接，调用后连接并不立即建立 " alt="" coords="228,31,403,57"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="451,5,533,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="581,31,632,57"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="af793970116cb395d164e407e4e2690dd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structHttpRequest.html">HttpRequest</a>* create_http_request </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>method</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>host</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建一个 HTTP 请求 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">method</td><td>请求方法, 主要用 GET </td></tr>
+    <tr><td class="paramname">host</td><td>主机名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的实例句柄 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_af793970116cb395d164e407e4e2690dd_icgraph.png" border="0" usemap="#connect_8c_af793970116cb395d164e407e4e2690dd_icgraph" alt=""/></div>
+<map name="connect_8c_af793970116cb395d164e407e4e2690dd_icgraph" id="connect_8c_af793970116cb395d164e407e4e2690dd_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#ae36b6472da40f83c6b72de5452779cc4" title="send_msg_to_tracker" alt="" coords="191,5,337,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0017b9340d4b1cca06a57ab102b09034" title="执行连接建立后的相关操作 " alt="" coords="385,5,484,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="532,5,615,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="663,5,713,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a6f711407b13d7f442a045a89417b8cdc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int make_blocking </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sfd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将套接字设置成阻塞的 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sfd</td><td>套接字 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>成功返回 0，错误返回 -1. </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_a6f711407b13d7f442a045a89417b8cdc_icgraph.png" border="0" usemap="#connect_8c_a6f711407b13d7f442a045a89417b8cdc_icgraph" alt=""/></div>
+<map name="connect_8c_a6f711407b13d7f442a045a89417b8cdc_icgraph" id="connect_8c_a6f711407b13d7f442a045a89417b8cdc_icgraph">
+<area shape="rect" id="node2" href="connect_8h.html#af910ceb3e70e0f4024756d716a1836d4" title="异步 connect " alt="" coords="163,42,273,69"/>
+<area shape="rect" id="node3" href="connect_8c.html#a62c2d1a7d56683549c20688922baf999" title="异步连接线程 " alt="" coords="321,5,496,47"/>
+<area shape="rect" id="node7" href="driver_8c.html#a288da41ae0ddeca593e7604471ed184e" title="将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 " alt="" coords="573,67,689,94"/>
+<area shape="rect" id="node4" href="connect_8h.html#ab13ba46f45b4aa412e363413a2cf7280" title="异步地与 tracker 建立连接，调用后连接并不立即建立 " alt="" coords="544,15,719,42"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="767,66,849,93"/>
+<area shape="rect" id="node6" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="897,41,948,67"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="add9224ab3979e07e52658d8ecbb9019d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int make_nonblocking </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sfd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将套接字设置成非阻塞的 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sfd</td><td>套接字 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>成功返回 0，错误返回 -1. </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_add9224ab3979e07e52658d8ecbb9019d_icgraph.png" border="0" usemap="#connect_8c_add9224ab3979e07e52658d8ecbb9019d_icgraph" alt=""/></div>
+<map name="connect_8c_add9224ab3979e07e52658d8ecbb9019d_icgraph" id="connect_8c_add9224ab3979e07e52658d8ecbb9019d_icgraph">
+<area shape="rect" id="node2" href="connect_8h.html#af910ceb3e70e0f4024756d716a1836d4" title="异步 connect " alt="" coords="184,42,295,69"/>
+<area shape="rect" id="node3" href="connect_8c.html#a62c2d1a7d56683549c20688922baf999" title="异步连接线程 " alt="" coords="343,5,517,47"/>
+<area shape="rect" id="node7" href="driver_8c.html#a288da41ae0ddeca593e7604471ed184e" title="将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 " alt="" coords="595,67,711,94"/>
+<area shape="rect" id="node4" href="connect_8h.html#ab13ba46f45b4aa412e363413a2cf7280" title="异步地与 tracker 建立连接，调用后连接并不立即建立 " alt="" coords="565,15,740,42"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="788,66,871,93"/>
+<area shape="rect" id="node6" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="919,41,969,67"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a3536b39d569f286bfc60ad5a7374a004"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void parse_url </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>url</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>method</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>port</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>request</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>解析 url 获取应用层协议、主机名、端口号 </p>
+<p>解析 URL</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">url</td><td>指向 url 字符串 </td></tr>
+    <tr><td class="paramname">method</td><td>接收应用层协议名 </td></tr>
+    <tr><td class="paramname">host</td><td>接收主机名 </td></tr>
+    <tr><td class="paramname">port</td><td>接收端口号 </td></tr>
+    <tr><td class="paramname">request</td><td>http 请求路径，一般是 /announce</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>自行保证缓冲区大小，host 和 port 可以使用 NI_MAXHOST 和 NI_MAXSERV. method 一般是 http 或者 udp. </p>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_a3536b39d569f286bfc60ad5a7374a004_icgraph.png" border="0" usemap="#connect_8c_a3536b39d569f286bfc60ad5a7374a004_icgraph" alt=""/></div>
+<map name="connect_8c_a3536b39d569f286bfc60ad5a7374a004_icgraph" id="connect_8c_a3536b39d569f286bfc60ad5a7374a004_icgraph">
+<area shape="rect" id="node2" href="metainfo_8h.html#a8859c576edfc642ef89d66984d0d531f" title="提取 tracker 列表 " alt="" coords="128,5,244,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="292,5,343,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a4fb50e0d96e378660189c0b47d68d53f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int send_http_request </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structHttpRequest.html">HttpRequest</a> *&#160;</td>
+          <td class="paramname"><em>req</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sfd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送一个 HTTP 请求 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">req</td><td>HTTP 请求句柄 </td></tr>
+    <tr><td class="paramname">sfd</td><td>连接套接字 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>成功返回 0, 失败返回 -1 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="connect_8c_a4fb50e0d96e378660189c0b47d68d53f_icgraph.png" border="0" usemap="#connect_8c_a4fb50e0d96e378660189c0b47d68d53f_icgraph" alt=""/></div>
+<map name="connect_8c_a4fb50e0d96e378660189c0b47d68d53f_icgraph" id="connect_8c_a4fb50e0d96e378660189c0b47d68d53f_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#ae36b6472da40f83c6b72de5452779cc4" title="send_msg_to_tracker" alt="" coords="183,5,329,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0017b9340d4b1cca06a57ab102b09034" title="执行连接建立后的相关操作 " alt="" coords="377,5,476,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="524,5,607,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="655,5,705,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<map id="dfs_bcode" name="query_bcode_by_key">
+<area shape="rect" id="node2" href="$driver_8c.html#a288da41ae0ddeca593e7604471ed184e" title="将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 " alt="" coords="136,5,252,32"/>
+<area shape="rect" id="node5" href="$driver_8c.html#af6fb06630b6c5402acaee4f8a5e4e8fb" title="提取 interval 信息并设置定时 " alt="" coords="139,56,249,83"/>
+<area shape="rect" id="node6" href="$metainfo_8h.html#a8859c576edfc642ef89d66984d0d531f" title="提取 tracker 列表 " alt="" coords="305,107,421,133"/>
+<area shape="rect" id="node7" href="$metainfo_8h.html#a108b01c970e97953b9430fe80cc571dd" title="获取文件名，读取文件，分析已经完成的块 " alt="" coords="300,157,427,184"/>
+<area shape="rect" id="node8" href="$metainfo_8h.html#af9920b3ee23e92c773734e1a7d1c4bc5" title="提取分片 hash " alt="" coords="141,208,247,235"/>
+<area shape="rect" id="node3" href="$driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="322,56,405,83"/>
+<area shape="rect" id="node4" href="$driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="475,132,525,159"/>
+</map>

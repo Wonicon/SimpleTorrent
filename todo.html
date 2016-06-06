@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: 待办事项列表</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li class="current"><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="headertitle">
+<div class="title">待办事项列表 </div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><dl class="reflist">
+<dt><a class="anchor" id="_todo000007"></a>全局 <a class="el" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70">bt_handler</a>  (struct <a class="el" href="structMetaInfo.html" title="描述一次运行的全局信息 ">MetaInfo</a> *mi, int efd)</dt>
+<dd>通过 accept 建立连接并监听连接套接字的 EPOLLIN 事件，加入 <a class="el" href="structMetaInfo.html#a34759b6fd0650e356c66919e9cf05a26" title="已发出 connect 的 peer 集合 ">MetaInfo::wait_peers</a> 队列。注意设置 <a class="el" href="structWaitPeer.html#a490f9d6c7e59d5155a3a254166339e03" title="0: 我方主动连接, 1: 对方主动连接。 ">WaitPeer::direction</a>  </dd>
+<dt><a class="anchor" id="_todo000006"></a>全局 <a class="el" href="driver_8c.html#a23d49f290a81bbd360baac95364fbef9">finish_handshake</a>  (struct <a class="el" href="structMetaInfo.html" title="描述一次运行的全局信息 ">MetaInfo</a> *mi, int sfd)</dt>
+<dd>要区分是对方回复的握手消息还是对方主动发来的握手消息 </dd>
+<dt><a class="anchor" id="_todo000002"></a>全局 <a class="el" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b">handle_msg</a>  (struct <a class="el" href="structMetaInfo.html" title="描述一次运行的全局信息 ">MetaInfo</a> *mi, struct <a class="el" href="structPeer.html" title="描述 peer 信息 ">Peer</a> *peer, struct <a class="el" href="structPeerMsg.html" title="BT 消息 ">PeerMsg</a> *msg)</dt>
+<dd><p class="startdd">根据 bitfield 增加 piece 持有者数量 </p>
+<p>根据 have 增加 piece 持有者数量 </p>
+<p>处理 REQUEST 消息 </p>
+<p class="enddd">处理 CANCEL 消息  </p>
+</dd>
+<dt><a class="anchor" id="_todo000010"></a>类 <a class="el" href="structMetaInfo.html">MetaInfo</a>  </dt>
+<dd><p class="startdd">确定子分片大小，记录并保存相关信息。 </p>
+<p>创建套接字并绑定侦听端口。 </p>
+<p class="enddd">创建侦听套接字，绑定给定的侦听端口并告知 tracker  </p>
+</dd>
+<dt><a class="anchor" id="_todo000008"></a>类 <a class="el" href="structPieceInfo.html">PieceInfo</a>  </dt>
+<dd>子分片使用何种数据结构比较合理？  </dd>
+<dt><a class="anchor" id="_todo000001"></a>全局 <a class="el" href="driver_8c.html#a1144015b47fb80b2a0faf9fe01bd6d02">select_piece</a>  (struct <a class="el" href="structMetaInfo.html" title="描述一次运行的全局信息 ">MetaInfo</a> *mi, struct <a class="el" href="structPeerMsg.html" title="BT 消息 ">PeerMsg</a> *msg)</dt>
+<dd>应用优化策略：最少优先  </dd>
+<dt><a class="anchor" id="_todo000009"></a>类 <a class="el" href="structWaitPeer.html">WaitPeer</a>  </dt>
+<dd>在 <a class="el" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 ">bt_handler()</a> 和 <a class="el" href="driver_8c.html#a288da41ae0ddeca593e7604471ed184e" title="将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 ">handle_peer_list()</a> 中正确地对 <a class="el" href="structWaitPeer.html#a490f9d6c7e59d5155a3a254166339e03" title="0: 我方主动连接, 1: 对方主动连接。 ">direction</a> 进行赋值，为 <a class="el" href="driver_8c.html#a23d49f290a81bbd360baac95364fbef9" title="完成握手消息的处理 ">finish_handshake()</a> 服务 </dd>
+</dl>
+</div></div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

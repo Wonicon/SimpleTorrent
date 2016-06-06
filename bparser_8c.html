@@ -1,0 +1,926 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: bparser.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li class="current"><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>文件列表</span></a></li>
+      <li><a href="globals.html"><span>全局定义</span></a></li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">结构体</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle">
+<div class="title">bparser.c 文件参考</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="bparser_8h_source.html">bparser.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="util_8h_source.html">util.h</a>&quot;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+bparser.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c__incl.png" border="0" usemap="#bparser_8c" alt=""/></div>
+<map name="bparser_8c" id="bparser_8c">
+<area shape="rect" id="node2" href="bparser_8h.html" title="B 编码 parser 的 API 声明 " alt="" coords="101,80,177,107"/>
+<area shape="rect" id="node5" href="util_8h.html" title="一些工具函数（宏）声明 / 定义 " alt="" coords="208,80,259,107"/>
+</map>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+结构体</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structState.html">State</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">parser 状态  <a href="structState.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a1129d7e0bed7c31561c8664cfe73ad07"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1129d7e0bed7c31561c8664cfe73ad07"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a1129d7e0bed7c31561c8664cfe73ad07">DELIM</a>&#160;&#160;&#160;':'</td></tr>
+<tr class="memdesc:a1129d7e0bed7c31561c8664cfe73ad07"><td class="mdescLeft">&#160;</td><td class="mdescRight">长度与字节串的分割符 <br /></td></tr>
+<tr class="separator:a1129d7e0bed7c31561c8664cfe73ad07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaae023eff3f347b4652033c17c20c654"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaae023eff3f347b4652033c17c20c654"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#aaae023eff3f347b4652033c17c20c654">LEAD_INT</a>&#160;&#160;&#160;'i'</td></tr>
+<tr class="memdesc:aaae023eff3f347b4652033c17c20c654"><td class="mdescLeft">&#160;</td><td class="mdescRight">整型结点的起始字符 <br /></td></tr>
+<tr class="separator:aaae023eff3f347b4652033c17c20c654"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a298ad0198ceb3531d358d8f50f6c5704"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a298ad0198ceb3531d358d8f50f6c5704"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a298ad0198ceb3531d358d8f50f6c5704">LEAD_LIST</a>&#160;&#160;&#160;'l'</td></tr>
+<tr class="memdesc:a298ad0198ceb3531d358d8f50f6c5704"><td class="mdescLeft">&#160;</td><td class="mdescRight">列表结点的起始字符 <br /></td></tr>
+<tr class="separator:a298ad0198ceb3531d358d8f50f6c5704"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed2aa5f2b32fadd55463a941638c2fa2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed2aa5f2b32fadd55463a941638c2fa2"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#aed2aa5f2b32fadd55463a941638c2fa2">LEAD_DICT</a>&#160;&#160;&#160;'d'</td></tr>
+<tr class="memdesc:aed2aa5f2b32fadd55463a941638c2fa2"><td class="mdescLeft">&#160;</td><td class="mdescRight">字典结点的起始字符 <br /></td></tr>
+<tr class="separator:aed2aa5f2b32fadd55463a941638c2fa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29fd18bed01c4d836c7ebfe73a125c3f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a29fd18bed01c4d836c7ebfe73a125c3f"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a29fd18bed01c4d836c7ebfe73a125c3f">END</a>&#160;&#160;&#160;'e'</td></tr>
+<tr class="memdesc:a29fd18bed01c4d836c7ebfe73a125c3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">非串结点的终止字符 <br /></td></tr>
+<tr class="separator:a29fd18bed01c4d836c7ebfe73a125c3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af06452818c05347976e0c1f59d892637"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af06452818c05347976e0c1f59d892637"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#af06452818c05347976e0c1f59d892637">error_unexpected_char</a>(st,  ch,  expect)&#160;&#160;&#160;<a class="el" href="util_8h.html#a8e85260aea3faba13a2db75db40bd381">log</a>(&quot;ERROR: unexpected '%c', expect '%c' at %lu&quot;, ch, expect, <a class="el" href="bparser_8c.html#a85918cdbb4f470292c26c081535c396a">pos</a>(st));</td></tr>
+<tr class="memdesc:af06452818c05347976e0c1f59d892637"><td class="mdescLeft">&#160;</td><td class="mdescRight">较为常用的错误类型 <br /></td></tr>
+<tr class="separator:af06452818c05347976e0c1f59d892637"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a6f1a4e645f95b71395b62299dc21e338"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a6f1a4e645f95b71395b62299dc21e338">parse_get_int</a> (struct <a class="el" href="structState.html">State</a> *st)</td></tr>
+<tr class="memdesc:a6f1a4e645f95b71395b62299dc21e338"><td class="mdescLeft">&#160;</td><td class="mdescRight">从数据流中取出一个长整型  <a href="#a6f1a4e645f95b71395b62299dc21e338">更多...</a><br /></td></tr>
+<tr class="separator:a6f1a4e645f95b71395b62299dc21e338"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17f63dfe8da72909cd3a405efc54d373"><td class="memItemLeft" align="right" valign="top">static char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a17f63dfe8da72909cd3a405efc54d373">parse_get_str</a> (struct <a class="el" href="structState.html">State</a> *st, size_t length)</td></tr>
+<tr class="memdesc:a17f63dfe8da72909cd3a405efc54d373"><td class="mdescLeft">&#160;</td><td class="mdescRight">从数据流中取出一个给定长度的字符串  <a href="#a17f63dfe8da72909cd3a405efc54d373">更多...</a><br /></td></tr>
+<tr class="separator:a17f63dfe8da72909cd3a405efc54d373"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5153c24c763092544219ccbfd080fcea"><td class="memItemLeft" align="right" valign="top">static char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a5153c24c763092544219ccbfd080fcea">parse_get_char</a> (struct <a class="el" href="structState.html">State</a> *st)</td></tr>
+<tr class="memdesc:a5153c24c763092544219ccbfd080fcea"><td class="mdescLeft">&#160;</td><td class="mdescRight">从数据流中取出一个字符  <a href="#a5153c24c763092544219ccbfd080fcea">更多...</a><br /></td></tr>
+<tr class="separator:a5153c24c763092544219ccbfd080fcea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac05e526eec31b5979d5b1a961f63a5ba"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#ac05e526eec31b5979d5b1a961f63a5ba">parse_back</a> (struct <a class="el" href="structState.html">State</a> *st, int n)</td></tr>
+<tr class="memdesc:ac05e526eec31b5979d5b1a961f63a5ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">退回 N 个字节  <a href="#ac05e526eec31b5979d5b1a961f63a5ba">更多...</a><br /></td></tr>
+<tr class="separator:ac05e526eec31b5979d5b1a961f63a5ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85918cdbb4f470292c26c081535c396a"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a85918cdbb4f470292c26c081535c396a">pos</a> (struct <a class="el" href="structState.html">State</a> *st)</td></tr>
+<tr class="memdesc:a85918cdbb4f470292c26c081535c396a"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前数据流位置  <a href="#a85918cdbb4f470292c26c081535c396a">更多...</a><br /></td></tr>
+<tr class="separator:a85918cdbb4f470292c26c081535c396a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff5a023a625e84fbc6b8ba638e57ad9c"><td class="memItemLeft" align="right" valign="top">static struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c">new_bnode</a> (enum <a class="el" href="bparser_8h.html#a416b65aa7f9e923c6cf461a99d456716">BNodeType</a> type)</td></tr>
+<tr class="memdesc:aff5a023a625e84fbc6b8ba638e57ad9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造一个新的语法结点  <a href="#aff5a023a625e84fbc6b8ba638e57ad9c">更多...</a><br /></td></tr>
+<tr class="separator:aff5a023a625e84fbc6b8ba638e57ad9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06a19c74de6c27c013bbf063a269196a"><td class="memItemLeft" align="right" valign="top">static struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a">parse_bcode</a> (struct <a class="el" href="structState.html">State</a> *st)</td></tr>
+<tr class="memdesc:a06a19c74de6c27c013bbf063a269196a"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析 B 编码  <a href="#a06a19c74de6c27c013bbf063a269196a">更多...</a><br /></td></tr>
+<tr class="separator:a06a19c74de6c27c013bbf063a269196a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae402d6e636381c4b1693fdfe3406eb2b"><td class="memItemLeft" align="right" valign="top">static char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#ae402d6e636381c4b1693fdfe3406eb2b">parse_bcode_is_key</a> (struct <a class="el" href="structState.html">State</a> *st, size_t *len_o)</td></tr>
+<tr class="memdesc:ae402d6e636381c4b1693fdfe3406eb2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析字符串（字典键）  <a href="#ae402d6e636381c4b1693fdfe3406eb2b">更多...</a><br /></td></tr>
+<tr class="separator:ae402d6e636381c4b1693fdfe3406eb2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc87a3c9f715548788734fc26b4f0dc5"><td class="memItemLeft" align="right" valign="top">static struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5">parse_bcode_is_str</a> (struct <a class="el" href="structState.html">State</a> *st)</td></tr>
+<tr class="memdesc:abc87a3c9f715548788734fc26b4f0dc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析串  <a href="#abc87a3c9f715548788734fc26b4f0dc5">更多...</a><br /></td></tr>
+<tr class="separator:abc87a3c9f715548788734fc26b4f0dc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cea9c2ba2e195ac26a68625bfef8aea"><td class="memItemLeft" align="right" valign="top">static struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea">parse_bcode_is_int</a> (struct <a class="el" href="structState.html">State</a> *st)</td></tr>
+<tr class="memdesc:a3cea9c2ba2e195ac26a68625bfef8aea"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析整型  <a href="#a3cea9c2ba2e195ac26a68625bfef8aea">更多...</a><br /></td></tr>
+<tr class="separator:a3cea9c2ba2e195ac26a68625bfef8aea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae107df7de65bd7ad66e9edadeba1deca"><td class="memItemLeft" align="right" valign="top">static struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca">parse_bcode_is_dict</a> (struct <a class="el" href="structState.html">State</a> *st)</td></tr>
+<tr class="memdesc:ae107df7de65bd7ad66e9edadeba1deca"><td class="mdescLeft">&#160;</td><td class="mdescRight">递归下降地解析字典  <a href="#ae107df7de65bd7ad66e9edadeba1deca">更多...</a><br /></td></tr>
+<tr class="separator:ae107df7de65bd7ad66e9edadeba1deca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2ab89580d33909c48c540b13b1cb958"><td class="memItemLeft" align="right" valign="top">static struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958">parse_bcode_is_list</a> (struct <a class="el" href="structState.html">State</a> *st)</td></tr>
+<tr class="memdesc:aa2ab89580d33909c48c540b13b1cb958"><td class="mdescLeft">&#160;</td><td class="mdescRight">递归下降地解析列表  <a href="#aa2ab89580d33909c48c540b13b1cb958">更多...</a><br /></td></tr>
+<tr class="separator:aa2ab89580d33909c48c540b13b1cb958"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee1be1b92903ad1538bd763772e53e46"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#aee1be1b92903ad1538bd763772e53e46">bparser</a> (char *bcode)</td></tr>
+<tr class="memdesc:aee1be1b92903ad1538bd763772e53e46"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析 B 编码  <a href="#aee1be1b92903ad1538bd763772e53e46">更多...</a><br /></td></tr>
+<tr class="separator:aee1be1b92903ad1538bd763772e53e46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f7a168bee91fc16e16a039b79c4429a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bparser_8c.html#a5f7a168bee91fc16e16a039b79c4429a">free_bnode</a> (struct <a class="el" href="structBNode.html">BNode</a> **pbnode)</td></tr>
+<tr class="memdesc:a5f7a168bee91fc16e16a039b79c4429a"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放 B 编码的抽象语法树  <a href="#a5f7a168bee91fc16e16a039b79c4429a">更多...</a><br /></td></tr>
+<tr class="separator:a5f7a168bee91fc16e16a039b79c4429a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a class="anchor" id="aee1be1b92903ad1538bd763772e53e46"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structBNode.html">BNode</a>* bparser </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>bcode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>解析 B 编码 </p>
+<p>顶层封装，进行错误检查以及屏蔽私有结构体。</p>
+<p>用户负责释放抽象语法树。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bcode</td><td>源缓冲区 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态生成的语法树根结点 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_aee1be1b92903ad1538bd763772e53e46_icgraph.png" border="0" usemap="#bparser_8c_aee1be1b92903ad1538bd763772e53e46_icgraph" alt=""/></div>
+<map name="bparser_8c_aee1be1b92903ad1538bd763772e53e46_icgraph" id="bparser_8c_aee1be1b92903ad1538bd763772e53e46_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="119,5,285,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="464,31,515,57"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="333,5,416,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a5f7a168bee91fc16e16a039b79c4429a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void free_bnode </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structBNode.html">BNode</a> **&#160;</td>
+          <td class="paramname"><em>pbnode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>释放 B 编码的抽象语法树 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pbnode</td><td>指向要释放的抽象语法树的根结点 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_a5f7a168bee91fc16e16a039b79c4429a_icgraph.png" border="0" usemap="#bparser_8c_a5f7a168bee91fc16e16a039b79c4429a_icgraph" alt=""/></div>
+<map name="bparser_8c_a5f7a168bee91fc16e16a039b79c4429a_icgraph" id="bparser_8c_a5f7a168bee91fc16e16a039b79c4429a_icgraph">
+<area shape="rect" id="node2" href="bparser_8h.html#a5f7a168bee91fc16e16a039b79c4429a" title="释放 B 编码的抽象语法树 " alt="" coords="140,56,227,83"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="275,5,357,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="405,56,456,83"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="aff5a023a625e84fbc6b8ba638e57ad9c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static struct <a class="el" href="structBNode.html">BNode</a>* new_bnode </td>
+          <td>(</td>
+          <td class="paramtype">enum <a class="el" href="bparser_8h.html#a416b65aa7f9e923c6cf461a99d456716">BNodeType</a>&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造一个新的语法结点 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>语法结点类型标签 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的语法结点 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_aff5a023a625e84fbc6b8ba638e57ad9c_icgraph.png" border="0" usemap="#bparser_8c_aff5a023a625e84fbc6b8ba638e57ad9c_icgraph" alt=""/></div>
+<map name="bparser_8c_aff5a023a625e84fbc6b8ba638e57ad9c_icgraph" id="bparser_8c_aff5a023a625e84fbc6b8ba638e57ad9c_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="141,39,276,66"/>
+<area shape="rect" id="node4" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="468,39,609,66"/>
+<area shape="rect" id="node5" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="470,140,607,167"/>
+<area shape="rect" id="node10" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="141,90,276,116"/>
+<area shape="rect" id="node3" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="324,90,420,116"/>
+<area shape="rect" id="node6" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="506,90,571,116"/>
+<area shape="rect" id="node7" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="657,64,824,91"/>
+<area shape="rect" id="node9" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="1003,90,1053,116"/>
+<area shape="rect" id="node8" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="872,64,955,91"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ac05e526eec31b5979d5b1a961f63a5ba"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void parse_back </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>退回 N 个字节 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>指向状态记录 </td></tr>
+    <tr><td class="paramname">n</td><td>回退字节数 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_ac05e526eec31b5979d5b1a961f63a5ba_icgraph.png" border="0" usemap="#bparser_8c_ac05e526eec31b5979d5b1a961f63a5ba_icgraph" alt=""/></div>
+<map name="bparser_8c_ac05e526eec31b5979d5b1a961f63a5ba_icgraph" id="bparser_8c_ac05e526eec31b5979d5b1a961f63a5ba_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="143,43,284,69"/>
+<area shape="rect" id="node3" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="332,93,428,120"/>
+<area shape="rect" id="node7" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="627,5,764,32"/>
+<area shape="rect" id="node4" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="476,68,564,95"/>
+<area shape="rect" id="node8" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="487,220,553,247"/>
+<area shape="rect" id="node5" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="628,93,763,120"/>
+<area shape="rect" id="node6" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="628,156,763,183"/>
+<area shape="rect" id="node9" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="612,213,779,240"/>
+<area shape="rect" id="node11" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="957,239,1008,265"/>
+<area shape="rect" id="node10" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="827,213,909,240"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a06a19c74de6c27c013bbf063a269196a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static struct <a class="el" href="structBNode.html">BNode</a> * parse_bcode </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>解析 B 编码 </p>
+<p>会向前看一个字节递归下降地进行解析。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>parser 状态 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的B编码语法结点 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_a06a19c74de6c27c013bbf063a269196a_icgraph.png" border="0" usemap="#bparser_8c_a06a19c74de6c27c013bbf063a269196a_icgraph" alt=""/></div>
+<map name="bparser_8c_a06a19c74de6c27c013bbf063a269196a_icgraph" id="bparser_8c_a06a19c74de6c27c013bbf063a269196a_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="149,93,237,120"/>
+<area shape="rect" id="node5" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="298,156,439,183"/>
+<area shape="rect" id="node6" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="300,231,437,257"/>
+<area shape="rect" id="node7" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="161,293,226,320"/>
+<area shape="rect" id="node3" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="301,5,436,32"/>
+<area shape="rect" id="node4" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="301,81,436,108"/>
+<area shape="rect" id="node8" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="285,337,452,364"/>
+<area shape="rect" id="node10" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="631,312,681,339"/>
+<area shape="rect" id="node9" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="500,337,583,364"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ae107df7de65bd7ad66e9edadeba1deca"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static struct <a class="el" href="structBNode.html">BNode</a>* parse_bcode_is_dict </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>递归下降地解析字典 </p>
+<p>本函数假设调用者已经消耗了字典的起始字符 'd'. 函数内部消耗终止字符 'e'.</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>parser 状态 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的字典结点 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_ae107df7de65bd7ad66e9edadeba1deca_icgraph.png" border="0" usemap="#bparser_8c_ae107df7de65bd7ad66e9edadeba1deca_icgraph" alt=""/></div>
+<map name="bparser_8c_ae107df7de65bd7ad66e9edadeba1deca_icgraph" id="bparser_8c_ae107df7de65bd7ad66e9edadeba1deca_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="195,83,291,110"/>
+<area shape="rect" id="node3" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="339,32,427,59"/>
+<area shape="rect" id="node6" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="489,146,627,172"/>
+<area shape="rect" id="node7" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="350,208,415,235"/>
+<area shape="rect" id="node4" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="491,7,625,34"/>
+<area shape="rect" id="node5" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="491,58,625,84"/>
+<area shape="rect" id="node8" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="475,252,641,279"/>
+<area shape="rect" id="node10" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="820,227,871,254"/>
+<area shape="rect" id="node9" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="689,252,772,279"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a3cea9c2ba2e195ac26a68625bfef8aea"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static struct <a class="el" href="structBNode.html">BNode</a>* parse_bcode_is_int </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>解析整型 </p>
+<p>本函数假设调用者已经消耗了整型的起始字符 'i'. 函数内部消耗终止字符 'e'.</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>parser 状态 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的整型结点 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_a3cea9c2ba2e195ac26a68625bfef8aea_icgraph.png" border="0" usemap="#bparser_8c_a3cea9c2ba2e195ac26a68625bfef8aea_icgraph" alt=""/></div>
+<map name="bparser_8c_a3cea9c2ba2e195ac26a68625bfef8aea_icgraph" id="bparser_8c_a3cea9c2ba2e195ac26a68625bfef8aea_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="188,97,284,123"/>
+<area shape="rect" id="node3" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="332,34,420,61"/>
+<area shape="rect" id="node5" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="481,97,622,123"/>
+<area shape="rect" id="node6" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="483,171,620,198"/>
+<area shape="rect" id="node7" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="343,234,409,261"/>
+<area shape="rect" id="node4" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="484,9,619,35"/>
+<area shape="rect" id="node8" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="468,278,635,305"/>
+<area shape="rect" id="node10" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="813,253,864,279"/>
+<area shape="rect" id="node9" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="683,278,765,305"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ae402d6e636381c4b1693fdfe3406eb2b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static char* parse_bcode_is_key </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>len_o</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>解析字符串（字典键） </p>
+<p>这是解析串的子集，可以为解析串和解析字典所复用</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>parser 状态 </td></tr>
+    <tr><td class="paramname">len_o</td><td>如果不为 NULL, 写入字符串长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的字符串 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_ae402d6e636381c4b1693fdfe3406eb2b_icgraph.png" border="0" usemap="#bparser_8c_ae402d6e636381c4b1693fdfe3406eb2b_icgraph" alt=""/></div>
+<map name="bparser_8c_ae402d6e636381c4b1693fdfe3406eb2b_icgraph" id="bparser_8c_ae402d6e636381c4b1693fdfe3406eb2b_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="195,68,329,95"/>
+<area shape="rect" id="node6" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="670,5,811,32"/>
+<area shape="rect" id="node3" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="377,119,473,145"/>
+<area shape="rect" id="node4" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="521,68,609,95"/>
+<area shape="rect" id="node7" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="672,181,809,208"/>
+<area shape="rect" id="node8" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="533,244,598,271"/>
+<area shape="rect" id="node5" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="673,93,808,120"/>
+<area shape="rect" id="node9" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="657,288,824,315"/>
+<area shape="rect" id="node11" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="1003,263,1053,289"/>
+<area shape="rect" id="node10" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="872,288,955,315"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="aa2ab89580d33909c48c540b13b1cb958"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static struct <a class="el" href="structBNode.html">BNode</a>* parse_bcode_is_list </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>递归下降地解析列表 </p>
+<p>本函数假设调用者已经消耗了列表的起始字符 'l'. 函数内部消耗终止字符 'e'.</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>parser 状态 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的列表结点 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_aa2ab89580d33909c48c540b13b1cb958_icgraph.png" border="0" usemap="#bparser_8c_aa2ab89580d33909c48c540b13b1cb958_icgraph" alt=""/></div>
+<map name="bparser_8c_aa2ab89580d33909c48c540b13b1cb958_icgraph" id="bparser_8c_aa2ab89580d33909c48c540b13b1cb958_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="191,83,287,110"/>
+<area shape="rect" id="node3" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="335,32,423,59"/>
+<area shape="rect" id="node6" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="483,146,625,172"/>
+<area shape="rect" id="node7" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="346,208,411,235"/>
+<area shape="rect" id="node4" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="487,7,621,34"/>
+<area shape="rect" id="node5" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="487,58,621,84"/>
+<area shape="rect" id="node8" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="471,252,637,279"/>
+<area shape="rect" id="node10" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="816,227,867,254"/>
+<area shape="rect" id="node9" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="685,252,768,279"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="abc87a3c9f715548788734fc26b4f0dc5"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static struct <a class="el" href="structBNode.html">BNode</a>* parse_bcode_is_str </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>解析串 </p>
+<p>与解析字符串（字典键）不同，串可以是二进制语义，要记录长度。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>parser 状态 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的串结点 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_abc87a3c9f715548788734fc26b4f0dc5_icgraph.png" border="0" usemap="#bparser_8c_abc87a3c9f715548788734fc26b4f0dc5_icgraph" alt=""/></div>
+<map name="bparser_8c_abc87a3c9f715548788734fc26b4f0dc5_icgraph" id="bparser_8c_abc87a3c9f715548788734fc26b4f0dc5_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="188,97,284,123"/>
+<area shape="rect" id="node3" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="332,34,420,61"/>
+<area shape="rect" id="node5" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="481,97,622,123"/>
+<area shape="rect" id="node6" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="483,171,620,198"/>
+<area shape="rect" id="node7" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="343,234,409,261"/>
+<area shape="rect" id="node4" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="484,9,619,35"/>
+<area shape="rect" id="node8" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="468,278,635,305"/>
+<area shape="rect" id="node10" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="813,253,864,279"/>
+<area shape="rect" id="node9" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="683,278,765,305"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a5153c24c763092544219ccbfd080fcea"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static char parse_get_char </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从数据流中取出一个字符 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>指向状态记录 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>取出的字符 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_a5153c24c763092544219ccbfd080fcea_icgraph.png" border="0" usemap="#bparser_8c_a5153c24c763092544219ccbfd080fcea_icgraph" alt=""/></div>
+<map name="bparser_8c_a5153c24c763092544219ccbfd080fcea_icgraph" id="bparser_8c_a5153c24c763092544219ccbfd080fcea_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#ae402d6e636381c4b1693fdfe3406eb2b" title="解析字符串（字典键） " alt="" coords="164,433,305,460"/>
+<area shape="rect" id="node4" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="536,232,632,259"/>
+<area shape="rect" id="node6" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="832,132,967,159"/>
+<area shape="rect" id="node7" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="829,320,970,347"/>
+<area shape="rect" id="node8" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="831,227,968,253"/>
+<area shape="rect" id="node3" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="353,283,488,309"/>
+<area shape="rect" id="node5" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="680,257,768,284"/>
+<area shape="rect" id="node9" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="691,31,757,57"/>
+<area shape="rect" id="node10" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="816,5,983,32"/>
+<area shape="rect" id="node12" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="1161,31,1212,57"/>
+<area shape="rect" id="node11" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="1031,5,1113,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a6f1a4e645f95b71395b62299dc21e338"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t parse_get_int </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从数据流中取出一个长整型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>指向状态记录 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>返回匹配的长整型 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_a6f1a4e645f95b71395b62299dc21e338_icgraph.png" border="0" usemap="#bparser_8c_a6f1a4e645f95b71395b62299dc21e338_icgraph" alt=""/></div>
+<map name="bparser_8c_a6f1a4e645f95b71395b62299dc21e338_icgraph" id="bparser_8c_a6f1a4e645f95b71395b62299dc21e338_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#ae402d6e636381c4b1693fdfe3406eb2b" title="解析字符串（字典键） " alt="" coords="153,221,295,248"/>
+<area shape="rect" id="node6" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="821,307,956,333"/>
+<area shape="rect" id="node3" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="343,221,477,248"/>
+<area shape="rect" id="node7" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="818,119,959,145"/>
+<area shape="rect" id="node4" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="525,193,621,220"/>
+<area shape="rect" id="node5" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="669,256,757,283"/>
+<area shape="rect" id="node8" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="820,193,957,220"/>
+<area shape="rect" id="node9" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="681,5,746,32"/>
+<area shape="rect" id="node10" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="805,31,972,57"/>
+<area shape="rect" id="node12" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="1151,5,1201,32"/>
+<area shape="rect" id="node11" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="1020,31,1103,57"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a17f63dfe8da72909cd3a405efc54d373"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static char* parse_get_str </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从数据流中取出一个给定长度的字符串 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>指向状态记录 </td></tr>
+    <tr><td class="paramname">length</td><td>字符串长度（不含 '\0'） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>动态分配的字符数组指针 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_a17f63dfe8da72909cd3a405efc54d373_icgraph.png" border="0" usemap="#bparser_8c_a17f63dfe8da72909cd3a405efc54d373_icgraph" alt=""/></div>
+<map name="bparser_8c_a17f63dfe8da72909cd3a405efc54d373_icgraph" id="bparser_8c_a17f63dfe8da72909cd3a405efc54d373_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#ae402d6e636381c4b1693fdfe3406eb2b" title="解析字符串（字典键） " alt="" coords="155,5,296,32"/>
+<area shape="rect" id="node3" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="344,68,479,95"/>
+<area shape="rect" id="node7" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="819,5,961,32"/>
+<area shape="rect" id="node4" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="527,119,623,145"/>
+<area shape="rect" id="node5" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="671,68,759,95"/>
+<area shape="rect" id="node8" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="821,181,959,208"/>
+<area shape="rect" id="node9" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="682,244,747,271"/>
+<area shape="rect" id="node6" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="823,93,957,120"/>
+<area shape="rect" id="node10" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="807,288,973,315"/>
+<area shape="rect" id="node12" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="1152,263,1203,289"/>
+<area shape="rect" id="node11" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="1021,288,1104,315"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a85918cdbb4f470292c26c081535c396a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t pos </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structState.html">State</a> *&#160;</td>
+          <td class="paramname"><em>st</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取当前数据流位置 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">st</td><td>指向状态记录 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>位置 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="bparser_8c_a85918cdbb4f470292c26c081535c396a_icgraph.png" border="0" usemap="#bparser_8c_a85918cdbb4f470292c26c081535c396a_icgraph" alt=""/></div>
+<map name="bparser_8c_a85918cdbb4f470292c26c081535c396a_icgraph" id="bparser_8c_a85918cdbb4f470292c26c081535c396a_icgraph">
+<area shape="rect" id="node2" href="bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="96,156,192,183"/>
+<area shape="rect" id="node3" href="bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="240,93,328,120"/>
+<area shape="rect" id="node6" href="bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="389,156,530,183"/>
+<area shape="rect" id="node7" href="bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="391,231,528,257"/>
+<area shape="rect" id="node8" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="251,293,317,320"/>
+<area shape="rect" id="node4" href="bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="392,5,527,32"/>
+<area shape="rect" id="node5" href="bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="392,81,527,108"/>
+<area shape="rect" id="node9" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="376,337,543,364"/>
+<area shape="rect" id="node11" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="721,312,772,339"/>
+<area shape="rect" id="node10" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="591,337,673,364"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

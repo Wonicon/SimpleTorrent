@@ -1,0 +1,852 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: driver.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li class="current"><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>文件列表</span></a></li>
+      <li><a href="globals.html"><span>全局定义</span></a></li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle">
+<div class="title">driver.c 文件参考</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>顶层驱动模块  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="butil_8h_source.html">butil.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="util_8h_source.html">util.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="peer_8h_source.html">peer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="connect_8h_source.html">connect.h</a>&quot;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;assert.h&gt;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
+<code>#include &lt;errno.h&gt;</code><br />
+<code>#include &lt;sys/epoll.h&gt;</code><br />
+<code>#include &lt;arpa/inet.h&gt;</code><br />
+<code>#include &lt;sys/timerfd.h&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+driver.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c__incl.png" border="0" usemap="#driver_8c" alt=""/></div>
+<map name="driver_8c" id="driver_8c">
+<area shape="rect" id="node2" href="butil_8h.html" title="基于 B 编码语法树的工具函数声明 " alt="" coords="89,80,146,107"/>
+<area shape="rect" id="node6" href="util_8h.html" title="一些工具函数（宏）声明 / 定义 " alt="" coords="283,80,333,107"/>
+<area shape="rect" id="node9" href="peer_8h.html" title="单个 peer 相关操作 API 声明 " alt="" coords="191,80,249,107"/>
+<area shape="rect" id="node12" href="connect_8h.html" title="网络连接相关 API 声明 " alt="" coords="358,80,437,107"/>
+<area shape="rect" id="node3" href="bparser_8h.html" title="B 编码 parser 的 API 声明 " alt="" coords="69,155,145,181"/>
+<area shape="rect" id="node10" href="metainfo_8h.html" title="操作全局信息的相关 API " alt="" coords="169,155,252,181"/>
+</map>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a6821bafc3c88dfb2e433a095df9940c6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6821bafc3c88dfb2e433a095df9940c6"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a6821bafc3c88dfb2e433a095df9940c6">BUF_SIZE</a>&#160;&#160;&#160;4096</td></tr>
+<tr class="memdesc:a6821bafc3c88dfb2e433a095df9940c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">报文缓冲区大小 <br /></td></tr>
+<tr class="separator:a6821bafc3c88dfb2e433a095df9940c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a5c9eb73361337051d0f02b0d2b41d7b3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5c9eb73361337051d0f02b0d2b41d7b3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a5c9eb73361337051d0f02b0d2b41d7b3">send_handshake</a> (int sfd, struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi)</td></tr>
+<tr class="memdesc:a5c9eb73361337051d0f02b0d2b41d7b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送握手信息 <br /></td></tr>
+<tr class="separator:a5c9eb73361337051d0f02b0d2b41d7b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae36b6472da40f83c6b72de5452779cc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#ae36b6472da40f83c6b72de5452779cc4">send_msg_to_tracker</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, struct <a class="el" href="structTracker.html">Tracker</a> *tracker, const char *event)</td></tr>
+<tr class="separator:ae36b6472da40f83c6b72de5452779cc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1144015b47fb80b2a0faf9fe01bd6d02"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a1144015b47fb80b2a0faf9fe01bd6d02">select_piece</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *msg)</td></tr>
+<tr class="memdesc:a1144015b47fb80b2a0faf9fe01bd6d02"><td class="mdescLeft">&#160;</td><td class="mdescRight">选择需要请求的分片  <a href="#a1144015b47fb80b2a0faf9fe01bd6d02">更多...</a><br /></td></tr>
+<tr class="separator:a1144015b47fb80b2a0faf9fe01bd6d02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad7963d90a4ba67f1a0e5dba9a5d24aa"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#aad7963d90a4ba67f1a0e5dba9a5d24aa">select_peer</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *msg)</td></tr>
+<tr class="memdesc:aad7963d90a4ba67f1a0e5dba9a5d24aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">选择可以发送请求的 peer  <a href="#aad7963d90a4ba67f1a0e5dba9a5d24aa">更多...</a><br /></td></tr>
+<tr class="separator:aad7963d90a4ba67f1a0e5dba9a5d24aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32f58bd3297fa208ea90ae27cb32201e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a32f58bd3297fa208ea90ae27cb32201e">send_request</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, struct <a class="el" href="structPeer.html">Peer</a> *peer, struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *msg)</td></tr>
+<tr class="memdesc:a32f58bd3297fa208ea90ae27cb32201e"><td class="mdescLeft">&#160;</td><td class="mdescRight">向 peer 发送分片请求，同时更新 peer 和对应子分片的大小  <a href="#a32f58bd3297fa208ea90ae27cb32201e">更多...</a><br /></td></tr>
+<tr class="separator:a32f58bd3297fa208ea90ae27cb32201e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84c804ac82d6ab32fe4c37310c2c8cb8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a84c804ac82d6ab32fe4c37310c2c8cb8">handle_piece</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, struct <a class="el" href="structPeer.html">Peer</a> *peer, struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *msg)</td></tr>
+<tr class="memdesc:a84c804ac82d6ab32fe4c37310c2c8cb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理分片消息  <a href="#a84c804ac82d6ab32fe4c37310c2c8cb8">更多...</a><br /></td></tr>
+<tr class="separator:a84c804ac82d6ab32fe4c37310c2c8cb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbae4421b9be5243d3f1773cf525292b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b">handle_msg</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, struct <a class="el" href="structPeer.html">Peer</a> *peer, struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *msg)</td></tr>
+<tr class="memdesc:adbae4421b9be5243d3f1773cf525292b"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理 BT 消息  <a href="#adbae4421b9be5243d3f1773cf525292b">更多...</a><br /></td></tr>
+<tr class="separator:adbae4421b9be5243d3f1773cf525292b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f1cf731e9e154ffff657456694856e0"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a1f1cf731e9e154ffff657456694856e0">handle_tracker_response</a> (int sfd)</td></tr>
+<tr class="memdesc:a1f1cf731e9e154ffff657456694856e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字  <a href="#a1f1cf731e9e154ffff657456694856e0">更多...</a><br /></td></tr>
+<tr class="separator:a1f1cf731e9e154ffff657456694856e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a288da41ae0ddeca593e7604471ed184e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a288da41ae0ddeca593e7604471ed184e">handle_peer_list</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, int efd, struct <a class="el" href="structBNode.html">BNode</a> *bcode)</td></tr>
+<tr class="memdesc:a288da41ae0ddeca593e7604471ed184e"><td class="mdescLeft">&#160;</td><td class="mdescRight">将 tracker 返回的 peers 异步 connect 并加入 epoll 队列  <a href="#a288da41ae0ddeca593e7604471ed184e">更多...</a><br /></td></tr>
+<tr class="separator:a288da41ae0ddeca593e7604471ed184e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6fb06630b6c5402acaee4f8a5e4e8fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#af6fb06630b6c5402acaee4f8a5e4e8fb">handle_interval</a> (struct <a class="el" href="structTracker.html">Tracker</a> *tracker, struct <a class="el" href="structBNode.html">BNode</a> *bcode, int efd)</td></tr>
+<tr class="memdesc:af6fb06630b6c5402acaee4f8a5e4e8fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">提取 interval 信息并设置定时  <a href="#af6fb06630b6c5402acaee4f8a5e4e8fb">更多...</a><br /></td></tr>
+<tr class="separator:af6fb06630b6c5402acaee4f8a5e4e8fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24ba120aedfee26e7bfde8e2f72449ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a24ba120aedfee26e7bfde8e2f72449ff">handle_error</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, int error_fd)</td></tr>
+<tr class="memdesc:a24ba120aedfee26e7bfde8e2f72449ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理出错套接字  <a href="#a24ba120aedfee26e7bfde8e2f72449ff">更多...</a><br /></td></tr>
+<tr class="separator:a24ba120aedfee26e7bfde8e2f72449ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0017b9340d4b1cca06a57ab102b09034"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a0017b9340d4b1cca06a57ab102b09034">handle_ready</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, int sfd)</td></tr>
+<tr class="memdesc:a0017b9340d4b1cca06a57ab102b09034"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行连接建立后的相关操作  <a href="#a0017b9340d4b1cca06a57ab102b09034">更多...</a><br /></td></tr>
+<tr class="separator:a0017b9340d4b1cca06a57ab102b09034"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23d49f290a81bbd360baac95364fbef9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a23d49f290a81bbd360baac95364fbef9">finish_handshake</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, int sfd)</td></tr>
+<tr class="memdesc:a23d49f290a81bbd360baac95364fbef9"><td class="mdescLeft">&#160;</td><td class="mdescRight">完成握手消息的处理  <a href="#a23d49f290a81bbd360baac95364fbef9">更多...</a><br /></td></tr>
+<tr class="separator:a23d49f290a81bbd360baac95364fbef9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa93c0218730a095b7930ba739b40ee70"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70">bt_handler</a> (struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *mi, int efd)</td></tr>
+<tr class="memdesc:aa93c0218730a095b7930ba739b40ee70"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理所有网络报文  <a href="#aa93c0218730a095b7930ba739b40ee70">更多...</a><br /></td></tr>
+<tr class="separator:aa93c0218730a095b7930ba739b40ee70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab140b7aa56f78ec906d79d6e7af83cf9"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#ab140b7aa56f78ec906d79d6e7af83cf9">get_torrent_data_from_file</a> (const char *torrent)</td></tr>
+<tr class="memdesc:ab140b7aa56f78ec906d79d6e7af83cf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">将种子文件完全载入内存  <a href="#ab140b7aa56f78ec906d79d6e7af83cf9">更多...</a><br /></td></tr>
+<tr class="separator:ab140b7aa56f78ec906d79d6e7af83cf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ddf1224851353fc92bfbff6f499fa97"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0ddf1224851353fc92bfbff6f499fa97"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97">main</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a0ddf1224851353fc92bfbff6f499fa97"><td class="mdescLeft">&#160;</td><td class="mdescRight">入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 <br /></td></tr>
+<tr class="separator:a0ddf1224851353fc92bfbff6f499fa97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>顶层驱动模块 </p>
+</div><h2 class="groupheader">函数说明</h2>
+<a class="anchor" id="aa93c0218730a095b7930ba739b40ee70"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void bt_handler </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>efd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>处理所有网络报文 </p>
+<p>使用 epoll 侦听各个描述符的事件，根据事件属性和描述符的所属采取相应的操作。 主要涉及的描述符类型：</p><ol type="1">
+<li>与 tracker 的连接套接字</li>
+<li>与 peer 的连接套接字</li>
+<li>tracker 的回访定时器</li>
+<li>本机的 keep-alive 定时器</li>
+</ol>
+<p>目前只对 peer 的 bt 消息做异步接受，其他报文基本要求同步地完全接受。</p>
+<p>最多每 5s 处理一次发送报文的逻辑。目前来看可能出现 write 写满导致的阻塞。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mi</td><td>种子文件元信息 </td></tr>
+    <tr><td class="paramname">efd</td><td>epoll file descriptor </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">待办事项:</a></b></dt><dd>通过 accept 建立连接并监听连接套接字的 EPOLLIN 事件，加入 <a class="el" href="structMetaInfo.html#a34759b6fd0650e356c66919e9cf05a26" title="已发出 connect 的 peer 集合 ">MetaInfo::wait_peers</a> 队列。注意设置 <a class="el" href="structWaitPeer.html#a490f9d6c7e59d5155a3a254166339e03" title="0: 我方主动连接, 1: 对方主动连接。 ">WaitPeer::direction</a> </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_aa93c0218730a095b7930ba739b40ee70_icgraph.png" border="0" usemap="#driver_8c_aa93c0218730a095b7930ba739b40ee70_icgraph" alt=""/></div>
+<map name="driver_8c_aa93c0218730a095b7930ba739b40ee70_icgraph" id="driver_8c_aa93c0218730a095b7930ba739b40ee70_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="136,5,187,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a23d49f290a81bbd360baac95364fbef9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int finish_handshake </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sfd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>完成握手消息的处理 </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">待办事项:</a></b></dt><dd>要区分是对方回复的握手消息还是对方主动发来的握手消息</dd></dl>
+<dl class="section return"><dt>返回</dt><dd>0: 正常, -1: 连接断开 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_a23d49f290a81bbd360baac95364fbef9_icgraph.png" border="0" usemap="#driver_8c_a23d49f290a81bbd360baac95364fbef9_icgraph" alt=""/></div>
+<map name="driver_8c_a23d49f290a81bbd360baac95364fbef9_icgraph" id="driver_8c_a23d49f290a81bbd360baac95364fbef9_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="176,5,259,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="307,5,357,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ab140b7aa56f78ec906d79d6e7af83cf9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* get_torrent_data_from_file </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>torrent</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将种子文件完全载入内存 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">torrent</td><td>种子文件名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>种子文件数据 [动态缓冲区] </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_ab140b7aa56f78ec906d79d6e7af83cf9_icgraph.png" border="0" usemap="#driver_8c_ab140b7aa56f78ec906d79d6e7af83cf9_icgraph" alt=""/></div>
+<map name="driver_8c_ab140b7aa56f78ec906d79d6e7af83cf9_icgraph" id="driver_8c_ab140b7aa56f78ec906d79d6e7af83cf9_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="227,5,277,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a24ba120aedfee26e7bfde8e2f72449ff"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void handle_error </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>error_fd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>处理出错套接字 </p>
+<p>程序所使用的描述符主要有两种：socket fd 和 timer fd.</p>
+<p>这里的错误处理逻辑针对 socket fd. Timer fd 相对来说并不那么容易出错。 函数会首先判断套接字是 tracker 的还是 peer 的，以输出错误信息并更新对应的队列。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mi</td><td>全局信息 </td></tr>
+    <tr><td class="paramname">error_fd</td><td>出错的套接字 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_a24ba120aedfee26e7bfde8e2f72449ff_icgraph.png" border="0" usemap="#driver_8c_a24ba120aedfee26e7bfde8e2f72449ff_icgraph" alt=""/></div>
+<map name="driver_8c_a24ba120aedfee26e7bfde8e2f72449ff_icgraph" id="driver_8c_a24ba120aedfee26e7bfde8e2f72449ff_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="147,5,229,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="277,5,328,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="af6fb06630b6c5402acaee4f8a5e4e8fb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void handle_interval </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structTracker.html">Tracker</a> *&#160;</td>
+          <td class="paramname"><em>tracker</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>bcode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>efd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>提取 interval 信息并设置定时 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tracker</td><td>指向发送响应的 tracker </td></tr>
+    <tr><td class="paramname">bcode</td><td>指向解析后的 B 编码语法树 </td></tr>
+    <tr><td class="paramname">efd</td><td>epoll file descriptor，用于加入 timer fd </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_af6fb06630b6c5402acaee4f8a5e4e8fb_icgraph.png" border="0" usemap="#driver_8c_af6fb06630b6c5402acaee4f8a5e4e8fb_icgraph" alt=""/></div>
+<map name="driver_8c_af6fb06630b6c5402acaee4f8a5e4e8fb_icgraph" id="driver_8c_af6fb06630b6c5402acaee4f8a5e4e8fb_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="163,5,245,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="293,5,344,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="adbae4421b9be5243d3f1773cf525292b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void handle_msg </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td>
+          <td class="paramname"><em>peer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>处理 BT 消息 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mi</td><td>全局信息 </td></tr>
+    <tr><td class="paramname">peer</td><td>指向发送消息的 peer </td></tr>
+    <tr><td class="paramname">msg</td><td>peer 发送的消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">待办事项:</a></b></dt><dd>根据 bitfield 增加 piece 持有者数量 </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">待办事项:</a></b></dt><dd>根据 have 增加 piece 持有者数量 </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">待办事项:</a></b></dt><dd>处理 REQUEST 消息 </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">待办事项:</a></b></dt><dd>处理 CANCEL 消息 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_adbae4421b9be5243d3f1773cf525292b_icgraph.png" border="0" usemap="#driver_8c_adbae4421b9be5243d3f1773cf525292b_icgraph" alt=""/></div>
+<map name="driver_8c_adbae4421b9be5243d3f1773cf525292b_icgraph" id="driver_8c_adbae4421b9be5243d3f1773cf525292b_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="145,5,228,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="276,5,327,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a288da41ae0ddeca593e7604471ed184e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void handle_peer_list </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>efd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structBNode.html">BNode</a> *&#160;</td>
+          <td class="paramname"><em>bcode</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将 tracker 返回的 peers 异步 connect 并加入 epoll 队列 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mi</td><td>全局信息 </td></tr>
+    <tr><td class="paramname">efd</td><td>epoll 描述符 </td></tr>
+    <tr><td class="paramname">bcode</td><td>B 编码数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_a288da41ae0ddeca593e7604471ed184e_icgraph.png" border="0" usemap="#driver_8c_a288da41ae0ddeca593e7604471ed184e_icgraph" alt=""/></div>
+<map name="driver_8c_a288da41ae0ddeca593e7604471ed184e_icgraph" id="driver_8c_a288da41ae0ddeca593e7604471ed184e_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="169,5,252,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="300,5,351,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a84c804ac82d6ab32fe4c37310c2c8cb8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void handle_piece </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td>
+          <td class="paramname"><em>peer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>处理分片消息 </p>
+<p>收到分片消息后，期望调用者处理字节序。 会将子分片写入到对应的分片文件中，如果一个子分片已经被写入过，则抛弃。 出于简单实现的考虑，子分片采取固定大小，使用位图管理完成进度， 最后一个分片不会在这里进行特殊处理，由发送过程保证最后一个分片长度的正确性。</p>
+<p>在这里结算一个子分片的下载速度。 </p>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_a84c804ac82d6ab32fe4c37310c2c8cb8_icgraph.png" border="0" usemap="#driver_8c_a84c804ac82d6ab32fe4c37310c2c8cb8_icgraph" alt=""/></div>
+<map name="driver_8c_a84c804ac82d6ab32fe4c37310c2c8cb8_icgraph" id="driver_8c_a84c804ac82d6ab32fe4c37310c2c8cb8_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b" title="处理 BT 消息 " alt="" coords="152,5,244,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="292,5,375,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="423,5,473,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a0017b9340d4b1cca06a57ab102b09034"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void handle_ready </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sfd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>执行连接建立后的相关操作 </p>
+<p>与 tracker 和 peer 通过 connect 方式建立连接后（相对的，还有通过 accept 与 peer 建立连接的情形）， 按照协议要求，要主动发送消息（HTTP 请求，握手）。 本函数首先根据套接字确定套接字所属的对象，然后发送对应的消息。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mi</td><td>全局信息 </td></tr>
+    <tr><td class="paramname">sfd</td><td>连接套接字 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_a0017b9340d4b1cca06a57ab102b09034_icgraph.png" border="0" usemap="#driver_8c_a0017b9340d4b1cca06a57ab102b09034_icgraph" alt=""/></div>
+<map name="driver_8c_a0017b9340d4b1cca06a57ab102b09034_icgraph" id="driver_8c_a0017b9340d4b1cca06a57ab102b09034_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="152,5,235,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="283,5,333,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a1f1cf731e9e154ffff657456694856e0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structBNode.html">BNode</a>* handle_tracker_response </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sfd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 </p>
+<p>考虑到 tracker 的响应数据量不大，内部全部使用 recv + MSG_WAITALL 防止 read 读取不足。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sfd</td><td>与 tracker 的连接套接字 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>解析后的语法树，非法时返回 NULL </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_a1f1cf731e9e154ffff657456694856e0_icgraph.png" border="0" usemap="#driver_8c_a1f1cf731e9e154ffff657456694856e0_icgraph" alt=""/></div>
+<map name="driver_8c_a1f1cf731e9e154ffff657456694856e0_icgraph" id="driver_8c_a1f1cf731e9e154ffff657456694856e0_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="220,5,303,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="351,5,401,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="aad7963d90a4ba67f1a0e5dba9a5d24aa"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structPeer.html">Peer</a>* select_peer </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>选择可以发送请求的 peer </p>
+<p>msg 不要转换字节序 </p>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_aad7963d90a4ba67f1a0e5dba9a5d24aa_icgraph.png" border="0" usemap="#driver_8c_aad7963d90a4ba67f1a0e5dba9a5d24aa_icgraph" alt=""/></div>
+<map name="driver_8c_aad7963d90a4ba67f1a0e5dba9a5d24aa_icgraph" id="driver_8c_aad7963d90a4ba67f1a0e5dba9a5d24aa_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="143,5,225,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="273,5,324,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a1144015b47fb80b2a0faf9fe01bd6d02"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int select_piece </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>选择需要请求的分片 </p>
+<p>采取最简单的前面的先下载策略。 使用输出参数 msg 是因为这种 msg 一般都是栈上生成的，用完就丢。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mi</td><td>全局信息 </td></tr>
+    <tr><td class="paramname">msg</td><td>要发送的请求 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>0 - 成功，-1 - 失败</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">待办事项:</a></b></dt><dd>应用优化策略：最少优先 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_a1144015b47fb80b2a0faf9fe01bd6d02_icgraph.png" border="0" usemap="#driver_8c_a1144015b47fb80b2a0faf9fe01bd6d02_icgraph" alt=""/></div>
+<map name="driver_8c_a1144015b47fb80b2a0faf9fe01bd6d02_icgraph" id="driver_8c_a1144015b47fb80b2a0faf9fe01bd6d02_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="148,5,231,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="279,5,329,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ae36b6472da40f83c6b72de5452779cc4"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void send_msg_to_tracker </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structTracker.html">Tracker</a> *&#160;</td>
+          <td class="paramname"><em>tracker</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>event</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>向 tracker 发送 HTTP GET 请求. 可以通过 event 指定发送的具体时间, 其余信息完全通过 mi 填写. </p>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_ae36b6472da40f83c6b72de5452779cc4_icgraph.png" border="0" usemap="#driver_8c_ae36b6472da40f83c6b72de5452779cc4_icgraph" alt=""/></div>
+<map name="driver_8c_ae36b6472da40f83c6b72de5452779cc4_icgraph" id="driver_8c_ae36b6472da40f83c6b72de5452779cc4_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#a0017b9340d4b1cca06a57ab102b09034" title="执行连接建立后的相关操作 " alt="" coords="200,5,299,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="347,5,429,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="477,5,528,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a32f58bd3297fa208ea90ae27cb32201e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void send_request </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structMetaInfo.html">MetaInfo</a> *&#160;</td>
+          <td class="paramname"><em>mi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td>
+          <td class="paramname"><em>peer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>向 peer 发送分片请求，同时更新 peer 和对应子分片的大小 </p>
+<p>修改 peer 状态，表明它处于下载任务中，同时更新起始时刻，用于之后计算速度。</p>
+<p>修改子分片状态，表明它正被下载，同时更新起始时刻，用于之后超时检测。</p>
+<p>msg 报文的本机字节序会转换为网络字节序。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mi</td><td>全局信息 </td></tr>
+    <tr><td class="paramname">peer</td><td>指向要发送请求的 peer 的指针 </td></tr>
+    <tr><td class="paramname">msg</td><td>构造好的请求报文，本机字节序 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="driver_8c_a32f58bd3297fa208ea90ae27cb32201e_icgraph.png" border="0" usemap="#driver_8c_a32f58bd3297fa208ea90ae27cb32201e_icgraph" alt=""/></div>
+<map name="driver_8c_a32f58bd3297fa208ea90ae27cb32201e_icgraph" id="driver_8c_a32f58bd3297fa208ea90ae27cb32201e_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="153,5,236,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="284,5,335,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

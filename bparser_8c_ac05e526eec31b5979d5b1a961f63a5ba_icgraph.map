@@ -1,0 +1,12 @@
+<map id="parse_back" name="parse_back">
+<area shape="rect" id="node2" href="$bparser_8c.html#ae107df7de65bd7ad66e9edadeba1deca" title="递归下降地解析字典 " alt="" coords="143,43,284,69"/>
+<area shape="rect" id="node3" href="$bparser_8c.html#a06a19c74de6c27c013bbf063a269196a" title="解析 B 编码 " alt="" coords="332,93,428,120"/>
+<area shape="rect" id="node7" href="$bparser_8c.html#aa2ab89580d33909c48c540b13b1cb958" title="递归下降地解析列表 " alt="" coords="627,5,764,32"/>
+<area shape="rect" id="node4" href="$bparser_8c.html#aff5a023a625e84fbc6b8ba638e57ad9c" title="构造一个新的语法结点 " alt="" coords="476,68,564,95"/>
+<area shape="rect" id="node8" href="$bparser_8h.html#aee1be1b92903ad1538bd763772e53e46" title="解析 B 编码 " alt="" coords="487,220,553,247"/>
+<area shape="rect" id="node5" href="$bparser_8c.html#abc87a3c9f715548788734fc26b4f0dc5" title="解析串 " alt="" coords="628,93,763,120"/>
+<area shape="rect" id="node6" href="$bparser_8c.html#a3cea9c2ba2e195ac26a68625bfef8aea" title="解析整型 " alt="" coords="628,156,763,183"/>
+<area shape="rect" id="node9" href="$driver_8c.html#a1f1cf731e9e154ffff657456694856e0" title="处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字 " alt="" coords="612,213,779,240"/>
+<area shape="rect" id="node11" href="$driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="957,239,1008,265"/>
+<area shape="rect" id="node10" href="$driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="827,213,909,240"/>
+</map>

@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: butil.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li class="current"><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>文件列表</span></a></li>
+      <li><a href="globals.html"><span>全局定义</span></a></li>
+    </ul>
+  </div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">butil.h</div>  </div>
+</div><!--header-->
+<div class="contents">
+<a href="butil_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#ifndef BUTIL_H</span></div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#define BUTIL_H</span></div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="bparser_8h.html">bparser.h</a>&quot;</span></div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div><div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">void</span> <a class="code" href="butil_8h.html#a44ec2be41e537a8acfba8b967c01f2d5">print_bcode</a>(<span class="keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structBNode.html">BNode</a> *node, <span class="keywordtype">int</span> indent, <span class="keywordtype">int</span> flag);</div><div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div><div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">const</span> <span class="keyword">struct </span><a class="code" href="structBNode.html">BNode</a> *<a class="code" href="butil_8h.html#ae0c6b4657159acd1ba9b2759480a1f77">query_bcode_by_key</a>(<span class="keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structBNode.html">BNode</a> *tree, <span class="keyword">const</span> <span class="keywordtype">char</span> *key);</div><div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div><div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="keywordtype">void</span> <a class="code" href="butil_8h.html#adca6e84da736fbc0562166efc0af0466">make_info_hash</a>(<span class="keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structBNode.html">BNode</a> *root, <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *md);</div><div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#endif  // BUTIL_H</span></div><div class="ttc" id="bparser_8h_html"><div class="ttname"><a href="bparser_8h.html">bparser.h</a></div><div class="ttdoc">B 编码 parser 的 API 声明 </div></div>
+<div class="ttc" id="structBNode_html"><div class="ttname"><a href="structBNode.html">BNode</a></div><div class="ttdoc">B 编码结点 </div><div class="ttdef"><b>Definition:</b> bparser.h:39</div></div>
+<div class="ttc" id="butil_8h_html_ae0c6b4657159acd1ba9b2759480a1f77"><div class="ttname"><a href="butil_8h.html#ae0c6b4657159acd1ba9b2759480a1f77">query_bcode_by_key</a></div><div class="ttdeci">const struct BNode * query_bcode_by_key(const struct BNode *tree, const char *key)</div><div class="ttdoc">搜索 bencode 树中字典里的某个键 key, 返回对应的值结点 </div><div class="ttdef"><b>Definition:</b> butil.c:179</div></div>
+<div class="ttc" id="butil_8h_html_adca6e84da736fbc0562166efc0af0466"><div class="ttname"><a href="butil_8h.html#adca6e84da736fbc0562166efc0af0466">make_info_hash</a></div><div class="ttdeci">void make_info_hash(const struct BNode *root, unsigned char *md)</div><div class="ttdoc">计算 torrent 文件的 info hash </div><div class="ttdef"><b>Definition:</b> butil.c:185</div></div>
+<div class="ttc" id="butil_8h_html_a44ec2be41e537a8acfba8b967c01f2d5"><div class="ttname"><a href="butil_8h.html#a44ec2be41e537a8acfba8b967c01f2d5">print_bcode</a></div><div class="ttdeci">void print_bcode(const struct BNode *node, int indent, int flag)</div><div class="ttdoc">打印以 node 为根的 bencode 树 </div><div class="ttdef"><b>Definition:</b> butil.c:127</div></div>
+</div><!-- fragment --></div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

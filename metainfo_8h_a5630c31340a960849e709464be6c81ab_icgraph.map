@@ -1,0 +1,6 @@
+<map id="get_wait_peer_index_by_fd" name="get_wait_peer_index_by_fd">
+<area shape="rect" id="node2" href="$driver_8c.html#a24ba120aedfee26e7bfde8e2f72449ff" title="处理出错套接字 " alt="" coords="209,5,303,32"/>
+<area shape="rect" id="node5" href="$driver_8c.html#a23d49f290a81bbd360baac95364fbef9" title="完成握手消息的处理 " alt="" coords="195,56,317,83"/>
+<area shape="rect" id="node3" href="$driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="365,31,448,57"/>
+<area shape="rect" id="node4" href="$driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="496,31,547,57"/>
+</map>

@@ -1,0 +1,771 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: peer.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li class="current"><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>文件列表</span></a></li>
+      <li><a href="globals.html"><span>全局定义</span></a></li>
+    </ul>
+  </div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle">
+<div class="title">peer.c 文件参考</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="peer_8h_source.html">peer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="util_8h_source.html">util.h</a>&quot;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;assert.h&gt;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
+<code>#include &lt;arpa/inet.h&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+peer.c 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c__incl.png" border="0" usemap="#peer_8c" alt=""/></div>
+<map name="peer_8c" id="peer_8c">
+<area shape="rect" id="node2" href="peer_8h.html" title="单个 peer 相关操作 API 声明 " alt="" coords="89,80,148,107"/>
+<area shape="rect" id="node7" href="util_8h.html" title="一些工具函数（宏）声明 / 定义 " alt="" coords="181,80,232,107"/>
+<area shape="rect" id="node3" href="metainfo_8h.html" title="操作全局信息的相关 API " alt="" coords="68,155,151,181"/>
+</map>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a1fefa7e5fc2c3428d958fdd20ecc958e"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#a1fefa7e5fc2c3428d958fdd20ecc958e">peer_get_packet</a> (struct <a class="el" href="structPeer.html">Peer</a> *peer)</td></tr>
+<tr class="memdesc:a1fefa7e5fc2c3428d958fdd20ecc958e"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取 BT 报文  <a href="#a1fefa7e5fc2c3428d958fdd20ecc958e">更多...</a><br /></td></tr>
+<tr class="separator:a1fefa7e5fc2c3428d958fdd20ecc958e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d142d9dcd3cbb22e49060842557237a"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#a3d142d9dcd3cbb22e49060842557237a">peer_new</a> (int fd, size_t nr_pieces)</td></tr>
+<tr class="memdesc:a3d142d9dcd3cbb22e49060842557237a"><td class="mdescLeft">&#160;</td><td class="mdescRight">peer 构造  <a href="#a3d142d9dcd3cbb22e49060842557237a">更多...</a><br /></td></tr>
+<tr class="separator:a3d142d9dcd3cbb22e49060842557237a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8f400940ee0f8734c3dfa12bd5b714a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#aa8f400940ee0f8734c3dfa12bd5b714a">peer_free</a> (struct <a class="el" href="structPeer.html">Peer</a> **p)</td></tr>
+<tr class="memdesc:aa8f400940ee0f8734c3dfa12bd5b714a"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放 peer  <a href="#aa8f400940ee0f8734c3dfa12bd5b714a">更多...</a><br /></td></tr>
+<tr class="separator:aa8f400940ee0f8734c3dfa12bd5b714a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3053e5e7224ba7afb7ddacd0a5defab7"><td class="memItemLeft" align="right" valign="top">static unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#a3053e5e7224ba7afb7ddacd0a5defab7">in_byte_mask_of_</a> (size_t off)</td></tr>
+<tr class="memdesc:a3053e5e7224ba7afb7ddacd0a5defab7"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取位域的字节内掩码  <a href="#a3053e5e7224ba7afb7ddacd0a5defab7">更多...</a><br /></td></tr>
+<tr class="separator:a3053e5e7224ba7afb7ddacd0a5defab7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a559875cc3ed09689c8a6f1d914f9ddb7"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#a559875cc3ed09689c8a6f1d914f9ddb7">byte_index_of_</a> (unsigned off)</td></tr>
+<tr class="memdesc:a559875cc3ed09689c8a6f1d914f9ddb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取位域的字节  <a href="#a559875cc3ed09689c8a6f1d914f9ddb7">更多...</a><br /></td></tr>
+<tr class="separator:a559875cc3ed09689c8a6f1d914f9ddb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abedf886a586a2d491204446a22b06724"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#abedf886a586a2d491204446a22b06724">in_byte_offset_of_</a> (unsigned bit_offset)</td></tr>
+<tr class="memdesc:abedf886a586a2d491204446a22b06724"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取位域的字节内偏移  <a href="#abedf886a586a2d491204446a22b06724">更多...</a><br /></td></tr>
+<tr class="separator:abedf886a586a2d491204446a22b06724"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ea965d50b1990a749543df60ae65130"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#a9ea965d50b1990a749543df60ae65130">set_bit</a> (unsigned char *bytes, unsigned bit_offset)</td></tr>
+<tr class="memdesc:a9ea965d50b1990a749543df60ae65130"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置 bit  <a href="#a9ea965d50b1990a749543df60ae65130">更多...</a><br /></td></tr>
+<tr class="separator:a9ea965d50b1990a749543df60ae65130"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b9d6bfc642136a6edb8a3d9fec89624"><td class="memItemLeft" align="right" valign="top">static unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#a2b9d6bfc642136a6edb8a3d9fec89624">get_bit</a> (unsigned char *bytes, unsigned bit_offset)</td></tr>
+<tr class="memdesc:a2b9d6bfc642136a6edb8a3d9fec89624"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取 bit  <a href="#a2b9d6bfc642136a6edb8a3d9fec89624">更多...</a><br /></td></tr>
+<tr class="separator:a2b9d6bfc642136a6edb8a3d9fec89624"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fe37e1b7532c6899c8b49f4479b98ce"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#a0fe37e1b7532c6899c8b49f4479b98ce">print_bit_in_byte</a> (unsigned char byte, size_t bit_len)</td></tr>
+<tr class="memdesc:a0fe37e1b7532c6899c8b49f4479b98ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印一个字节的 bit  <a href="#a0fe37e1b7532c6899c8b49f4479b98ce">更多...</a><br /></td></tr>
+<tr class="separator:a0fe37e1b7532c6899c8b49f4479b98ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa42f4c047cff6735930c01aa74af3961"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#aa42f4c047cff6735930c01aa74af3961">print_bit</a> (unsigned char *bytes, size_t bit_len)</td></tr>
+<tr class="memdesc:aa42f4c047cff6735930c01aa74af3961"><td class="mdescLeft">&#160;</td><td class="mdescRight">向标准输出打印 bitfield  <a href="#aa42f4c047cff6735930c01aa74af3961">更多...</a><br /></td></tr>
+<tr class="separator:aa42f4c047cff6735930c01aa74af3961"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa865d0384a36f922169b95e282603fcd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#aa865d0384a36f922169b95e282603fcd">peer_set_bit</a> (struct <a class="el" href="structPeer.html">Peer</a> *peer, unsigned bit_offset)</td></tr>
+<tr class="memdesc:aa865d0384a36f922169b95e282603fcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置 peer 的位域  <a href="#aa865d0384a36f922169b95e282603fcd">更多...</a><br /></td></tr>
+<tr class="separator:aa865d0384a36f922169b95e282603fcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c9055a4ae8ab59863e98a0f0df9d9cb"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#a1c9055a4ae8ab59863e98a0f0df9d9cb">peer_get_bit</a> (struct <a class="el" href="structPeer.html">Peer</a> *peer, unsigned bit_offset)</td></tr>
+<tr class="memdesc:a1c9055a4ae8ab59863e98a0f0df9d9cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取 peer 的位域  <a href="#a1c9055a4ae8ab59863e98a0f0df9d9cb">更多...</a><br /></td></tr>
+<tr class="separator:a1c9055a4ae8ab59863e98a0f0df9d9cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab2c57ba93aa8f8f08653a34e4014fcd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#aab2c57ba93aa8f8f08653a34e4014fcd">peer_send_msg</a> (struct <a class="el" href="structPeer.html">Peer</a> *peer, struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *msg)</td></tr>
+<tr class="memdesc:aab2c57ba93aa8f8f08653a34e4014fcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">向 peer 发送 BT 消息  <a href="#aab2c57ba93aa8f8f08653a34e4014fcd">更多...</a><br /></td></tr>
+<tr class="separator:aab2c57ba93aa8f8f08653a34e4014fcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:af76344ae1a7db8457ad67034c5d26e35"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="peer_8c.html#af76344ae1a7db8457ad67034c5d26e35">bt_types</a> []</td></tr>
+<tr class="memdesc:af76344ae1a7db8457ad67034c5d26e35"><td class="mdescLeft">&#160;</td><td class="mdescRight">对应 BT 报文类型的字符串  <a href="#af76344ae1a7db8457ad67034c5d26e35">更多...</a><br /></td></tr>
+<tr class="separator:af76344ae1a7db8457ad67034c5d26e35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a class="anchor" id="a559875cc3ed09689c8a6f1d914f9ddb7"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int byte_index_of_ </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>off</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取位域的字节 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">off</td><td>位偏移 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>字节下标 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_a559875cc3ed09689c8a6f1d914f9ddb7_icgraph.png" border="0" usemap="#peer_8c_a559875cc3ed09689c8a6f1d914f9ddb7_icgraph" alt=""/></div>
+<map name="peer_8c_a559875cc3ed09689c8a6f1d914f9ddb7_icgraph" id="peer_8c_a559875cc3ed09689c8a6f1d914f9ddb7_icgraph">
+<area shape="rect" id="node2" href="peer_8c.html#a9ea965d50b1990a749543df60ae65130" title="设置 bit " alt="" coords="164,5,225,32"/>
+<area shape="rect" id="node7" href="peer_8c.html#a2b9d6bfc642136a6edb8a3d9fec89624" title="获取 bit " alt="" coords="164,56,225,83"/>
+<area shape="rect" id="node3" href="peer_8h.html#aa865d0384a36f922169b95e282603fcd" title="设置 peer 的位域 " alt="" coords="273,5,367,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b" title="处理 BT 消息 " alt="" coords="415,5,507,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="555,31,637,57"/>
+<area shape="rect" id="node6" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="685,31,736,57"/>
+<area shape="rect" id="node8" href="peer_8h.html#a1c9055a4ae8ab59863e98a0f0df9d9cb" title="获取 peer 的位域 " alt="" coords="273,56,367,83"/>
+<area shape="rect" id="node9" href="driver_8c.html#aad7963d90a4ba67f1a0e5dba9a5d24aa" title="选择可以发送请求的 peer " alt="" coords="416,56,505,83"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a2b9d6bfc642136a6edb8a3d9fec89624"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned char get_bit </td>
+          <td>(</td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>bytes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>bit_offset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取 bit </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bytes</td><td>bit field </td></tr>
+    <tr><td class="paramname">bit_offset</td><td>bit 偏移 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bit 值 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_a2b9d6bfc642136a6edb8a3d9fec89624_icgraph.png" border="0" usemap="#peer_8c_a2b9d6bfc642136a6edb8a3d9fec89624_icgraph" alt=""/></div>
+<map name="peer_8c_a2b9d6bfc642136a6edb8a3d9fec89624_icgraph" id="peer_8c_a2b9d6bfc642136a6edb8a3d9fec89624_icgraph">
+<area shape="rect" id="node2" href="peer_8h.html#a1c9055a4ae8ab59863e98a0f0df9d9cb" title="获取 peer 的位域 " alt="" coords="115,5,208,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#aad7963d90a4ba67f1a0e5dba9a5d24aa" title="选择可以发送请求的 peer " alt="" coords="256,5,345,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="393,5,476,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="524,5,575,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a3053e5e7224ba7afb7ddacd0a5defab7"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned in_byte_mask_of_ </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>off</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取位域的字节内掩码 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">off</td><td>位偏移 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>字节掩码, 独热 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_a3053e5e7224ba7afb7ddacd0a5defab7_icgraph.png" border="0" usemap="#peer_8c_a3053e5e7224ba7afb7ddacd0a5defab7_icgraph" alt=""/></div>
+<map name="peer_8c_a3053e5e7224ba7afb7ddacd0a5defab7_icgraph" id="peer_8c_a3053e5e7224ba7afb7ddacd0a5defab7_icgraph">
+<area shape="rect" id="node2" href="peer_8c.html#a9ea965d50b1990a749543df60ae65130" title="设置 bit " alt="" coords="209,56,271,83"/>
+<area shape="rect" id="node7" href="peer_8c.html#a2b9d6bfc642136a6edb8a3d9fec89624" title="获取 bit " alt="" coords="209,107,271,133"/>
+<area shape="rect" id="node10" href="peer_8c.html#a0fe37e1b7532c6899c8b49f4479b98ce" title="打印一个字节的 bit " alt="" coords="181,5,299,32"/>
+<area shape="rect" id="node3" href="peer_8h.html#aa865d0384a36f922169b95e282603fcd" title="设置 peer 的位域 " alt="" coords="347,56,440,83"/>
+<area shape="rect" id="node4" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b" title="处理 BT 消息 " alt="" coords="488,56,580,83"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="628,81,711,108"/>
+<area shape="rect" id="node6" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="759,81,809,108"/>
+<area shape="rect" id="node8" href="peer_8h.html#a1c9055a4ae8ab59863e98a0f0df9d9cb" title="获取 peer 的位域 " alt="" coords="347,107,440,133"/>
+<area shape="rect" id="node9" href="driver_8c.html#aad7963d90a4ba67f1a0e5dba9a5d24aa" title="选择可以发送请求的 peer " alt="" coords="489,107,579,133"/>
+<area shape="rect" id="node11" href="peer_8h.html#aa42f4c047cff6735930c01aa74af3961" title="向标准输出打印 bitfield " alt="" coords="359,5,427,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="abedf886a586a2d491204446a22b06724"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int in_byte_offset_of_ </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>bit_offset</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取位域的字节内偏移 </p>
+<p>BitTorrent 的规定与常规思维不同, MSB 是 [0], LSB 是 [7], 所以要用 7 减去与出来的值.</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bit_offset</td><td>位域偏移 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>字节内偏移 </dd></dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_abedf886a586a2d491204446a22b06724_icgraph.png" border="0" usemap="#peer_8c_abedf886a586a2d491204446a22b06724_icgraph" alt=""/></div>
+<map name="peer_8c_abedf886a586a2d491204446a22b06724_icgraph" id="peer_8c_abedf886a586a2d491204446a22b06724_icgraph">
+<area shape="rect" id="node2" href="peer_8c.html#a2b9d6bfc642136a6edb8a3d9fec89624" title="获取 bit " alt="" coords="183,5,244,32"/>
+<area shape="rect" id="node3" href="peer_8h.html#a1c9055a4ae8ab59863e98a0f0df9d9cb" title="获取 peer 的位域 " alt="" coords="292,5,385,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#aad7963d90a4ba67f1a0e5dba9a5d24aa" title="选择可以发送请求的 peer " alt="" coords="433,5,523,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="571,5,653,32"/>
+<area shape="rect" id="node6" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="701,5,752,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="aa8f400940ee0f8734c3dfa12bd5b714a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void peer_free </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structPeer.html">Peer</a> **&#160;</td>
+          <td class="paramname"><em>peer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>释放 peer </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">peer</td><td>要释放的 peer, 会改写成 NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a1c9055a4ae8ab59863e98a0f0df9d9cb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char peer_get_bit </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td>
+          <td class="paramname"><em>peer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>bit_offset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取 peer 的位域 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">peer</td><td>要获取的 peer </td></tr>
+    <tr><td class="paramname">bit_offset</td><td>位偏移量 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_a1c9055a4ae8ab59863e98a0f0df9d9cb_icgraph.png" border="0" usemap="#peer_8c_a1c9055a4ae8ab59863e98a0f0df9d9cb_icgraph" alt=""/></div>
+<map name="peer_8c_a1c9055a4ae8ab59863e98a0f0df9d9cb_icgraph" id="peer_8c_a1c9055a4ae8ab59863e98a0f0df9d9cb_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aad7963d90a4ba67f1a0e5dba9a5d24aa" title="选择可以发送请求的 peer " alt="" coords="147,5,236,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="284,5,367,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="415,5,465,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a1fefa7e5fc2c3428d958fdd20ecc958e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structPeerMsg.html">PeerMsg</a>* peer_get_packet </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td>
+          <td class="paramname"><em>peer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取 BT 报文 </p>
+<p>len 不应为 0, keep-alive 由上层检查 </p>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_a1fefa7e5fc2c3428d958fdd20ecc958e_icgraph.png" border="0" usemap="#peer_8c_a1fefa7e5fc2c3428d958fdd20ecc958e_icgraph" alt=""/></div>
+<map name="peer_8c_a1fefa7e5fc2c3428d958fdd20ecc958e_icgraph" id="peer_8c_a1fefa7e5fc2c3428d958fdd20ecc958e_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="172,5,255,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="303,5,353,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a3d142d9dcd3cbb22e49060842557237a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structPeer.html">Peer</a>* peer_new </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>fd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nr_pieces</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>peer 构造 </p>
+<p>bitfield 的大小是对 nr_pieces / 8 的上取整. </p>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_a3d142d9dcd3cbb22e49060842557237a_icgraph.png" border="0" usemap="#peer_8c_a3d142d9dcd3cbb22e49060842557237a_icgraph" alt=""/></div>
+<map name="peer_8c_a3d142d9dcd3cbb22e49060842557237a_icgraph" id="peer_8c_a3d142d9dcd3cbb22e49060842557237a_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#a23d49f290a81bbd360baac95364fbef9" title="完成握手消息的处理 " alt="" coords="132,5,255,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="303,5,385,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="433,5,484,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="aab2c57ba93aa8f8f08653a34e4014fcd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void peer_send_msg </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td>
+          <td class="paramname"><em>peer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct <a class="el" href="structPeerMsg.html">PeerMsg</a> *&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>向 peer 发送 BT 消息 </p>
+<p>提前构造好 msg 并将其发送给指定的 peer， 以 msg 的 len 成员为准发送缓冲区，调用者保证其正确性。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">peer</td><td>要发送消息的 peer </td></tr>
+    <tr><td class="paramname">msg</td><td>发送的消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa865d0384a36f922169b95e282603fcd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void peer_set_bit </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structPeer.html">Peer</a> *&#160;</td>
+          <td class="paramname"><em>peer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>bit_offset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置 peer 的位域 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">peer</td><td>要设置的 peer </td></tr>
+    <tr><td class="paramname">bit_offset</td><td>位偏移量 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_aa865d0384a36f922169b95e282603fcd_icgraph.png" border="0" usemap="#peer_8c_aa865d0384a36f922169b95e282603fcd_icgraph" alt=""/></div>
+<map name="peer_8c_aa865d0384a36f922169b95e282603fcd_icgraph" id="peer_8c_aa865d0384a36f922169b95e282603fcd_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b" title="处理 BT 消息 " alt="" coords="147,5,239,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="287,5,369,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="417,5,468,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="aa42f4c047cff6735930c01aa74af3961"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void print_bit </td>
+          <td>(</td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>bytes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bit_len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>向标准输出打印 bitfield </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bytes</td><td>bitfield 缓冲区 </td></tr>
+    <tr><td class="paramname">bit_len</td><td>bit 数, 一般对应分片数量 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_aa42f4c047cff6735930c01aa74af3961_icgraph.png" border="0" usemap="#peer_8c_aa42f4c047cff6735930c01aa74af3961_icgraph" alt=""/></div>
+<map name="peer_8c_aa42f4c047cff6735930c01aa74af3961_icgraph" id="peer_8c_aa42f4c047cff6735930c01aa74af3961_icgraph">
+<area shape="rect" id="node2" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b" title="处理 BT 消息 " alt="" coords="121,5,213,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="261,5,344,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="392,5,443,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a0fe37e1b7532c6899c8b49f4479b98ce"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void print_bit_in_byte </td>
+          <td>(</td>
+          <td class="paramtype">unsigned char&#160;</td>
+          <td class="paramname"><em>byte</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bit_len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>打印一个字节的 bit </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">byte</td><td>bit field </td></tr>
+    <tr><td class="paramname">bit_len</td><td>限长（小于 8） </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_a0fe37e1b7532c6899c8b49f4479b98ce_icgraph.png" border="0" usemap="#peer_8c_a0fe37e1b7532c6899c8b49f4479b98ce_icgraph" alt=""/></div>
+<map name="peer_8c_a0fe37e1b7532c6899c8b49f4479b98ce_icgraph" id="peer_8c_a0fe37e1b7532c6899c8b49f4479b98ce_icgraph">
+<area shape="rect" id="node2" href="peer_8h.html#aa42f4c047cff6735930c01aa74af3961" title="向标准输出打印 bitfield " alt="" coords="171,5,239,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b" title="处理 BT 消息 " alt="" coords="287,5,379,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="427,5,509,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="557,5,608,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a9ea965d50b1990a749543df60ae65130"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void set_bit </td>
+          <td>(</td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>bytes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>bit_offset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>设置 bit </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bytes</td><td>bit field </td></tr>
+    <tr><td class="paramname">bit_offset</td><td>bit 偏移 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="dynheader">
+这是这个函数的调用关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="peer_8c_a9ea965d50b1990a749543df60ae65130_icgraph.png" border="0" usemap="#peer_8c_a9ea965d50b1990a749543df60ae65130_icgraph" alt=""/></div>
+<map name="peer_8c_a9ea965d50b1990a749543df60ae65130_icgraph" id="peer_8c_a9ea965d50b1990a749543df60ae65130_icgraph">
+<area shape="rect" id="node2" href="peer_8h.html#aa865d0384a36f922169b95e282603fcd" title="设置 peer 的位域 " alt="" coords="115,5,208,32"/>
+<area shape="rect" id="node3" href="driver_8c.html#adbae4421b9be5243d3f1773cf525292b" title="处理 BT 消息 " alt="" coords="256,5,348,32"/>
+<area shape="rect" id="node4" href="driver_8c.html#aa93c0218730a095b7930ba739b40ee70" title="处理所有网络报文 " alt="" coords="396,5,479,32"/>
+<area shape="rect" id="node5" href="driver_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。 " alt="" coords="527,5,577,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a class="anchor" id="af76344ae1a7db8457ad67034c5d26e35"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* bt_types[]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">=</div><div class="line">{</div><div class="line">    <span class="stringliteral">&quot;CHOKE&quot;</span>,</div><div class="line">    <span class="stringliteral">&quot;UNCHOKE&quot;</span>,</div><div class="line">    <span class="stringliteral">&quot;INTERESTED&quot;</span>,</div><div class="line">    <span class="stringliteral">&quot;NOT_INTERESTED&quot;</span>,</div><div class="line">    <span class="stringliteral">&quot;HAVE&quot;</span>,</div><div class="line">    <span class="stringliteral">&quot;BITFIELD&quot;</span>,</div><div class="line">    <span class="stringliteral">&quot;REQUEST&quot;</span>,</div><div class="line">    <span class="stringliteral">&quot;PIECE&quot;</span>,</div><div class="line">    <span class="stringliteral">&quot;CANCEL&quot;</span>,</div><div class="line">}</div></div><!-- fragment -->
+<p>对应 BT 报文类型的字符串 </p>
+
+</div>
+</div>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>

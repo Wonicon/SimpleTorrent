@@ -1,0 +1,7 @@
+<map id="MetaInfo" name="MetaInfo">
+<area shape="rect" id="node2" href="$structPeer.html" title="描述 peer 信息 " alt="" coords="18,95,67,121"/>
+<area shape="rect" id="node3" href="$structPeerMsg.html" title="BT 消息 " alt="" coords="5,5,80,32"/>
+<area shape="rect" id="node4" href="$structWaitPeer.html" title="描述处于等待握手状态的 peer 信息 " alt="" coords="91,95,167,121"/>
+<area shape="rect" id="node5" href="$structTracker.html" title="描述 tracker 的相关信息 " alt="" coords="195,95,261,121"/>
+<area shape="rect" id="node6" href="$structPieceInfo.html" title="分片信息 " alt="" coords="285,95,363,121"/>
+</map>

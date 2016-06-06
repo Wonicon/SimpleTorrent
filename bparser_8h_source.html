@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.11"/>
+<title>SimpleTorrent: bparser.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { init_search(); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">SimpleTorrent
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.8.11 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'搜索');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>首页</span></a></li>
+      <li><a href="pages.html"><span>相关页面</span></a></li>
+      <li><a href="annotated.html"><span>结构体</span></a></li>
+      <li class="current"><a href="files.html"><span>文件</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="搜索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>文件列表</span></a></li>
+      <li><a href="globals.html"><span>全局定义</span></a></li>
+    </ul>
+  </div>
+</div><!-- top -->
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">bparser.h</div>  </div>
+</div><!--header-->
+<div class="contents">
+<a href="bparser_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#ifndef BPARSER_H</span></div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#define BPARSER_H</span></div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;stddef.h&gt;</span></div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;inttypes.h&gt;</span></div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div><div class="line"><a name="l00015"></a><span class="lineno"><a class="line" href="bparser_8h.html#a416b65aa7f9e923c6cf461a99d456716">   15</a></span>&#160;<span class="keyword">enum</span> <a class="code" href="bparser_8h.html#a416b65aa7f9e923c6cf461a99d456716">BNodeType</a></div><div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;{</div><div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    B_NA,</div><div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    B_STR,</div><div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    B_INT,</div><div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    B_LIST,</div><div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    B_DICT,</div><div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    NR_BTYPE</div><div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;};</div><div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div><div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="structBNode.html">   39</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structBNode.html">BNode</a></div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{</div><div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="structBNode.html#aaff42119a7f054871c560115fa7f76ef">   41</a></span>&#160;    <span class="keyword">enum</span> <a class="code" href="bparser_8h.html#a416b65aa7f9e923c6cf461a99d456716">BNodeType</a> <a class="code" href="structBNode.html#aaff42119a7f054871c560115fa7f76ef">type</a>;              </div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">union</span></div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    {</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keyword">struct </span>{</div><div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="structBNode.html#a76b4dd2db0f3f6c9c1b26f1353e2d030">   45</a></span>&#160;            <span class="keyword">struct </span><a class="code" href="structBNode.html">BNode</a> *<a class="code" href="structBNode.html#a76b4dd2db0f3f6c9c1b26f1353e2d030">l_item</a>;     </div><div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="structBNode.html#a21d1585c38121224b42c3775f3be2a92">   46</a></span>&#160;            <span class="keyword">struct </span><a class="code" href="structBNode.html">BNode</a> *<a class="code" href="structBNode.html#a21d1585c38121224b42c3775f3be2a92">l_next</a>;     </div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        };</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keyword">struct </span>{</div><div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="structBNode.html#a5d2a3d1e81f4024e41cc5415a1504cff">   49</a></span>&#160;            <span class="keywordtype">char</span> *<a class="code" href="structBNode.html#a5d2a3d1e81f4024e41cc5415a1504cff">d_key</a>;              </div><div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="structBNode.html#aedcd5210f1f3f0d5cb0ea005564b4e96">   50</a></span>&#160;            <span class="keyword">struct </span><a class="code" href="structBNode.html">BNode</a> *<a class="code" href="structBNode.html#aedcd5210f1f3f0d5cb0ea005564b4e96">d_val</a>;      </div><div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="structBNode.html#a27cba7465ccc73b7b2a04098415d5f00">   51</a></span>&#160;            <span class="keyword">struct </span><a class="code" href="structBNode.html">BNode</a> *<a class="code" href="structBNode.html#a27cba7465ccc73b7b2a04098415d5f00">d_next</a>;     </div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        };</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keyword">struct </span>{</div><div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="structBNode.html#aa6a707c3a82ab344e08a761044e33c5f">   54</a></span>&#160;            <span class="keywordtype">size_t</span> <a class="code" href="structBNode.html#aa6a707c3a82ab344e08a761044e33c5f">s_size</a>;            </div><div class="line"><a name="l00055"></a><span class="lineno"><a class="line" href="structBNode.html#a5c5fc8fb34004098bf943f5ea2aca760">   55</a></span>&#160;            <span class="keywordtype">char</span> *<a class="code" href="structBNode.html#a5c5fc8fb34004098bf943f5ea2aca760">s_data</a>;             </div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        };</div><div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="structBNode.html#a52628b887a44cc54d814e35bd59bd224">   57</a></span>&#160;        <span class="keywordtype">long</span> <a class="code" href="structBNode.html#a52628b887a44cc54d814e35bd59bd224">i</a>;                       </div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    };</div><div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="structBNode.html#a714c4ea2fa9026f387ae24f76960bf52">   59</a></span>&#160;    <span class="keywordtype">char</span> *<a class="code" href="structBNode.html#a714c4ea2fa9026f387ae24f76960bf52">start</a>;                      </div><div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="structBNode.html#a0fc75b90c48ad7f2b746579f622c8fdc">   60</a></span>&#160;    <span class="keywordtype">char</span> *<a class="code" href="structBNode.html#a0fc75b90c48ad7f2b746579f622c8fdc">end</a>;                        </div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;};</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">// 解析 B 编码数据获取抽象语法树</span></div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="keyword">struct </span><a class="code" href="structBNode.html">BNode</a> *<a class="code" href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46">bparser</a>(<span class="keywordtype">char</span> *bcode);</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">// 释放 B 编码的抽象语法树</span></div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="keywordtype">void</span> <a class="code" href="bparser_8h.html#a5f7a168bee91fc16e16a039b79c4429a">free_bnode</a>(<span class="keyword">struct</span> <a class="code" href="structBNode.html">BNode</a> **pbnode);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#endif //  BPARSER_H</span></div><div class="ttc" id="structBNode_html_a714c4ea2fa9026f387ae24f76960bf52"><div class="ttname"><a href="structBNode.html#a714c4ea2fa9026f387ae24f76960bf52">BNode::start</a></div><div class="ttdeci">char * start</div><div class="ttdoc">结点在源缓冲区的开始处 </div><div class="ttdef"><b>Definition:</b> bparser.h:59</div></div>
+<div class="ttc" id="structBNode_html_aaff42119a7f054871c560115fa7f76ef"><div class="ttname"><a href="structBNode.html#aaff42119a7f054871c560115fa7f76ef">BNode::type</a></div><div class="ttdeci">enum BNodeType type</div><div class="ttdoc">类型标签 </div><div class="ttdef"><b>Definition:</b> bparser.h:41</div></div>
+<div class="ttc" id="structBNode_html_a21d1585c38121224b42c3775f3be2a92"><div class="ttname"><a href="structBNode.html#a21d1585c38121224b42c3775f3be2a92">BNode::l_next</a></div><div class="ttdeci">struct BNode * l_next</div><div class="ttdoc">余下列表项 </div><div class="ttdef"><b>Definition:</b> bparser.h:46</div></div>
+<div class="ttc" id="structBNode_html_aa6a707c3a82ab344e08a761044e33c5f"><div class="ttname"><a href="structBNode.html#aa6a707c3a82ab344e08a761044e33c5f">BNode::s_size</a></div><div class="ttdeci">size_t s_size</div><div class="ttdoc">串长度 </div><div class="ttdef"><b>Definition:</b> bparser.h:54</div></div>
+<div class="ttc" id="structBNode_html_a5c5fc8fb34004098bf943f5ea2aca760"><div class="ttname"><a href="structBNode.html#a5c5fc8fb34004098bf943f5ea2aca760">BNode::s_data</a></div><div class="ttdeci">char * s_data</div><div class="ttdoc">串内容（深拷贝） </div><div class="ttdef"><b>Definition:</b> bparser.h:55</div></div>
+<div class="ttc" id="structBNode_html_a0fc75b90c48ad7f2b746579f622c8fdc"><div class="ttname"><a href="structBNode.html#a0fc75b90c48ad7f2b746579f622c8fdc">BNode::end</a></div><div class="ttdeci">char * end</div><div class="ttdoc">结点在源缓冲区的结束处 </div><div class="ttdef"><b>Definition:</b> bparser.h:60</div></div>
+<div class="ttc" id="bparser_8h_html_a5f7a168bee91fc16e16a039b79c4429a"><div class="ttname"><a href="bparser_8h.html#a5f7a168bee91fc16e16a039b79c4429a">free_bnode</a></div><div class="ttdeci">void free_bnode(struct BNode **pbnode)</div><div class="ttdoc">释放 B 编码的抽象语法树 </div><div class="ttdef"><b>Definition:</b> bparser.c:301</div></div>
+<div class="ttc" id="structBNode_html"><div class="ttname"><a href="structBNode.html">BNode</a></div><div class="ttdoc">B 编码结点 </div><div class="ttdef"><b>Definition:</b> bparser.h:39</div></div>
+<div class="ttc" id="structBNode_html_a5d2a3d1e81f4024e41cc5415a1504cff"><div class="ttname"><a href="structBNode.html#a5d2a3d1e81f4024e41cc5415a1504cff">BNode::d_key</a></div><div class="ttdeci">char * d_key</div><div class="ttdoc">字典键（在 B 编码中是串，但是可以保证是字符串） </div><div class="ttdef"><b>Definition:</b> bparser.h:49</div></div>
+<div class="ttc" id="structBNode_html_a76b4dd2db0f3f6c9c1b26f1353e2d030"><div class="ttname"><a href="structBNode.html#a76b4dd2db0f3f6c9c1b26f1353e2d030">BNode::l_item</a></div><div class="ttdeci">struct BNode * l_item</div><div class="ttdoc">列表项 </div><div class="ttdef"><b>Definition:</b> bparser.h:45</div></div>
+<div class="ttc" id="structBNode_html_a27cba7465ccc73b7b2a04098415d5f00"><div class="ttname"><a href="structBNode.html#a27cba7465ccc73b7b2a04098415d5f00">BNode::d_next</a></div><div class="ttdeci">struct BNode * d_next</div><div class="ttdoc">余下字典项 </div><div class="ttdef"><b>Definition:</b> bparser.h:51</div></div>
+<div class="ttc" id="bparser_8h_html_aee1be1b92903ad1538bd763772e53e46"><div class="ttname"><a href="bparser_8h.html#aee1be1b92903ad1538bd763772e53e46">bparser</a></div><div class="ttdeci">struct BNode * bparser(char *bcode)</div><div class="ttdoc">解析 B 编码 </div><div class="ttdef"><b>Definition:</b> bparser.c:283</div></div>
+<div class="ttc" id="bparser_8h_html_a416b65aa7f9e923c6cf461a99d456716"><div class="ttname"><a href="bparser_8h.html#a416b65aa7f9e923c6cf461a99d456716">BNodeType</a></div><div class="ttdeci">BNodeType</div><div class="ttdoc">B 编码语法结点类型标签 </div><div class="ttdef"><b>Definition:</b> bparser.h:15</div></div>
+<div class="ttc" id="structBNode_html_a52628b887a44cc54d814e35bd59bd224"><div class="ttname"><a href="structBNode.html#a52628b887a44cc54d814e35bd59bd224">BNode::i</a></div><div class="ttdeci">long i</div><div class="ttdoc">整型 </div><div class="ttdef"><b>Definition:</b> bparser.h:57</div></div>
+<div class="ttc" id="structBNode_html_aedcd5210f1f3f0d5cb0ea005564b4e96"><div class="ttname"><a href="structBNode.html#aedcd5210f1f3f0d5cb0ea005564b4e96">BNode::d_val</a></div><div class="ttdeci">struct BNode * d_val</div><div class="ttdoc">字典值 </div><div class="ttdef"><b>Definition:</b> bparser.h:50</div></div>
+</div><!-- fragment --></div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+制作者 &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.11
+</small></address>
+</body>
+</html>
