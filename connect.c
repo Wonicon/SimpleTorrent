@@ -92,7 +92,7 @@ add_http_request_attr(struct HttpRequest *req, const char *key, const char *fmt,
 {
     req->curr += sprintf(req->curr, "%s%s=", req->delim, key);
     req->delim = "&";
-    
+
     va_list args;
     va_start(args, fmt);
     req->curr += vsprintf(req->curr, fmt, args);
@@ -210,6 +210,10 @@ async_connect_to_tracker_non_block(void *arg)
             continue;
         }
 
+        if (sfd == 0) {
+            log("fuck");
+            exit(-1);
+        }
         if (async_connect(efd, sfd, rp->ai_addr, rp->ai_addrlen) == EINPROGRESS) {
             break;
         }

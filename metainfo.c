@@ -66,10 +66,6 @@ extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
             tracker++;
         }
     }
-
-    for (int i = 0; i < mi->nr_trackers; i++) {
-        mi->trackers[i].timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
-    }
 }
 
 void

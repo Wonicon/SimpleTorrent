@@ -163,7 +163,7 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
 }
 
 /** @brief 选择可以发送请求的 peer
- * 
+ *
  * msg 不要转换字节序
  */
 struct Peer *
@@ -388,7 +388,7 @@ handle_peer_list(int efd, struct BNode *bcode)
 
 /** @brief 提取 interval 信息并设置定时 */
 void
-handle_interval(struct Tracker *tracker, struct BNode *bcode)
+handle_interval(struct Tracker *tracker, struct BNode *bcode, int efd)
 {
     const struct BNode *interval = dfs_bcode(bcode, "interval");
     if (interval == NULL) {
@@ -396,14 +396,23 @@ handle_interval(struct Tracker *tracker, struct BNode *bcode)
         return;
     }
 
+    tracker->timerfd = timerfd_create(CLOCK_REALTIME, 0);
+
+    // 单次定时器，靠重新获取报文来重新定时
     struct itimerspec ts = {
-            .it_interval = { .tv_sec = interval->i, .tv_nsec = 0 },
-            .it_value = { .tv_sec = 0, .tv_nsec = 0 }
+        .it_interval = { .tv_sec = 0, .tv_nsec = 0 },
+        .it_value = { .tv_sec = interval->i, .tv_nsec = 0 }
     };
 
     if (timerfd_settime(tracker->timerfd, 0, &ts, NULL) == -1) {
         perror("settime");
     }
+
+    struct epoll_event ev = {
+        .data.fd = tracker->timerfd,
+        .events = EPOLLIN
+    };
+    epoll_ctl(efd, EPOLL_CTL_ADD, tracker->timerfd, &ev);
 }
 
 /** @brief 处理与 tracker 的交互
@@ -425,6 +434,7 @@ bt_handler(struct MetaInfo *mi, int efd)
         int n = epoll_wait(efd, events, 100, 5000);  // 超时限制 5s
 
         if (n < 0) {
+            perror("epoll");
             break;
         }
 
@@ -488,7 +498,7 @@ bt_handler(struct MetaInfo *mi, int efd)
                         if (bcode != NULL) {
                             print_bcode(bcode, 0, 0);
                             handle_peer_list(efd, bcode);
-                            handle_interval(tracker, bcode);
+                            handle_interval(tracker, bcode, efd);
                             free_bnode(&bcode);
                         }
                         epoll_ctl(efd, EPOLL_CTL_DEL, tracker->sfd, NULL);
@@ -497,11 +507,17 @@ bt_handler(struct MetaInfo *mi, int efd)
                     }
                     else if ((tracker = get_tracker_by_timer(mi, events[i].data.fd)) != NULL) {  // 定时回访
                         log("timer event for %s:%s%s", tracker->host, tracker->port, tracker->request);
+                        if (close(tracker->timerfd) == -1)
+                            perror("close tracker timer fd");
+                        if (epoll_ctl(efd, EPOLL_CTL_DEL, tracker->timerfd, NULL) == -1)
+                            perror("epoll delete tracker timer fd");
                         async_connect_to_tracker(tracker, efd);
                     }
                     else if (events[i].data.fd == mi->timerfd) {  // 定时发送 KEEP ALIVE
-                        int len = htonl(0);
                         log("keep-alive");
+                        uint64_t expiration;
+                        read(mi->timerfd, &expiration, 8);  // 消耗定时器数据才能重新等待
+                        int len = htonl(0);
                         for (int k = 0; k < mi->nr_peers; k++) {
                             write(mi->peers[k]->fd, &len, 4);
                         }
@@ -622,10 +638,6 @@ main(int argc, char *argv[])
 {
     struct MetaInfo *mi = calloc(1, sizeof(*mi));
 
-    mi->timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
-    struct itimerspec ts = { { 120, 0 }, { 0, 0} };
-    timerfd_settime(mi->timerfd, 0, &ts, NULL);
-
     char *bcode = get_torrent_data_from_file(argv[1]);
     struct BNode *ast = bparser(bcode);
 
@@ -656,6 +668,12 @@ main(int argc, char *argv[])
         perror("epoll_create1");
         exit(EXIT_FAILURE);
     }
+
+    mi->timerfd = timerfd_create(CLOCK_REALTIME, 0);
+    struct itimerspec ts = { { 120, 0 }, { 120, 0} };
+    timerfd_settime(mi->timerfd, 0, &ts, NULL);
+    struct epoll_event ev = { .data.fd = mi->timerfd, .events = EPOLLIN };
+    epoll_ctl(efd, EPOLL_CTL_ADD, mi->timerfd, &ev);
 
     // 异步连接 tracker
     for (int i = 0; i < mi->nr_trackers; i++) {
