@@ -1,8 +1,8 @@
-/** @brief 顶层驱动模块
- *  @file driver.c
+/**
+ * @file driver.c
+ * @brief 顶层驱动模块
  */
 
-#include "bparser.h"
 #include "butil.h"
 #include "util.h"
 #include "peer.h"
@@ -15,6 +15,9 @@
 #include <arpa/inet.h>    // inet_ntoa()
 #include <sys/timerfd.h>  // timerfd_settime()
 
+/**
+ * @brief 报文缓冲区大小
+ */
 #define BUF_SIZE 4096
 
 /**
@@ -76,12 +79,13 @@ send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker, const char *ev
  * @param mi 全局信息
  * @param msg 要发送的请求
  * @return 0 - 成功，-1 - 失败
+ *
+ * @todo 应用优化策略：最少优先
  */
 int
 select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
 {
     // 找到一个没有完成的子分片
-    // @todo 应用优化策略
 
     uint32_t index = 0;
     uint32_t begin = 0;
@@ -184,6 +188,19 @@ select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
     return fastest_peer;
 }
 
+/**
+ * @brief 向 peer 发送分片请求，同时更新 peer 和对应子分片的大小
+ *
+ * 修改 peer 状态，表明它处于下载任务中，同时更新起始时刻，用于之后计算速度。
+ *
+ * 修改子分片状态，表明它正被下载，同时更新起始时刻，用于之后超时检测。
+ *
+ * msg 报文的本机字节序会转换为网络字节序。
+ *
+ * @param mi 全局信息
+ * @param peer 指向要发送请求的 peer 的指针
+ * @param msg 构造好的请求报文，本机字节序
+ */
 void
 send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
 {
@@ -258,6 +275,12 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     log("%s:%d's speed %lfB/s", peer->ip, peer->port, peer->speed);
 }
 
+/**
+ * @brief 处理 BT 消息
+ * @param mi 全局信息
+ * @param peer 指向发送消息的 peer
+ * @param msg peer 发送的消息
+ */
 void
 handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
 {
@@ -273,15 +296,15 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         print_bit(msg->bitfield, mi->nr_pieces);
         putchar('\n');
         memcpy(peer->bitfield, msg->bitfield, mi->bitfield_size);
-        // TODO 根据 bitfield 增加 piece 持有者数量(首先...).
+        /// @todo 根据 bitfield 增加 piece 持有者数量
         break;
     case BT_HAVE:
         msg->have.piece_index = ntohl(msg->have.piece_index);
         log("%s:%d has a new piece %d", peer->ip, peer->port, msg->have.piece_index);
         peer_set_bit(peer, msg->have.piece_index);
-        // TODO 根据 piece_index 增加 piece 持有者数量(首先...).
         print_bit(peer->bitfield, mi->nr_pieces);
         putchar('\n');
+        /// @todo 根据 have 增加 piece 持有者数量
         break;
     case BT_PIECE:
         msg->piece.index = htonl(msg->piece.index);
@@ -296,12 +319,25 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     case BT_CHOKE:
         peer->get_choked = 1;
         break;
+    case BT_INTERESTED:
+        peer->get_interested = 1;
+        break;
+    case BT_NOT_INTERESTED:
+        peer->get_interested = 0;
+        break;
+    case BT_REQUEST:
+        /// @todo 处理 REQUEST 消息
+        break;
+    case BT_CANCEL:
+        /// @todo 处理 CANCEL 消息
+        break;
     default:
         break;
     }
 }
 
-/** @brief 处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字
+/**
+ * @brief 处理 tracker 响应的 HTTP 报文，将解析后的语法树返回给上层使用，在内部关闭套接字
  *
  * 考虑到 tracker 的响应数据量不大，内部全部使用 recv + MSG_WAITALL 防止 read 读取不足。
  *
@@ -352,15 +388,17 @@ handle_tracker_response(int sfd)
     return bcode;
 }
 
-/** @brief 将 tracker 返回的 peers 异步 connect 并加入 epoll 队列
+/**
+ * @brief 将 tracker 返回的 peers 异步 connect 并加入 epoll 队列
  *
+ * @param mi 全局信息
  * @param efd epoll 描述符
- * @param data B 编码数据
+ * @param bcode B 编码数据
  */
 void
 handle_peer_list(struct MetaInfo *mi, int efd, struct BNode *bcode)
 {
-    const struct BNode *peers = dfs_bcode(bcode, "peers");
+    const struct BNode *peers = query_bcode_by_key(bcode, "peers");
 
     if (peers == NULL) {
         log("no peers are found");
@@ -404,11 +442,17 @@ handle_peer_list(struct MetaInfo *mi, int efd, struct BNode *bcode)
     }
 }
 
-/** @brief 提取 interval 信息并设置定时 */
+/**
+ * @brief 提取 interval 信息并设置定时
+ *
+ * @param tracker 指向发送响应的 tracker
+ * @param bcode 指向解析后的 B 编码语法树
+ * @param efd epoll file descriptor，用于加入 timer fd
+ */
 void
 handle_interval(struct Tracker *tracker, struct BNode *bcode, int efd)
 {
-    const struct BNode *interval = dfs_bcode(bcode, "interval");
+    const struct BNode *interval = query_bcode_by_key(bcode, "interval");
     if (interval == NULL) {
         fprintf(stderr, "interval not found\n");
         return;
@@ -559,11 +603,22 @@ finish_handshake(struct MetaInfo *mi, int sfd)
     }
 }
 
-/** @brief 处理与 tracker 的交互
- * @param mi 种子文件元信息
- * @param tracker_idx tracker 在元信息中的下标
+/**
+ * @brief 处理所有网络报文
  *
- * 本函数不主动关闭套接字。
+ * 使用 epoll 侦听各个描述符的事件，根据事件属性和描述符的所属采取相应的操作。
+ * 主要涉及的描述符类型：
+ * 1. 与 tracker 的连接套接字
+ * 2. 与 peer 的连接套接字
+ * 3. tracker 的回访定时器
+ * 4. 本机的 keep-alive 定时器
+ *
+ * 目前只对 peer 的 bt 消息做异步接受，其他报文基本要求同步地完全接受。
+ *
+ * 最多每 5s 处理一次发送报文的逻辑。目前来看可能出现 write 写满导致的阻塞。
+ *
+ * @param mi 种子文件元信息
+ * @param efd epoll file descriptor
  */
 void
 bt_handler(struct MetaInfo *mi, int efd)
@@ -648,6 +703,12 @@ bt_handler(struct MetaInfo *mi, int efd)
                     }
 
                     continue;
+                }
+
+                if (ev->data.fd == mi->listen_fd) {
+                    /// @todo 通过 accept 建立连接并监听连接套接字的 EPOLLIN 事件，加入 MetaInfo#wait_peers 队列。注意设置 WaitPeer#direction
+                    // 将连接套接字加入 wait_peers 后，可以在最后的 finish_handshake 里和我方主动连接的套接字统一处理。
+                    // 两种情况虽然有是否回复 handshake 的差别，但是可以通过设置 direction 进行区分。
                 }
 
                 // tracker 的响应
@@ -737,6 +798,9 @@ get_torrent_data_from_file(const char *torrent)
     return bcode;
 }
 
+/**
+ * @brief 入口函数，完成种子文件的解析，全局信息的生成以及进入消息处理逻辑。
+ */
 int
 main(int argc, char *argv[])
 {

@@ -1,3 +1,8 @@
+/**
+ * @file metainfo.c
+ * @brief 操作全局信息的相关 API 实现
+ */
+
 #include "metainfo.h"
 #include "bparser.h"
 #include "butil.h"
@@ -33,11 +38,11 @@ extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
 {
     // 提取 tracker 列表
 
-    const struct BNode *announce_list = dfs_bcode(ast, "announce-list");
+    const struct BNode *announce_list = query_bcode_by_key(ast, "announce-list");
 
     if (!announce_list) {
         // 没有 announce-list, 那么就使用 announce
-        const struct BNode *announce = dfs_bcode(ast, "announce");
+        const struct BNode *announce = query_bcode_by_key(ast, "announce");
         mi->nr_trackers = 1;
         mi->trackers = calloc(mi->nr_trackers, sizeof(*mi->trackers));
         parse_url(announce->s_data,
@@ -71,7 +76,7 @@ extract_trackers(struct MetaInfo *mi, const struct BNode *ast)
 void
 metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
 {
-    const struct BNode *name = dfs_bcode(ast, "name");
+    const struct BNode *name = query_bcode_by_key(ast, "name");
 
     log("filename: %s", name->s_data);
 
@@ -122,12 +127,12 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
 {
     // 提取分片信息
 
-    const struct BNode *length_node = dfs_bcode(ast, "length");
+    const struct BNode *length_node = query_bcode_by_key(ast, "length");
     if (length_node) {
         mi->file_size = (size_t)length_node->i;
     }
 
-    const struct BNode *piece_length_node = dfs_bcode(ast, "piece length");
+    const struct BNode *piece_length_node = query_bcode_by_key(ast, "piece length");
     if (piece_length_node) {
         mi->piece_size = (uint32_t)piece_length_node->i;
     }
@@ -144,7 +149,7 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
 
     log("sub_size %d, sub_count %lu", mi->sub_size, mi->sub_count);
 
-    const struct BNode *pieces_node = dfs_bcode(ast, "pieces");
+    const struct BNode *pieces_node = query_bcode_by_key(ast, "pieces");
     if (pieces_node) {
         mi->pieces = calloc(mi->nr_pieces, sizeof(*mi->pieces));
         const char *hash = pieces_node->s_data;

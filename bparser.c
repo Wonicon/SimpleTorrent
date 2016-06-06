@@ -1,22 +1,27 @@
+/**
+ * @file bparser.c
+ * @brief B 编码 parser 的 API 实现
+ */
+
 #include "bparser.h"
 #include "util.h"
 #include <string.h>
 
-#define DELIM     ':'
-#define LEAD_INT  'i'
-#define LEAD_LIST 'l'
-#define LEAD_DICT 'd'
-#define END       'e'
+#define DELIM     ':'  ///< 长度与字节串的分割符
+#define LEAD_INT  'i'  ///< 整型结点的起始字符
+#define LEAD_LIST 'l'  ///< 列表结点的起始字符
+#define LEAD_DICT 'd'  ///< 字典结点的起始字符
+#define END       'e'  ///< 非串结点的终止字符
 
 /**
  * @brief parser 状态
- * 
+ *
  * 内部使用，用来记录当前 parsing 的状态，即字符指针的位置。
  */
-struct state
+struct State
 {
-    char *start;
-    char *curr;
+    char *start;  ///< 源缓冲区起始地址
+    char *curr;   ///< 解析的当前地址
 };
 
 /**
@@ -25,7 +30,7 @@ struct state
  * @return 返回匹配的长整型
  */
 static inline size_t
-parse_get_int(struct state *st)
+parse_get_int(struct State *st)
 {
     return strtoul(st->curr, &st->curr, 10);
 }
@@ -37,7 +42,7 @@ parse_get_int(struct state *st)
  * @return 动态分配的字符数组指针
  */
 static inline char *
-parse_get_str(struct state *st, size_t length)
+parse_get_str(struct State *st, size_t length)
 {
     char *s = calloc(length + 1, sizeof(*s));
     memcpy(s, st->curr, length);  // 有时候会需要拷贝字节流
@@ -51,7 +56,7 @@ parse_get_str(struct state *st, size_t length)
  * @return 取出的字符
  */
 static inline char
-parse_get_char(struct state *st)
+parse_get_char(struct State *st)
 {
     return *st->curr++;
 }
@@ -62,7 +67,7 @@ parse_get_char(struct state *st)
  * @param n 回退字节数
  */
 static inline void
-parse_back(struct state *st, int n)
+parse_back(struct State *st, int n)
 {
     st->curr -= n;
 }
@@ -73,7 +78,7 @@ parse_back(struct state *st, int n)
  * @return 位置
  */
 static inline size_t
-pos(struct state *st)
+pos(struct State *st)
 {
     return st->curr - st->start;
 }
@@ -83,6 +88,11 @@ pos(struct state *st)
  */
 #define error_unexpected_char(st, ch, expect) log("ERROR: unexpected '%c', expect '%c' at %lu", ch, expect, pos(st));
 
+/**
+ * @brief 构造一个新的语法结点
+ * @param type 语法结点类型标签
+ * @return 动态分配的语法结点
+ */
 static struct BNode *
 new_bnode(enum BNodeType type)
 {
@@ -91,10 +101,19 @@ new_bnode(enum BNodeType type)
     return bnode;
 }
 
-static struct BNode *parse_bcode(struct state *st);
+static struct BNode *parse_bcode(struct State *st);
 
+/**
+ * @brief 解析字符串（字典键）
+ *
+ * 这是解析串的子集，可以为解析串和解析字典所复用
+ *
+ * @param st parser 状态
+ * @param len_o 如果不为 NULL, 写入字符串长度
+ * @return 动态分配的字符串
+ */
 static char *
-parse_bcode_is_key(struct state *st, size_t *len_o)
+parse_bcode_is_key(struct State *st, size_t *len_o)
 {
     size_t len = parse_get_int(st);
 
@@ -108,8 +127,16 @@ parse_bcode_is_key(struct state *st, size_t *len_o)
     return parse_get_str(st, len);
 }
 
+/**
+ * @brief 解析串
+ *
+ * 与解析字符串（字典键）不同，串可以是二进制语义，要记录长度。
+ *
+ * @param st parser 状态
+ * @return 动态分配的串结点
+ */
 static struct BNode *
-parse_bcode_is_str(struct state *st)
+parse_bcode_is_str(struct State *st)
 {
     struct BNode *bnode = new_bnode(B_STR);
     bnode->start = st->curr;
@@ -118,9 +145,17 @@ parse_bcode_is_str(struct state *st)
     return bnode;
 }
 
-// assume caller consumes the leading 'i'
+/**
+ * @brief 解析整型
+ *
+ * 本函数假设调用者已经消耗了整型的起始字符 'i'.
+ * 函数内部消耗终止字符 'e'.
+ *
+ * @param st parser 状态
+ * @return 动态分配的整型结点
+ */
 static struct BNode *
-parse_bcode_is_int(struct state *st)
+parse_bcode_is_int(struct State *st)
 {
     struct BNode *bnode = new_bnode(B_INT);
     bnode->start = st->curr - 1;
@@ -136,9 +171,17 @@ parse_bcode_is_int(struct state *st)
     return bnode;
 }
 
-// assume caller consumes the leading 'd'
+/**
+ * @brief 递归下降地解析字典
+ *
+ * 本函数假设调用者已经消耗了字典的起始字符 'd'.
+ * 函数内部消耗终止字符 'e'.
+ *
+ * @param st parser 状态
+ * @return 动态分配的字典结点
+ */
 static struct BNode *
-parse_bcode_is_dict(struct state *st)
+parse_bcode_is_dict(struct State *st)
 {
     struct BNode *bnode;
     struct BNode **iter = &bnode;
@@ -163,9 +206,17 @@ parse_bcode_is_dict(struct state *st)
     return bnode;
 }
 
-// assume caller consumes the leading 'l'
+/**
+ * @brief 递归下降地解析列表
+ *
+ * 本函数假设调用者已经消耗了列表的起始字符 'l'.
+ * 函数内部消耗终止字符 'e'.
+ *
+ * @param st parser 状态
+ * @return 动态分配的列表结点
+ */
 static struct BNode *
-parse_bcode_is_list(struct state *st)
+parse_bcode_is_list(struct State *st)
 {
     struct BNode *bnode;
     struct BNode **iter = &bnode;
@@ -189,8 +240,16 @@ parse_bcode_is_list(struct state *st)
     return bnode;
 }
 
+/**
+ * @brief 解析 B 编码
+ *
+ * 会向前看一个字节递归下降地进行解析。
+ *
+ * @param st parser 状态
+ * @return 动态分配的B编码语法结点
+ */
 static struct BNode *
-parse_bcode(struct state *st)
+parse_bcode(struct State *st)
 {
     char ch = parse_get_char(st);
 
@@ -212,11 +271,14 @@ parse_bcode(struct state *st)
 }
 
 /**
- * @brief 解析 torrent 字节串，获取抽象语法树
- * @param bcode 指向 torrent 文件的完整数据
- * @return 解析完成的抽象语法树根结点
+ * @brief 解析 B 编码
  *
- * 用户负责释放抽象语法树
+ * 顶层封装，进行错误检查以及屏蔽私有结构体。
+ *
+ * 用户负责释放抽象语法树。
+ *
+ * @param bcode 源缓冲区
+ * @return 动态生成的语法树根结点
  */
 struct BNode *
 bparser(char *bcode)
@@ -225,7 +287,7 @@ bparser(char *bcode)
         return NULL;
     }
 
-    struct state st = {
+    struct State st = {
         .start = bcode,
         .curr = bcode,
     };

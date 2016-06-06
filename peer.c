@@ -1,3 +1,8 @@
+/**
+ * @file peer.c
+ * @brief 单个 peer 相关操作 API 实现
+ */
+
 #include "peer.h"
 #include "util.h"
 #include <string.h>
@@ -119,16 +124,15 @@ peer_free(struct Peer **p)
     free(peer);
 }
 
-/** @brief 获取位域的字节内掩码
+/**
+ * @brief 获取位域的字节内掩码
  * @param off 位偏移
  * @return 字节掩码, 独热
  */
 static inline unsigned
 in_byte_mask_of_(size_t off)
 {
-    /**
-     * 8 元组内, 最高位是对应组内偏移 0.
-     */
+    // 8 元组内, 最高位是对应组内偏移 0.
     off = off & 0x7;
     return (1U << (7 - off));
 }
@@ -144,11 +148,12 @@ byte_index_of_(unsigned off)
 }
 
 /** @brief 获取位域的字节内偏移
- * @param off 位域偏移
- * @return 字节内偏移
  *
  * BitTorrent 的规定与常规思维不同, MSB 是 [0], LSB 是 [7],
  * 所以要用 7 减去与出来的值.
+ *
+ * @param bit_offset 位域偏移
+ * @return 字节内偏移
  */
 static inline int
 in_byte_offset_of_(unsigned bit_offset)
@@ -156,21 +161,25 @@ in_byte_offset_of_(unsigned bit_offset)
     return (7 - (bit_offset & 7));
 }
 
-void
+/**
+ * @brief 设置 bit
+ * @param bytes bit field
+ * @param bit_offset bit 偏移
+ */
+static void
 set_bit(unsigned char *bytes, unsigned bit_offset)
 {
     int byte_index = byte_index_of_(bit_offset);
     bytes[byte_index] |= in_byte_mask_of_(bit_offset);
 }
 
-void
-clr_bit(unsigned char *bytes, unsigned bit_offset)
-{
-    int byte_index = byte_index_of_(bit_offset);
-    bytes[byte_index] &= ~(in_byte_mask_of_(bit_offset));
-}
-
-unsigned char
+/**
+ * @brief 获取 bit
+ * @param bytes bit field
+ * @param bit_offset bit 偏移
+ * @return bit 值
+ */
+static unsigned char
 get_bit(unsigned char *bytes, unsigned bit_offset)
 {
     int byte_index = byte_index_of_(bit_offset);
@@ -178,7 +187,12 @@ get_bit(unsigned char *bytes, unsigned bit_offset)
     return (unsigned char)((bytes[byte_index] & in_byte_mask_of_(bit_offset)) >> in_byte_offset);
 }
 
-void
+/**
+ * @brief 打印一个字节的 bit
+ * @param byte bit field
+ * @param bit_len 限长（小于 8）
+ */
+static void
 print_bit_in_byte(unsigned char byte, size_t bit_len)
 {
     bit_len = (bit_len < 8) ? bit_len : 8;
@@ -203,12 +217,6 @@ void
 peer_set_bit(struct Peer *peer, unsigned bit_offset)
 {
     set_bit(peer->bitfield, bit_offset);
-}
-
-void
-peer_clr_bit(struct Peer *peer, unsigned bit_offset)
-{
-    clr_bit(peer->bitfield, bit_offset);
 }
 
 unsigned char

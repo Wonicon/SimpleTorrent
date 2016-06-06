@@ -1,4 +1,4 @@
-/** 
+/**
  * @file connect.h
  * @brief 网络连接相关 API 声明
  */
@@ -60,9 +60,10 @@ void parse_url(const char *url, char *method, char *host, char *port, char *requ
  */
 int async_connect(int efd, int sfd, const struct sockaddr *addr, socklen_t addrlen);
 
-/** @brief 异步地与 tracker 建立连接，调用后连接并不立即建立
- * @param host 主机名（域名或 IPv4 地址字符串）
- * @param port 端口号
+/**
+ * @brief 异步地与 tracker 建立连接，调用后连接并不立即建立
+ * @param tracker 指向 tracker 信息的指针
+ * @param efd epoll file descriptor，创建的套接字会加入该队列中，侦听 EPOLLOUT
  */
 void async_connect_to_tracker(struct Tracker *tracker, int efd);
 

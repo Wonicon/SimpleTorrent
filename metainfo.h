@@ -1,6 +1,6 @@
 /**
  * @file metainfo.h
- * @brief 操作全局信息的相关 API
+ * @brief 操作全局信息的相关 API 声明
  */
 
 #ifndef METAINFO_H
@@ -10,6 +10,9 @@
 #include <time.h>
 #include <inttypes.h>
 
+/**
+ * @brief SHA1 HASH 的字节数
+ */
 #define HASH_SIZE 20
 
 struct BNode;
@@ -25,7 +28,17 @@ struct Tracker
     int timerfd;            ///< 定时器描述符，用于在 epoll 里处理定时事件。
 };
 
-/** @brief 分片信息
+/** 子分片没有开始下载 */
+#define SUB_NA 0
+/** 子分片下载中 */
+#define SUB_DOWNLOAD 1
+/** 子分片完成下载 */
+#define SUB_FINISH 2
+/** 子分片最长等待时间 10s */
+#define WAIT_THRESHOLD 10.0
+
+/**
+ * @brief 分片信息
  *
  * hash 在一开始构造 metainfo 时从 B 编码树上获取并记录。
  * nr_owners 在处理 bitfield 和 have 报文时进行更新。
@@ -33,18 +46,15 @@ struct Tracker
  * 使用文件作为保存数据的临时空间，主要出于内存消耗以及
  * 断点续传的考虑，但是计算 hash 不是很方便。
  *
- * @todo subpieces 使用何种数据结构比较合理？
+ * @todo 子分片使用何种数据结构比较合理？
  */
 struct PieceInfo
 {
     unsigned char  hash[HASH_SIZE]; ///< 该分片的 SHA1 摘要。
     int            nr_owners;       ///< 该分片拥有者的数量。
     int            is_downloaded;   ///< 标记该分片是否已经完成下载：1 - 已下载，0 - 未完成。
-#define SUB_NA 0
-#define SUB_DOWNLOAD 1
-#define SUB_FINISH 2
+
     unsigned char *substate;        ///< 标记子分片完成情况： SUB_NA - 未下载，SUB_DOWNLOAD - 下载中，SUB_FINISH - 下载完成。
-#define WAIT_THRESHOLD 10.0         ///< 子分片最长等待时间 10s
     time_t        *subtimer;        ///< 标记子分片下载等待时间
 };
 
@@ -53,15 +63,17 @@ struct PieceInfo
  *
  * 用于记录那些已经发送 / 收到连接请求但是还没有完成握手信息的 peer,
  * 由这个结构体构成的队列将用于回避对同一个 peer 的重复连接。
+ *
+ * @todo 在 bt_handler() 和 handle_peer_list() 中正确地对 #direction 进行赋值，为 finish_handshake() 服务
  */
 struct WaitPeer
 {
-    int fd;
+    int fd;               ///< 尚未完成连接或握手的套接字
     union {
-        uint32_t addr;
-        uint8_t ip[4];
+        uint32_t addr;    ///< ip 地址，方便比较的形式
+        uint8_t ip[4];    ///< ip 地址，方便打印的形式
     };
-    uint16_t port;
+    uint16_t port;        ///< 端口号，网络字节序
     int direction;        ///< 0: 我方主动连接, 1: 对方主动连接。
 };
 
@@ -72,6 +84,7 @@ struct WaitPeer
  *
  * @todo 确定子分片大小，记录并保存相关信息。
  * @todo 创建套接字并绑定侦听端口。
+ * @todo 创建侦听套接字，绑定给定的侦听端口并告知 tracker
  */
 struct MetaInfo
 {
@@ -100,7 +113,8 @@ struct MetaInfo
 /** @brief 释放全局信息 */
 void free_metainfo(struct MetaInfo **pmi);
 
-/** @brief 提取 tracker 列表
+/**
+ * @brief 提取 tracker 列表
  * @param mi 全局信息
  * @param ast B 编码语法树
  */
@@ -109,25 +123,29 @@ void extract_trackers(struct MetaInfo *mi, const struct BNode *ast);
 /** @brief 获取文件名，读取文件，分析已经完成的块 */
 void metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast);
 
-/** @brief 提取分片 hash
+/**
+ * @brief 提取分片 hash
  * @param mi 全局信息
  * @param ast B 编码语法树
  */
 void extract_pieces(struct MetaInfo *mi, const struct BNode *ast);
 
-/** @brief 增加一个 peer
+/**
+ * @brief 增加一个 peer
  * @param mi 全局信息
  * @param p 要加入的 peer, 要求是动态分配的.
  */
 void add_peer(struct MetaInfo *mi, struct Peer *p);
 
-/** @brief 根据连接套接字删除 peer
+/**
+ * @brief 根据连接套接字删除 peer
  * @param mi 全局信息
  * @param fd 连接套接字描述符
  */
 void del_peer_by_fd(struct MetaInfo *mi, int fd);
 
-/** @brief 根据连接套接字搜索 peer
+/**
+ * @brief 根据连接套接字搜索 peer
  * @param mi 全局信息
  * @param fd 连接套接字描述符
  * @return 找到时返回对应的 peer 指针, 否则返回 NULL.
@@ -144,9 +162,22 @@ struct Peer *get_peer_by_fd(struct MetaInfo *mi, int fd);
  */
 struct Peer * get_peer_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port);
 
+/**
+ * @brief 检查某一分片的子分片状态并打印
+ *
+ * 打印符号说明：
+ *   1. . 已完成
+ *   2. 0 正下载
+ *   3. X 未下载
+ *
+ * @param mi 全局信息
+ * @param index 分片号
+ * @return 如果全部子分片完成返回 1, 否则返回 0.
+ */
 int check_substate(struct MetaInfo *mi, int index);
 
-/** @brief 根据连接套接字找 tracker
+/**
+ * @brief 根据连接套接字找 tracker
  *
  * 适用于第一手信息是套接字的场合: epoll
  *
@@ -156,7 +187,8 @@ int check_substate(struct MetaInfo *mi, int index);
  */
 struct Tracker *get_tracker_by_fd(struct MetaInfo *mi, int sfd);
 
-/** @brief 根据定时器描述符找 tracker
+/**
+ * @brief 根据定时器描述符找 tracker
  *
  * 定时事件是一个低频事件，所以这个函数在 EPOLLIN 事件里排在最后
  *
@@ -169,7 +201,8 @@ struct Tracker *get_tracker_by_timer(struct MetaInfo *mi, int timerfd);
 /** @brief 添加等待 peer, 网络字节序 */
 void add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port);
 
-/** @brief 根据套接字找到 peer 下标
+/**
+ * @brief 根据套接字找到 peer 下标
  *
  * @return 对应的下标，没找到则 -1.
  */

@@ -1,27 +1,50 @@
+/**
+ * @file butil.c
+ * @brief 基于 B 编码语法树的工具函数实现
+ */
+
+#include "butil.h"
 #include "metainfo.h"
-#include "bparser.h"
 #include <string.h>
 #include <arpa/inet.h>
 #include <openssl/sha.h>
 
-#define PIECE_HASH (1 << 0)
-#define PEERS (1 << 1)
+#define PIECE_HASH (1 << 0)  ///< 打印 hash 的 flag
+#define PEERS (1 << 1)       ///< 打印二进制 peers 列表的 flag
 
+/**
+ * @brief 输出缩进
+ * @param indent 缩进量
+ */
 static inline void
 put_indent(int indent)
 {
     printf("%*s", indent, "");
 }
 
+/**
+ * @brief 带缩进的格式化打印
+ */
 #define print_with_indent(indent, fmt, ...) \
     printf("%*s" fmt, indent, "", ## __VA_ARGS__)
 
+/**
+ * @brief 打印整型
+ * @param bi 整型结点
+ * @param indent 缩进级别
+ */
 static void
 print_int(const struct BNode *bi, int indent)
 {
     print_with_indent(indent, "%ld\n", bi->i);
 }
 
+/**
+ * @brief 打印串
+ * @param b 串结点
+ * @param indent 缩进级别
+ * @param flags 打印格式要求
+ */
 static void
 print_str(const struct BNode *b, int indent, int flags)
 {
@@ -50,8 +73,12 @@ print_str(const struct BNode *b, int indent, int flags)
     }
 }
 
-void print_bcode(const struct BNode *bnode, int indent, int flags);
-
+/**
+ * @brief 打印列表
+ * @param list 列表结点
+ * @param indent 缩进级别
+ * @param flags 打印格式要求
+ */
 static void
 print_list(const struct BNode *list, int indent, int flags)
 {
@@ -65,6 +92,12 @@ print_list(const struct BNode *list, int indent, int flags)
     print_with_indent(indent, "]\n");
 }
 
+/**
+ * @brief 打印字典
+ * @param dict 字典结点
+ * @param indent 缩进级别
+ * @param flags 打印格式要求
+ */
 static void
 print_dict(const struct BNode *dict, int indent, int flags)
 {
@@ -102,7 +135,13 @@ print_bcode(const struct BNode *node, int indent, int flags)
     }
 }
 
-const struct BNode *
+/**
+ * @brief 深度优先搜索 bencode 树中字典里的某个键 key, 返回对应的值结点
+ * @param node 语法树根结点
+ * @param key 要搜索的键
+ * @return 键对应的值结点，没有则返回 NULL.
+ */
+static const struct BNode *
 dfs_bcode(const struct BNode *node, const char *key)
 {
     switch (node->type) {
@@ -137,9 +176,15 @@ dfs_bcode(const struct BNode *node, const char *key)
     }
 }
 
+const struct BNode *
+query_bcode_by_key(const struct BNode *node, const char *key)
+{
+    return dfs_bcode(node, key);
+}
+
 void
 make_info_hash(const struct BNode *root, unsigned char *md)
 {
-    const struct BNode *val = dfs_bcode(root, "info");
+    const struct BNode *val = query_bcode_by_key(root, "info");
     SHA1((void *)val->start, val->end - val->start, md);  // avoid the last 'e' for the top-level dict
 }

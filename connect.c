@@ -1,3 +1,8 @@
+/**
+ * @file connect.c
+ * @brief 网络连接相关 API 实现
+ */
+
 #include "util.h"
 #include "metainfo.h"
 #include <string.h>
@@ -67,13 +72,22 @@ parse_url(const char *url, char *method, char *host, char *port, char *request)
     strcpy(request, url);
 }
 
+/**
+ * @brief HTTP 报文缓冲区的最大长度
+ */
 #define REQUEST_MAX 1024
 
+/**
+ * @brief 描述一个 HTTP 请求
+ *
+ * buf 存储要发送的报文，add_http_request_addr() 以流的形式向报文里追加表项。
+ * 每填一个表项，curr 都会前进相应的字节。
+ */
 struct HttpRequest
 {
-    char buf[REQUEST_MAX];
-    char *curr;
-    char *delim;
+    char buf[REQUEST_MAX];  ///< 请求报文缓冲区。
+    char *curr;             ///< 指向报文缓冲区未填写部分的开头。
+    char *delim;            ///< 请求表单的分割符，最开始以 ? 分割请求和表单，之后用 & 分割表项。
 };
 
 struct HttpRequest *
@@ -111,6 +125,11 @@ send_http_request(struct HttpRequest *req, int sfd)
     return 0;
 }
 
+/**
+ * @brief 将套接字设置成非阻塞的
+ * @param sfd 套接字
+ * @return 成功返回 0，错误返回 -1.
+ */
 int
 make_nonblocking(int sfd)
 {
@@ -129,6 +148,11 @@ make_nonblocking(int sfd)
     return 0;
 }
 
+/**
+ * @brief 将套接字设置成阻塞的
+ * @param sfd 套接字
+ * @return 成功返回 0，错误返回 -1.
+ */
 int
 make_blocking(int sfd)
 {
