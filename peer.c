@@ -161,12 +161,7 @@ in_byte_offset_of_(unsigned bit_offset)
     return (7 - (bit_offset & 7));
 }
 
-/**
- * @brief 设置 bit
- * @param bytes bit field
- * @param bit_offset bit 偏移
- */
-static void
+void
 set_bit(unsigned char *bytes, unsigned bit_offset)
 {
     int byte_index = byte_index_of_(bit_offset);

@@ -60,9 +60,9 @@ send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker, const char *ev
 
     // 其他一些请求信息
     add_http_request_attr(req, "peer_id"   , "-Test-Test-Test-Test");
-    add_http_request_attr(req, "uploaded"  , "0");
-    add_http_request_attr(req, "downloaded", "0");
-    add_http_request_attr(req, "left"      , "%ld", mi->file_size);
+    add_http_request_attr(req, "uploaded"  , "%ld", mi->uploaded);
+    add_http_request_attr(req, "downloaded", "%ld", mi->downloaded);
+    add_http_request_attr(req, "left"      , "%ld", mi->left);
 
     if (event != NULL) {
         add_http_request_attr(req, "event", "%s", event);
@@ -252,14 +252,28 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
 
     int sub_idx = msg->piece.begin / mi->sub_size;
 
+    uint32_t dl_size = msg->len - 9;  // 9 是 id, index, begin 的冗余长度。
+
     if (piece->substate[sub_idx] != SUB_FINISH) {
         fseek(mi->file, msg->piece.index * mi->piece_size + msg->piece.begin, SEEK_SET);
-        fwrite(msg->piece.block, 1, msg->len - 9, mi->file);  // 9 是 id, index, begin 的冗余长度。
+        fwrite(msg->piece.block, 1, dl_size, mi->file);
         piece->substate[sub_idx] = SUB_FINISH;
         if (check_substate(mi, msg->piece.index)) {
             piece->is_downloaded = 1;
+            // 发送 HAVE 消息
+            struct PeerMsg have_msg = { .len = 5, .have.piece_index = msg->piece.index };
+            for (int i = 0; i < mi->nr_peers; i++) {
+                if (!peer_get_bit(peer, msg->piece.index)) {
+                    peer_send_msg(peer, &have_msg);
+                    log("send %s %d to %s:%u",
+                        bt_types[have_msg.id], have_msg.have.piece_index,
+                        peer->ip, peer->port);
+                }
+            }
         }
-        peer->contribution += msg->len - 9;
+        peer->contribution += dl_size;
+        mi->downloaded += dl_size;
+        mi->left -= dl_size;
     }
     else {
         log("discard piece %d subpiece %d from %s:%d due to previous accomplishment",
@@ -271,7 +285,7 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     peer->requesting_begin = -1;
 
     // 结算下载速度
-    peer->speed = (msg->len - 9) / difftime(time(NULL), peer->start_time);
+    peer->speed = (dl_size) / difftime(time(NULL), peer->start_time);
     log("%s:%d's speed %lfB/s", peer->ip, peer->port, peer->speed);
 }
 
@@ -524,7 +538,8 @@ handle_error(struct MetaInfo *mi, int error_fd)
  * @param mi 全局信息
  * @param sfd 连接套接字
  */
-void handle_ready(struct MetaInfo *mi, int sfd)
+void
+handle_ready(struct MetaInfo *mi, int sfd)
 {
     struct Tracker *tracker;
     if ((tracker = get_tracker_by_fd(mi, sfd)) != NULL) {
@@ -581,6 +596,15 @@ finish_handshake(struct MetaInfo *mi, int sfd)
 
         log("handshaking failed, disconnect %u.%u.%u.%u:%u",
             wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
+
+        // 发送 bitfield
+        struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
+        bitfield_msg->len = (uint32_t)(1 + mi->bitfield_size);
+        bitfield_msg->id = BT_BITFIELD;
+        memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
+        peer_send_msg(peer, bitfield_msg);
+        free(bitfield_msg);
+        log("send %s to %s:%u", bt_types[bitfield_msg->id], peer->ip, peer->port);
 
         // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
 
@@ -646,7 +670,8 @@ bt_handler(struct MetaInfo *mi, int efd)
                 epoll_ctl(efd, EPOLL_CTL_DEL, ev->data.fd, NULL);
             }
             else if (ev->events & EPOLLOUT) {  // connect 完成
-                // EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲，即意味着连接成功建立.
+                // EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲，
+                // 即意味着连接成功建立.
                 handle_ready(mi, ev->data.fd);
                 // 对于新建立的连接，之后都是要接收数据的，所以统一修改侦听 EPOLLIN.
                 ev->events = EPOLLIN;
@@ -680,7 +705,8 @@ bt_handler(struct MetaInfo *mi, int efd)
                         epoll_ctl(efd, EPOLL_CTL_DEL, ev->data.fd, NULL);
                         close(peer->fd);
                         // 不需要撤销分片的下载状态，因为超时后自会重置下载状态，
-                        // 还有可能本 peer 负责的子分片已经超时，导致 分片状态被修改，再次修改会导致不一致。
+                        // 还有可能本 peer 负责的子分片已经超时，导致 分片状态被修改，
+                        // 再次修改会导致不一致。
                         del_peer_by_fd(mi, peer->fd);
                     }
                     else if (peer->wanted == 0) {  // 读取了完整的 BT 消息
@@ -705,7 +731,12 @@ bt_handler(struct MetaInfo *mi, int efd)
                 }
 
                 if (ev->data.fd == mi->listen_fd) {
-                    /// @todo 通过 accept 建立连接并监听连接套接字的 EPOLLIN 事件，加入 MetaInfo#wait_peers 队列。注意设置 WaitPeer#direction
+                    /**
+                     * @todo
+                     * 通过 accept 建立连接并监听连接套接字的 EPOLLIN 事件，
+                     * 加入 MetaInfo#wait_peers 队列注意设置 WaitPeer#direction
+                     */
+
                     // 将连接套接字加入 wait_peers 后，可以在最后的 finish_handshake 里和我方主动连接的套接字统一处理。
                     // 两种情况虽然有是否回复 handshake 的差别，但是可以通过设置 direction 进行区分。
                     continue;
@@ -844,10 +875,11 @@ main(int argc, char *argv[])
         perror("create listen socket");
         exit(EXIT_FAILURE);
     }
+    mi->port = (uint16_t)atoi(argv[2]);
     struct sockaddr_in addr = {
         .sin_addr.s_addr = INADDR_ANY,
         .sin_family = AF_INET,
-        .sin_port = htons((uint16_t)atoi(argv[2])),
+        .sin_port = htons(mi->port),
     };
     if (bind(sfd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
         perror("bind listen socket");

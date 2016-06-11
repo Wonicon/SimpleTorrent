@@ -150,6 +150,13 @@ void peer_free(struct Peer **peer);
 void print_bit(unsigned char *bytes, size_t bit_len);
 
 /**
+ * @brief 设置 bit
+ * @param bytes bit field
+ * @param bit_offset bit 偏移
+ */
+void set_bit(unsigned char *bytes, unsigned bit_offset);
+
+/**
  * @brief 设置 peer 的位域
  * @param peer 要设置的 peer
  * @param bit_offset 位偏移量

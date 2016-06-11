@@ -86,6 +86,9 @@ struct WaitPeer
 struct MetaInfo
 {
     size_t file_size;                   ///< 数据文件大小
+    size_t downloaded;                  ///< 已完成文件大小
+    size_t left;                        ///< 未完成文件大小
+    size_t uploaded;                    ///< 上传文件大小
     FILE *file;                         ///< 下载文件
     unsigned char info_hash[HASH_SIZE]; ///< 整个 info 字典的 sha1 摘要
 
@@ -95,6 +98,7 @@ struct MetaInfo
     uint32_t sub_size;                  ///< 子分片的大小，使用统一大小的子分片以简化实现
     size_t sub_count;                   ///< 子分片的数量
     struct PieceInfo *pieces;           ///< 分片信息数组
+    uint8_t *bitfield;                  ///< 分片完成情况位图
 
     unsigned short port;                ///< 侦听端口
     int listen_fd;                      ///< 侦听套接字

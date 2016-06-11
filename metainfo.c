@@ -92,13 +92,13 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
         while ((nr_read = fread(piece, 1, mi->piece_size, fp)) != 0) {  // EOF 退出，容许不足
             SHA1(piece, nr_read, md);
 
-            // log
-            printf("piece %d: %lu bytes, sha1: ", piece_index, nr_read);
-            for (int i = 0; i < HASH_SIZE; i++) printf("%02x", md[i]);
+            printf("piece %d: %lu bytes", piece_index, nr_read);
 
             if (memcmp(md, mi->pieces[piece_index].hash, HASH_SIZE) == 0) {  // 分片正确
                 mi->pieces[piece_index].is_downloaded = 1;
                 correct_piece_count++;
+                mi->downloaded += nr_read;
+                set_bit(mi->bitfield, piece_index);
                 printf(" ok");
             }
 
@@ -120,6 +120,8 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
     else {  // 没有下载文件，放心 trunc
         mi->file = fopen(name->s_data, "wb");
     }
+
+    mi->left = mi->file_size - mi->downloaded;
 }
 
 void
@@ -142,6 +144,8 @@ extract_pieces(struct MetaInfo *mi, const struct BNode *ast)
         mi->bitfield_size = (mi->nr_pieces - 1) / 8 + 1;
         mi->sub_size = 0x4000;
         mi->sub_count = (mi->piece_size - 1) / mi->sub_size + 1;
+
+        mi->bitfield = calloc(mi->bitfield_size, 1);
     }
 
     log("filesz %ld, piecesz %d, nr pieces %lu, bitfield len %lu",
