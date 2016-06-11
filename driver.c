@@ -559,9 +559,6 @@ handle_ready(struct MetaInfo *mi, int sfd)
 
 /**
  * @brief 完成握手消息的处理
- *
- * @todo 要区分是对方回复的握手消息还是对方主动发来的握手消息
- *
  * @return 0: 正常, -1: 连接断开
  */
 int
@@ -589,13 +586,18 @@ finish_handshake(struct MetaInfo *mi, int sfd)
         return -1;
     }
     else {
-        // 处理对方回复的握手消息：将对方加入到正式 peers 列表中
+        // 处理对方的握手消息：将对方加入到正式 peers 列表中
 
         struct Peer *peer = peer_new(sfd, mi->nr_pieces);
         add_peer(mi, peer);
 
         log("handshaking failed, disconnect %u.%u.%u.%u:%u",
             wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
+
+        // 如果是对方主动连接，则我方要返回 handshake
+        if (wp.direction == 1) {
+            send_handshake(wp.fd, mi);
+        }
 
         // 发送 bitfield
         struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
@@ -730,13 +732,25 @@ bt_handler(struct MetaInfo *mi, int efd)
                     continue;
                 }
 
+                // peer 主动建立连接请求
                 if (ev->data.fd == mi->listen_fd) {
-                    /**
-                     * @todo
-                     * 通过 accept 建立连接并监听连接套接字的 EPOLLIN 事件，
-                     * 加入 MetaInfo#wait_peers 队列注意设置 WaitPeer#direction
-                     */
-
+                    struct sockaddr_in addr;
+                    socklen_t addrlen = sizeof(addr);
+                    int fd = accept(mi->listen_fd, (struct sockaddr *)&addr, &addrlen);
+                    // 防止重复连接
+                    if (!(get_peer_by_addr(mi, addr.sin_addr.s_addr, addr.sin_port) != NULL ||
+                            find_wait_peer_fd_by_addr(mi, addr.sin_addr.s_addr, addr.sin_port))) {
+                        add_wait_peer(mi, fd, addr.sin_addr.s_addr, addr.sin_port);
+                        // 标记为对方主动连接
+                        mi->wait_peers[mi->nr_wait_peers - 1].direction = 1;
+                        // 侦听握手消息
+                        ev->data.fd = fd;
+                        ev->events = EPOLLIN;
+                        epoll_ctl(efd, EPOLL_CTL_ADD, fd, ev);
+                    }
+                    else {
+                        close(fd);
+                    }
                     // 将连接套接字加入 wait_peers 后，可以在最后的 finish_handshake 里和我方主动连接的套接字统一处理。
                     // 两种情况虽然有是否回复 handshake 的差别，但是可以通过设置 direction 进行区分。
                     continue;
