@@ -261,7 +261,7 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         if (check_substate(mi, msg->piece.index)) {
             piece->is_downloaded = 1;
             // 发送 HAVE 消息
-            struct PeerMsg have_msg = { .len = 5, .have.piece_index = msg->piece.index };
+            struct PeerMsg have_msg = { .len = htonl(5), .have.piece_index = msg->piece.index };
             for (int i = 0; i < mi->nr_peers; i++) {
                 if (!peer_get_bit(peer, msg->piece.index)) {
                     peer_send_msg(peer, &have_msg);
@@ -638,7 +638,7 @@ finish_handshake(struct MetaInfo *mi, int sfd)
             send_handshake(wp.fd, mi);
             // 发送 bitfield
             struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
-            bitfield_msg->len = (uint32_t)(1 + mi->bitfield_size);
+            bitfield_msg->len = htonl((1 + mi->bitfield_size));
             bitfield_msg->id = BT_BITFIELD;
             memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
             peer_send_msg(peer, bitfield_msg);
