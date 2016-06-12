@@ -51,8 +51,6 @@ peer_get_packet(struct Peer *peer)
 
         if (peer->msg->len == 0) {  // KEEP-ALIVE
             log("KEEP_ALIVE");
-            // 投机报活 :)
-            write(peer->fd, peer->msg, 4);
             return peer->msg;
         }
 
