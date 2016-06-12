@@ -257,6 +257,7 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     if (piece->substate[sub_idx] != SUB_FINISH) {
         fseek(mi->file, msg->piece.index * mi->piece_size + msg->piece.begin, SEEK_SET);
         fwrite(msg->piece.block, 1, dl_size, mi->file);
+        fflush(mi->file);  // sub piece may not be write back, cause the final race never end.
         piece->substate[sub_idx] = SUB_FINISH;
         if (check_substate(mi, msg->piece.index)) {
             piece->is_downloaded = 1;
@@ -274,6 +275,7 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         peer->contribution += dl_size;
         mi->downloaded += dl_size;
         mi->left -= dl_size;
+        log("downloaded %lu", mi->downloaded);
     }
     else {
         log("discard piece %d subpiece %d from %s:%d due to previous accomplishment",
