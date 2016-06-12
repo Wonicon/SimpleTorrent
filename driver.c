@@ -35,7 +35,7 @@ send_handshake(int sfd, struct MetaInfo *mi)
     if (write(sfd, &handshake, sizeof(handshake)) < sizeof(handshake)) {
         perror("handshake");
     }
-};
+}
 
 /**
  * 向 tracker 发送 HTTP GET 请求. 可以通过 event 指定发送的具体时间,
@@ -597,16 +597,15 @@ finish_handshake(struct MetaInfo *mi, int sfd)
         // 如果是对方主动连接，则我方要返回 handshake
         if (wp.direction == 1) {
             send_handshake(wp.fd, mi);
+            // 发送 bitfield
+            struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
+            bitfield_msg->len = (uint32_t)(1 + mi->bitfield_size);
+            bitfield_msg->id = BT_BITFIELD;
+            memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
+            peer_send_msg(peer, bitfield_msg);
+            free(bitfield_msg);
+            log("send %s to %s:%u", bt_types[bitfield_msg->id], peer->ip, peer->port);
         }
-
-        // 发送 bitfield
-        struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
-        bitfield_msg->len = (uint32_t)(1 + mi->bitfield_size);
-        bitfield_msg->id = BT_BITFIELD;
-        memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
-        peer_send_msg(peer, bitfield_msg);
-        free(bitfield_msg);
-        log("send %s to %s:%u", bt_types[bitfield_msg->id], peer->ip, peer->port);
 
         // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
 
