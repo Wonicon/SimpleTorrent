@@ -238,6 +238,9 @@ async_connect_to_tracker_non_block(void *arg)
             log("fuck");
             exit(-1);
         }
+
+        // Assign socket before connecting to avoid hazard.
+        tracker->sfd = sfd;
         if (async_connect(efd, sfd, rp->ai_addr, rp->ai_addrlen) == EINPROGRESS) {
             log("tracker %s fd %d", tracker->host, sfd);
             break;
@@ -254,7 +257,6 @@ async_connect_to_tracker_non_block(void *arg)
         return NULL;
     }
 
-    tracker->sfd = sfd;
     return NULL;
 }
 
