@@ -474,7 +474,7 @@ handle_peer_list(struct MetaInfo *mi, int efd, struct BNode *bcode)
             continue;
         }
 
-        if (find_wait_peer_fd_by_addr(mi, p->addr, p->port) != -1) {
+        if (get_wait_peer_fd(mi, p->addr, p->port, 0) != -1) {
             log("already connecting to peer %d.%d.%d.%d:%d", p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
             continue;
         }
@@ -482,7 +482,7 @@ handle_peer_list(struct MetaInfo *mi, int efd, struct BNode *bcode)
         int fd = socket(AF_INET, SOCK_STREAM, 0);
 
         // 将地址信息加入到等待 peer 集合以备之后的查重工作
-        add_wait_peer(mi, fd, p->addr, p->port);
+        add_wait_peer(mi, fd, p->addr, p->port, 0);
 
         log("fd %d is assigned for %d.%d.%d.%d:%d", fd, p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
         struct sockaddr_in sa;
@@ -585,7 +585,7 @@ handle_ready(struct MetaInfo *mi, int sfd)
         log("connected to %s:%s%s", tracker->host, tracker->port, tracker->request);
         send_msg_to_tracker(mi, tracker, NULL);
     }
-    else {
+    else if (get_wait_peer_index_by_fd(mi, sfd) != -1) {
         // 这里不进行检查，因为可以肯定是 tracker
         struct sockaddr_in addr;
         socklen_t addrlen = sizeof(addr);
@@ -593,6 +593,9 @@ handle_ready(struct MetaInfo *mi, int sfd)
         log("%s is connected at %u", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
         send_handshake(sfd, mi);
         log("handshaking with %s:%d", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+    }
+    else {
+        log("already-deleted socket %d", sfd);
     }
 }
 
@@ -667,6 +670,39 @@ finish_handshake(struct MetaInfo *mi, int sfd)
 }
 
 /**
+ * @brief handle the coming peer
+ * @param mi metainfo
+ * @param ev the current epoll event
+ * @param efd epoll file descriptor
+ */
+void handle_comming_peer(struct MetaInfo *mi, struct epoll_event *ev, int efd)
+{
+    struct sockaddr_in peer_addr, local_addr;
+    socklen_t peer_len = sizeof(peer_addr), local_len = sizeof(local_addr);
+
+    int fd = accept(mi->listen_fd, (struct sockaddr *)&peer_addr, &peer_len);
+    getsockname(fd, (void *)&local_addr, &local_len);
+    log("one peer wants to connect, conn_fd %d", fd);
+    log("peer  %s:%u", inet_ntoa(peer_addr.sin_addr), ntohs(peer_addr.sin_port));
+    log("local %s:%u", inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port));
+
+    // 防止重复连接
+    if (peer_addr.sin_addr.s_addr != local_addr.sin_addr.s_addr) {
+        add_wait_peer(mi, fd, peer_addr.sin_addr.s_addr, peer_addr.sin_port, 1);   // 1 - connecting from
+        // 侦听握手消息
+        ev->data.fd = fd;
+        ev->events = EPOLLIN;
+        epoll_ctl(efd, EPOLL_CTL_ADD, fd, ev);
+    }
+    else {
+        log("duplicated peer!");
+        close(fd);
+    }
+    // 将连接套接字加入 wait_peers 后，可以在最后的 finish_handshake 里和我方主动连接的套接字统一处理。
+    // 两种情况虽然有是否回复 handshake 的差别，但是可以通过设置 direction 进行区分。
+}
+
+/**
  * @brief 处理所有网络报文
  *
  * 使用 epoll 侦听各个描述符的事件，根据事件属性和描述符的所属采取相应的操作。
@@ -704,6 +740,8 @@ bt_handler(struct MetaInfo *mi, int efd)
         for (int i = 0; i < n; i++) {
             puts(bar);
             struct epoll_event *ev = &events[i];
+            log("handle fd %d", ev->data.fd);
+
             if ((ev->events & EPOLLERR) || (ev->events & EPOLLHUP)) {  // 异步 connect 错误处理
                 handle_error(mi, ev->data.fd);
                 close(ev->data.fd);
@@ -772,25 +810,7 @@ bt_handler(struct MetaInfo *mi, int efd)
 
                 // peer 主动建立连接请求
                 if (ev->data.fd == mi->listen_fd) {
-                    struct sockaddr_in addr;
-                    socklen_t addrlen = sizeof(addr);
-                    int fd = accept(mi->listen_fd, (struct sockaddr *)&addr, &addrlen);
-                    // 防止重复连接
-                    if (!(get_peer_by_addr(mi, addr.sin_addr.s_addr, addr.sin_port) != NULL ||
-                            find_wait_peer_fd_by_addr(mi, addr.sin_addr.s_addr, addr.sin_port))) {
-                        add_wait_peer(mi, fd, addr.sin_addr.s_addr, addr.sin_port);
-                        // 标记为对方主动连接
-                        mi->wait_peers[mi->nr_wait_peers - 1].direction = 1;
-                        // 侦听握手消息
-                        ev->data.fd = fd;
-                        ev->events = EPOLLIN;
-                        epoll_ctl(efd, EPOLL_CTL_ADD, fd, ev);
-                    }
-                    else {
-                        close(fd);
-                    }
-                    // 将连接套接字加入 wait_peers 后，可以在最后的 finish_handshake 里和我方主动连接的套接字统一处理。
-                    // 两种情况虽然有是否回复 handshake 的差别，但是可以通过设置 direction 进行区分。
+                    handle_comming_peer(mi, ev, efd);
                     continue;
                 }
 
@@ -847,13 +867,23 @@ bt_handler(struct MetaInfo *mi, int efd)
             }
         }
         log("%d / %d peers working", work_cnt, mi->nr_peers);
+        log("peers >>>");
         for (int i = 0; i < mi->nr_peers; i++) {
             struct Peer *pr = mi->peers[i];
-            printf("%16s:%5d %7s %s %9d  %5d  %lf\n", pr->ip, pr->port,
+            log("%16s:%-5d %7s %s  %10d  %6d  %lf\n", pr->ip, pr->port,
                    pr->get_choked ? "choke" : "unchoke",
                    pr->get_interested ? "int" : "not",
                    pr->contribution, pr->wanted, pr->speed);
         }
+        log("peers <<<");
+
+        log("wait peers >>>");
+        for (int i = 0; i < mi->nr_wait_peers; i++) {
+            struct WaitPeer *p = &mi->wait_peers[i];
+            struct in_addr ia = { .s_addr = p->addr };
+            log("%2d  %16s:%-5d  %d", p->fd, inet_ntoa(ia), ntohs(p->port), p->direction);
+        }
+        log("wait peers <<<");
     }
 }
 

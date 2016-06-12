@@ -198,7 +198,7 @@ struct Tracker *get_tracker_by_fd(struct MetaInfo *mi, int sfd);
 struct Tracker *get_tracker_by_timer(struct MetaInfo *mi, int timerfd);
 
 /** @brief 添加等待 peer, 网络字节序 */
-void add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port);
+void add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port, int direction);
 
 /**
  * @brief 根据套接字找到 peer 下标
@@ -207,11 +207,22 @@ void add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port);
  */
 int get_wait_peer_index_by_fd(struct MetaInfo *mi, int fd);
 
-/** @brief 根据地址找到 peer 的套接字，网络字节序
+/**
+ * @brief 根据地址找到 peer 的套接字，网络字节序
+ *
+ * find the waiting peer using all attributes.
+ * if a peer has the same ip but different direction,
+ * it means we are downloading from the same machine,
+ * which is unexpected.
+ *
+ * @param mi global info
+ * @param addr ip address
+ * @param port listening port, which is not useful for peers from accept.
+ * @param direction connecting to / from, used to determine local peer.
  *
  * @return 对应的套接字，没找到则 -1.
  */
-int find_wait_peer_fd_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port);
+int get_wait_peer_fd(struct MetaInfo *mi, uint32_t addr, uint16_t port, int direction);
 
 /** @brief 删除等待 peer */
 void rm_wait_peer(struct MetaInfo *mi, int index);

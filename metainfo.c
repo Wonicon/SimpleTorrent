@@ -242,7 +242,7 @@ get_peer_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port)
 int
 check_substate(struct MetaInfo *mi, int index)
 {
-    size_t sub_cnt = (index != mi->nr_pieces) ? mi->sub_count :
+    size_t sub_cnt = (index != mi->nr_pieces - 1) ? mi->sub_count :
         (((mi->file_size % mi->piece_size) - 1) / mi->sub_size + 1);
 
     int is_finished = 1;
@@ -290,14 +290,14 @@ get_tracker_by_timer(struct MetaInfo *mi, int timerfd)
 }
 
 void
-add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port)
+add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port, int direction)
 {
     mi->wait_peers = realloc(mi->wait_peers, (mi->nr_wait_peers + 1) * sizeof(struct WaitPeer));
     struct WaitPeer *p = &mi->wait_peers[mi->nr_wait_peers];
     p->fd = fd;
     p->addr = addr;
     p->port = port;
-    p->direction = 0;
+    p->direction = direction;
     mi->nr_wait_peers++;
 }
 
@@ -313,11 +313,11 @@ get_wait_peer_index_by_fd(struct MetaInfo *mi, int fd)
 }
 
 int
-find_wait_peer_fd_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port)
+get_wait_peer_fd(struct MetaInfo *mi, uint32_t addr, uint16_t port, int direction)
 {
     for (int i = 0; i < mi->nr_wait_peers; i++) {
         struct WaitPeer *p = &mi->wait_peers[i];
-        if (p->addr == addr && p->port == port) {
+        if (p->addr == addr && (p->port == port || p->direction != direction)) {
             return p->fd;
         }
     }
