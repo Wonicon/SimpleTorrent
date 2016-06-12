@@ -297,6 +297,7 @@ add_wait_peer(struct MetaInfo *mi, int fd, uint32_t addr, uint16_t port)
     p->fd = fd;
     p->addr = addr;
     p->port = port;
+    p->direction = 0;
     mi->nr_wait_peers++;
 }
 

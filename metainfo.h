@@ -63,8 +63,6 @@ struct PieceInfo
  *
  * 用于记录那些已经发送 / 收到连接请求但是还没有完成握手信息的 peer,
  * 由这个结构体构成的队列将用于回避对同一个 peer 的重复连接。
- *
- * @todo 在 bt_handler() 和 handle_peer_list() 中正确地对 #direction 进行赋值，为 finish_handshake() 服务
  */
 struct WaitPeer
 {
