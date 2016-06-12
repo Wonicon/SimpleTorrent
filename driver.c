@@ -434,8 +434,6 @@ handle_tracker_response(int sfd)
         perror("read");
     }
 
-    close(sfd);  // 对 tracker 来说, 没必要维持长连接.
-
     struct BNode *bcode = bparser(data);
 
     free(data);
