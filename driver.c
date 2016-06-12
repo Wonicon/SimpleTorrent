@@ -290,6 +290,42 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
 }
 
 /**
+ * @brief Handle request from peer
+ * @param pInfo global information
+ * @param pPeer the peer to send piece
+ * @param pMsg the request msg
+ *
+ * @todo check whether writing a large piece of data in the socket may stall the execution.
+ */
+void handle_request(struct MetaInfo *pInfo, struct Peer *pPeer, struct PeerMsg *pMsg) {
+    FILE *fp = pInfo->file;
+    uint32_t piece_size = pInfo->piece_size;
+    uint32_t index = pMsg->request.index;
+    uint32_t begin = pMsg->request.begin;
+    uint32_t length = pMsg->request.length;
+
+    // Check whether we have that piece.
+    // If we allow seeking non-existing piece, it might exceed the file boundary.
+    if (!pInfo->pieces[index].is_downloaded) {
+        return;
+    }
+
+    // Construct piece message.
+    struct PeerMsg *response = malloc(4 + 9 + length);
+    response->len = htonl(9 + length);
+    response->id = BT_PIECE;
+    response->piece.index = htonl(index);
+    response->piece.begin = htonl(begin);
+    fseek(fp, index * piece_size + begin, SEEK_SET);
+    if (fread(response->piece.block, 1, length, fp) < length) {
+        err("index %u begin %u length %u is not feasible", index, length, length);
+    }
+
+    // Send message
+    write(pPeer->fd, response, 4 + 9 + length);
+}
+
+/**
  * @brief 处理 BT 消息
  * @param mi 全局信息
  * @param peer 指向发送消息的 peer
@@ -340,7 +376,10 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         peer->get_interested = 0;
         break;
     case BT_REQUEST:
-        /// @todo 处理 REQUEST 消息
+        msg->request.index = ntohl(msg->request.index);
+        msg->request.begin = ntohl(msg->request.begin);
+        msg->request.length = ntohl(msg->request.length);
+        handle_request(mi, peer, msg);
         break;
     case BT_CANCEL:
         /// @todo 处理 CANCEL 消息
