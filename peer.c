@@ -221,5 +221,5 @@ peer_get_bit(struct Peer *peer, unsigned bit_offset)
 void
 peer_send_msg(struct Peer *peer, struct PeerMsg *msg)
 {
-    write(peer->fd, msg, 4 + msg->len);
+    write(peer->fd, msg, 4 + ntohl(msg->len));
 }

@@ -14,6 +14,7 @@
 #include <sys/epoll.h>    // epoll_create1(), epoll_ctl(), epoll_wait(), epoll_event
 #include <arpa/inet.h>    // inet_ntoa()
 #include <sys/timerfd.h>  // timerfd_settime()
+#include <openssl/sha.h>  // SHA1()
 
 /**
  * @brief 报文缓冲区大小
@@ -232,6 +233,44 @@ send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         bt_types[msg->id], index, begin, length, peer->ip, peer->port);
 }
 
+/**
+ * @brief check a piece's sha1
+ * @param fp file
+ * @param piece_idx piece index
+ * @param piece_size common piece size, no need to adjust for the last one
+ * @param file_size file size
+ * @param check correct sha1
+ * @return 1 - consistent, 0 - not
+ */
+int check_piece(FILE *fp, int piece_idx, uint32_t piece_size, uint32_t file_size, uint8_t check[20])
+{
+    uint8_t *piece = malloc(piece_size);
+    fseek(fp, piece_idx * piece_size, SEEK_SET);
+    ssize_t nr_read = fread(piece, 1, piece_size, fp);
+    if (nr_read < piece_size) {
+        if (feof(fp)) {
+            err("EOF");
+        }
+        else if (ferror(fp)) {
+            err("err");
+        }
+        perror("");
+    }
+    uint8_t md[20];
+    log("idx %d size %u, read %ld", piece_idx, piece_size, nr_read);
+    SHA1(piece, nr_read, md);
+    for (int i = 0; i < 20; i++) {
+        printf("%02x", check[i]);
+    }
+    putchar('\n');
+    for (int i = 0; i < 20; i++) {
+        printf("%02x", md[i]);
+    }
+    puts("");
+    free(piece);
+    return memcmp(check, md, 20) == 0;
+}
+
 /** @brief 处理分片消息
  *
  * 收到分片消息后，期望调用者处理字节序。
@@ -260,16 +299,25 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         fflush(mi->file);  // sub piece may not be write back, cause the final race never end.
         piece->substate[sub_idx] = SUB_FINISH;
         if (check_substate(mi, msg->piece.index)) {
-            piece->is_downloaded = 1;
-            // 发送 HAVE 消息
-            struct PeerMsg have_msg = { .len = htonl(5), .have.piece_index = msg->piece.index };
-            for (int i = 0; i < mi->nr_peers; i++) {
-                if (!peer_get_bit(peer, msg->piece.index)) {
-                    peer_send_msg(peer, &have_msg);
-                    log("send %s %d to %s:%u",
-                        bt_types[have_msg.id], have_msg.have.piece_index,
-                        peer->ip, peer->port);
+            if (check_piece(mi->file, msg->piece.index, mi->piece_size, (uint32_t)mi->file_size, piece->hash)) {
+                piece->is_downloaded = 1;
+                set_bit(mi->bitfield, msg->piece.index);
+                // 发送 HAVE 消息
+                struct PeerMsg have_msg = {.len = htonl(5), .have.piece_index = msg->piece.index};
+                for (int i = 0; i < mi->nr_peers; i++) {
+                    if (!peer_get_bit(peer, msg->piece.index)) {
+                        peer_send_msg(peer, &have_msg);
+                        log("send %s %d to %s:%u",
+                            bt_types[have_msg.id], have_msg.have.piece_index,
+                            peer->ip, peer->port);
+                    }
                 }
+            }
+            else {
+                log("piece %d mismatch", msg->piece.index);
+                memset(piece->substate, SUB_NA, mi->sub_count);
+                mi->left -= (msg->piece.index == mi->nr_pieces - 1) ?(mi->file_size % mi->piece_size) : mi->piece_size;
+                mi->left += dl_size;  // make up the following subtraction
             }
         }
         peer->contribution += dl_size;
@@ -306,9 +354,12 @@ void handle_request(struct MetaInfo *pInfo, struct Peer *pPeer, struct PeerMsg *
     uint32_t begin = pMsg->request.begin;
     uint32_t length = pMsg->request.length;
 
+    log("%s:%u request index %u begin %u length %u", pPeer->ip, pPeer->port, index, begin, length);
+
     // Check whether we have that piece.
     // If we allow seeking non-existing piece, it might exceed the file boundary.
     if (!pInfo->pieces[index].is_downloaded) {
+        log("give up");
         return;
     }
 
@@ -324,7 +375,11 @@ void handle_request(struct MetaInfo *pInfo, struct Peer *pPeer, struct PeerMsg *
     }
 
     // Send message
-    write(pPeer->fd, response, 4 + 9 + length);
+    if (write(pPeer->fd, response, 4 + 9 + length) < 4 + 9 + length) {
+        err("damn");
+    }
+
+    free(response);
 }
 
 /**
@@ -517,7 +572,7 @@ handle_interval(struct Tracker *tracker, struct BNode *bcode, int efd)
     // 单次定时器，靠重新获取报文来重新定时
     struct itimerspec ts = {
         .it_interval = { .tv_sec = 0, .tv_nsec = 0 },
-        .it_value = { .tv_sec = interval->i, .tv_nsec = 0 }
+        .it_value = { .tv_sec = 10, .tv_nsec = 0 }
     };
 
     if (timerfd_settime(tracker->timerfd, 0, &ts, NULL) == -1) {
@@ -639,15 +694,16 @@ finish_handshake(struct MetaInfo *mi, int sfd)
         // 如果是对方主动连接，则我方要返回 handshake
         if (wp.direction == 1) {
             send_handshake(wp.fd, mi);
-            // 发送 bitfield
-            struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
-            bitfield_msg->len = htonl((1 + mi->bitfield_size));
-            bitfield_msg->id = BT_BITFIELD;
-            memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
-            peer_send_msg(peer, bitfield_msg);
-            log("send %s to %s:%u", bt_types[bitfield_msg->id], peer->ip, peer->port);
-            free(bitfield_msg);
         }
+
+        // 发送 bitfield
+        struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
+        bitfield_msg->len = htonl((1 + mi->bitfield_size));
+        bitfield_msg->id = BT_BITFIELD;
+        memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
+        peer_send_msg(peer, bitfield_msg);
+        log("send %s to %s:%u", bt_types[bitfield_msg->id], peer->ip, peer->port);
+        free(bitfield_msg);
 
         // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
 
@@ -729,12 +785,7 @@ bt_handler(struct MetaInfo *mi, int efd)
     char *bar = "---------------------------------------------------------------";
     struct epoll_event *events = calloc(100, sizeof(*events));
     while (1) {
-        int n = epoll_wait(efd, events, 100, 5000);  // 超时限制 5s
-
-        if (n < 0) {
-            perror("epoll");
-            break;
-        }
+        int n = epoll_wait(efd, events, 100, -1);  // 超时限制 5s
 
         // 处理接收逻辑
         for (int i = 0; i < n; i++) {
@@ -746,107 +797,115 @@ bt_handler(struct MetaInfo *mi, int efd)
                 handle_error(mi, ev->data.fd);
                 close(ev->data.fd);
                 epoll_ctl(efd, EPOLL_CTL_DEL, ev->data.fd, NULL);
+                continue;
             }
-            else if (ev->events & EPOLLOUT) {  // connect 完成
+
+            if (ev->events & EPOLLOUT) {  // connect 完成
                 // EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲，
                 // 即意味着连接成功建立.
                 handle_ready(mi, ev->data.fd);
                 // 对于新建立的连接，之后都是要接收数据的，所以统一修改侦听 EPOLLIN.
                 ev->events = EPOLLIN;
                 epoll_ctl(efd, EPOLL_CTL_MOD, ev->data.fd, ev);
+                continue;
             }
-            else if (ev->events & EPOLLIN) {  // 接受并处理 BT 报文
-                /*
-                 * 关于握手报文与 BT 报文的区分方法:
-                 *
-                 *   握手报文和 BT 报文无法从数据格式上进行区分, 但是一个没有完成
-                 *   握手的 peer 是不会发送 BT 报文的. 我们将完成握手的 peer 记录
-                 *   在一个集合 peers 中(抽象). 对于当前的可读套接字, 如果它不在
-                 *   peers 集合里, 则是没有完成握手的 peer, 那么它送来的数据, 只
-                 *   可能是握手信息或者 FIN 报文.
-                 */
 
-                // peers, trackers 等查询函数有线性时间复杂度，而 peer 的 BT 消息最为频繁，
-                // 所以优先考虑套接字属于 peer 可以减少开销。
+            if (!(ev->events & EPOLLIN)) {
+                continue;
+            }
 
-                struct Peer *peer;
-                struct Tracker *tracker;
+            // 接受并处理 BT 报文
 
-                // 处理 BT 消息
-                if ((peer = get_peer_by_fd(mi, ev->data.fd)) != NULL) {
-                    // 虽然有多个 BT 报文凑到一个 TCP 报文段里的情况, 但是这里只处理一个报文.
-                    // 由于报文变长, 所以要注意保持数据的一致性.
-                    log("handling %s:%u :", peer->ip, peer->port);
-                    struct PeerMsg *msg = peer_get_packet(peer);
-                    if (msg == NULL) {
-                        log("remove peer %s:%d", peer->ip, peer->port);
-                        epoll_ctl(efd, EPOLL_CTL_DEL, ev->data.fd, NULL);
-                        close(peer->fd);
-                        // 不需要撤销分片的下载状态，因为超时后自会重置下载状态，
-                        // 还有可能本 peer 负责的子分片已经超时，导致 分片状态被修改，
-                        // 再次修改会导致不一致。
-                        del_peer_by_fd(mi, peer->fd);
-                    }
-                    else if (peer->wanted == 0) {  // 读取了完整的 BT 消息
-                        handle_msg(mi, peer, msg);
-                        free(msg);
-                    }
+            /*
+             * 关于握手报文与 BT 报文的区分方法:
+             *
+             *   握手报文和 BT 报文无法从数据格式上进行区分, 但是一个没有完成
+             *   握手的 peer 是不会发送 BT 报文的. 我们将完成握手的 peer 记录
+             *   在一个集合 peers 中(抽象). 对于当前的可读套接字, 如果它不在
+             *   peers 集合里, 则是没有完成握手的 peer, 那么它送来的数据, 只
+             *   可能是握手信息或者 FIN 报文.
+             */
 
-                    continue;
-                }
+            // peers, trackers 等查询函数有线性时间复杂度，而 peer 的 BT 消息最为频繁，
+            // 所以优先考虑套接字属于 peer 可以减少开销。
 
-                // 定时事件：发送 KEEP ALIVE
-                if (ev->data.fd == mi->timerfd) {
-                    log("keep-alive");
-                    uint64_t expiration;
-                    read(mi->timerfd, &expiration, 8);  // 消耗定时器数据才能重新等待
-                    int len = htonl(0);
-                    for (int k = 0; k < mi->nr_peers; k++) {
-                        write(mi->peers[k]->fd, &len, 4);
-                    }
+            struct Peer *peer;
+            struct Tracker *tracker;
 
-                    continue;
-                }
-
-                // peer 主动建立连接请求
-                if (ev->data.fd == mi->listen_fd) {
-                    handle_comming_peer(mi, ev, efd);
-                    continue;
-                }
-
-                // tracker 的响应
-                if ((tracker = get_tracker_by_fd(mi, ev->data.fd)) != NULL) {
-                    struct BNode *bcode = handle_tracker_response(tracker->sfd);
-                    if (bcode != NULL) {
-                        print_bcode(bcode, 0, 0);
-                        handle_peer_list(mi, efd, bcode);
-                        handle_interval(tracker, bcode, efd);
-                        free_bnode(&bcode);
-                    }
-                    epoll_ctl(efd, EPOLL_CTL_DEL, tracker->sfd, NULL);
-                    close(tracker->sfd);  // tracker 的连接只用一次
-                    tracker->sfd = -1;
-
-                    continue;
-                }
-
-                // 定时回访 tracker
-                if ((tracker = get_tracker_by_timer(mi, ev->data.fd)) != NULL) {
-                    log("timer event for %s:%s%s", tracker->host, tracker->port, tracker->request);
-                    if (close(tracker->timerfd) == -1)
-                        perror("close tracker timer fd");
-                    if (epoll_ctl(efd, EPOLL_CTL_DEL, tracker->timerfd, NULL) == -1)
-                        perror("epoll delete tracker timer fd");
-                    async_connect_to_tracker(tracker, efd);
-
-                    continue;
-                }
-
-                // 处理 peer 握手消息
-                if (finish_handshake(mi, ev->data.fd) == -1) {
-                    // 连接已断开，没有必要再侦听
+            // 处理 BT 消息
+            if ((peer = get_peer_by_fd(mi, ev->data.fd)) != NULL) {
+                // 虽然有多个 BT 报文凑到一个 TCP 报文段里的情况, 但是这里只处理一个报文.
+                // 由于报文变长, 所以要注意保持数据的一致性.
+                log("handling %s:%u :", peer->ip, peer->port);
+                struct PeerMsg *msg = peer_get_packet(peer);
+                if (msg == NULL) {
+                    log("remove peer %s:%d", peer->ip, peer->port);
                     epoll_ctl(efd, EPOLL_CTL_DEL, ev->data.fd, NULL);
+                    close(peer->fd);
+                    // 不需要撤销分片的下载状态，因为超时后自会重置下载状态，
+                    // 还有可能本 peer 负责的子分片已经超时，导致 分片状态被修改，
+                    // 再次修改会导致不一致。
+                    del_peer_by_fd(mi, peer->fd);
                 }
+                else if (peer->wanted == 0) {  // 读取了完整的 BT 消息
+                    handle_msg(mi, peer, msg);
+                    free(msg);
+                }
+
+                continue;
+            }
+
+            // 定时事件：发送 KEEP ALIVE
+            if (ev->data.fd == mi->timerfd) {
+                log("keep-alive");
+                uint64_t expiration;
+                read(mi->timerfd, &expiration, 8);  // 消耗定时器数据才能重新等待
+                int len = htonl(0);
+                for (int k = 0; k < mi->nr_peers; k++) {
+                    write(mi->peers[k]->fd, &len, 4);
+                }
+
+                continue;
+            }
+
+            // peer 主动建立连接请求
+            if (ev->data.fd == mi->listen_fd) {
+                handle_comming_peer(mi, ev, efd);
+                continue;
+            }
+
+            // tracker 的响应
+            if ((tracker = get_tracker_by_fd(mi, ev->data.fd)) != NULL) {
+                struct BNode *bcode = handle_tracker_response(tracker->sfd);
+                if (bcode != NULL) {
+                    print_bcode(bcode, 0, 0);
+                    handle_peer_list(mi, efd, bcode);
+                    handle_interval(tracker, bcode, efd);
+                    free_bnode(&bcode);
+                }
+                epoll_ctl(efd, EPOLL_CTL_DEL, tracker->sfd, NULL);
+                close(tracker->sfd);  // tracker 的连接只用一次
+                tracker->sfd = -1;
+
+                continue;
+            }
+
+            // 定时回访 tracker
+            if ((tracker = get_tracker_by_timer(mi, ev->data.fd)) != NULL) {
+                log("timer event for %s:%s%s", tracker->host, tracker->port, tracker->request);
+                if (close(tracker->timerfd) == -1)
+                    perror("close tracker timer fd");
+                if (epoll_ctl(efd, EPOLL_CTL_DEL, tracker->timerfd, NULL) == -1)
+                    perror("epoll delete tracker timer fd");
+                async_connect_to_tracker(tracker, efd);
+
+                continue;
+            }
+
+            // 处理 peer 握手消息
+            if (finish_handshake(mi, ev->data.fd) == -1) {
+                // 连接已断开，没有必要再侦听
+                epoll_ctl(efd, EPOLL_CTL_DEL, ev->data.fd, NULL);
             }
         }
 
@@ -870,7 +929,7 @@ bt_handler(struct MetaInfo *mi, int efd)
         log("peers >>>");
         for (int i = 0; i < mi->nr_peers; i++) {
             struct Peer *pr = mi->peers[i];
-            log("%16s:%-5d %7s %s  %10d  %6d  %lf\n", pr->ip, pr->port,
+            log("%16s:%-5d %7s %s  %10d  %6d  %lf", pr->ip, pr->port,
                    pr->get_choked ? "choke" : "unchoke",
                    pr->get_interested ? "int" : "not",
                    pr->contribution, pr->wanted, pr->speed);

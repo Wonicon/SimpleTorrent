@@ -119,6 +119,9 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
     }
     else {  // 没有下载文件，放心 trunc
         mi->file = fopen(name->s_data, "wb");
+        fwrite("hello", 1, 5, mi->file);
+        fclose(mi->file);
+        mi->file = fopen(name->s_data, "rb+");
     }
 
     mi->left = mi->file_size - mi->downloaded;

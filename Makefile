@@ -8,10 +8,7 @@ DEPS := $(SRCS:%.c=build/%.d)
 client: $(OBJS)
 	$(CC) -o $@ $^ -lpthread -lcrypto
 
-build:
-	mkdir -p $@
-
-build/%.o: %.c build
+build/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 -include $(DEPS)
