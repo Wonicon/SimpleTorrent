@@ -632,7 +632,7 @@ finish_handshake(struct MetaInfo *mi, int sfd)
         struct Peer *peer = peer_new(sfd, mi->nr_pieces);
         add_peer(mi, peer);
 
-        log("handshaking failed, disconnect %u.%u.%u.%u:%u",
+        log("handshaked with %u.%u.%u.%u:%u",
             wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
 
         // 如果是对方主动连接，则我方要返回 handshake
@@ -644,8 +644,8 @@ finish_handshake(struct MetaInfo *mi, int sfd)
             bitfield_msg->id = BT_BITFIELD;
             memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
             peer_send_msg(peer, bitfield_msg);
-            free(bitfield_msg);
             log("send %s to %s:%u", bt_types[bitfield_msg->id], peer->ip, peer->port);
+            free(bitfield_msg);
         }
 
         // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
