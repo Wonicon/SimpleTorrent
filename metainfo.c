@@ -82,13 +82,18 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
 
     FILE *fp = fopen(name->s_data, "rb");
 
+    // This variable record the downloaded pieces' size.
+    // We do not use MetaInfo::downloaded as that field is only for data exchanging
+    // and if MetaInfo::downloaded is 0 as well as MetaInfo::left is, it means this
+    // client is seeding.
+    size_t finished = 0;
+
     if (fp != NULL) {  // 已有下载文件，检查分片 SHA1
         uint8_t *piece = malloc(mi->piece_size);  // piece data buffer
         uint8_t md[HASH_SIZE];  // sha1 buffer
 
         size_t nr_read;
         int piece_index = 0;
-        int correct_piece_count = 0;
         while ((nr_read = fread(piece, 1, mi->piece_size, fp)) != 0) {  // EOF 退出，容许不足
             SHA1(piece, nr_read, md);
 
@@ -96,8 +101,7 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
 
             if (memcmp(md, mi->pieces[piece_index].hash, HASH_SIZE) == 0) {  // 分片正确
                 mi->pieces[piece_index].is_downloaded = 1;
-                correct_piece_count++;
-                mi->downloaded += nr_read;
+                finished += nr_read;
                 set_bit(mi->bitfield, piece_index);
                 printf(" ok");
             }
@@ -107,7 +111,7 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
             piece_index++;
         }
 
-        if (correct_piece_count == mi->nr_pieces) {
+        if (finished == mi->file_size) {
             log("file has been downloaded");
             mi->file = fp;
             return;
@@ -124,7 +128,7 @@ metainfo_load_file(struct MetaInfo *mi, const struct BNode *ast)
         mi->file = fopen(name->s_data, "rb+");
     }
 
-    mi->left = mi->file_size - mi->downloaded;
+    mi->left = mi->file_size - finished;
 }
 
 void

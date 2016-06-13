@@ -43,7 +43,7 @@ send_handshake(int sfd, struct MetaInfo *mi)
  * 其余信息完全通过 mi 填写.
  */
 void
-send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker, const char *event)
+send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker)
 {
     // 请求头
     struct HttpRequest *req = create_http_request("GET", tracker->request);
@@ -65,10 +65,26 @@ send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker, const char *ev
     add_http_request_attr(req, "downloaded", "%ld", mi->downloaded);
     add_http_request_attr(req, "left"      , "%ld", mi->left);
 
+    const char *event = NULL;
+    if (tracker->timerfd == 0) {
+        // This tracker is to be connected at the first time,
+        // as we haven't set timer according to its response.
+        event = "start";
+    }
+    else if (mi->downloaded > 0 && mi->left == 0) {
+        assert(tracker->timerfd != 0);
+        event = "completed";
+    }
+    else if (mi->downloaded == mi->file_size && mi->left == mi->file_size) {
+        // Impossible, provided when invoke SIGINT
+        event = "stopped";
+    }
+
     if (event != NULL) {
         add_http_request_attr(req, "event", "%s", event);
     }
 
+    log("send tracker %s:%s%s with event %s", tracker->host, tracker->port, tracker->request, event);
     send_http_request(req, tracker->sfd);
 }
 
@@ -638,7 +654,7 @@ handle_ready(struct MetaInfo *mi, int sfd)
     struct Tracker *tracker;
     if ((tracker = get_tracker_by_fd(mi, sfd)) != NULL) {
         log("connected to %s:%s%s", tracker->host, tracker->port, tracker->request);
-        send_msg_to_tracker(mi, tracker, NULL);
+        send_msg_to_tracker(mi, tracker);
     }
     else if (get_wait_peer_index_by_fd(mi, sfd) != -1) {
         // 这里不进行检查，因为可以肯定是 tracker

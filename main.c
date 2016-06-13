@@ -10,13 +10,82 @@
 #include <sys/epoll.h>    // epoll_create1(), epoll_ctl(), epoll_wait(), epoll_event
 #include <arpa/inet.h>    // inet_ntoa()
 #include <sys/timerfd.h>  // timerfd_settime()
+#include <signal.h>       // sigaction()
+#include <unistd.h>
 
 /**
  * @brief 报文缓冲区大小
  */
 #define BUF_SIZE 4096
 
+/**
+ * @brief global metainfo, describing the current downloading task.
+ */
+struct MetaInfo *mi = NULL;
+
 void bt_handler(struct MetaInfo *mi, int efd);
+
+void send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker);
+
+/**
+ * @brief send stopped message to trackers when exit from SIGINT
+ */
+void exit_handler(int signum)
+{
+    if (mi == NULL || mi->trackers == NULL) {
+        err("either meta info or trackers are not constructed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Indicate STOPPED event!
+    mi->downloaded = mi->left = mi->file_size;
+
+    int efd = epoll_create1(0);
+    if (efd == -1) {
+        perror("epoll_create1");
+        exit(EXIT_FAILURE);
+    }
+
+    struct epoll_event ev = { .events = EPOLLIN };
+
+    // 异步连接 tracker
+    int nr_trackers = 0;
+    for (int i = 0; i < mi->nr_trackers; i++) {
+        struct Tracker *tracker = &mi->trackers[i];
+        if (tracker->timerfd > 0) {
+            // only connect accessible tracker.
+            // @todo this solution ignores the tracker sent the start message which hasn't response.
+            nr_trackers++;
+            async_connect_to_tracker(tracker, efd);
+        }
+    }
+
+    struct epoll_event events[10];
+    while (nr_trackers > 0) {
+        int n = epoll_wait(efd, events, 10, -1);
+        for (int i = 0; i < n; i++) {
+            typeof(events[i].events) event = events[i].events;
+            int fd = events[i].data.fd;
+            if (event & EPOLLOUT) {
+                struct Tracker *tracker;
+                if ((tracker = get_tracker_by_fd(mi, fd)) != NULL) {
+                    send_msg_to_tracker(mi, tracker);
+                    nr_trackers--;
+                    epoll_ctl(efd, EPOLL_CTL_DEL, fd, NULL);
+                }
+                else {
+                    err("fd %d is not a tracker", fd);
+                }
+            }
+            else if (event * (EPOLLERR | EPOLLHUP)) {
+                err("fd %d err", fd);
+            }
+        }
+    }
+
+    close(efd);
+    exit(EXIT_SUCCESS);
+}
 
 /**
  * @brief 将种子文件完全载入内存
@@ -55,6 +124,14 @@ main(int argc, char *argv[])
 
     setbuf(stdout, NULL);
 
+    // Register SIGINT callback
+    struct sigaction act = {
+        .sa_handler = exit_handler,
+    };
+    if (sigaction(SIGINT, &act, NULL) == -1) {
+        perror("sigaction");
+    }
+
     // 解析种子文件
     char *bcode = get_torrent_data_from_file(argv[1]);
     struct BNode *ast = bparser(bcode);
@@ -62,7 +139,7 @@ main(int argc, char *argv[])
     print_bcode(ast, 0, 0);
 
     // 创建并初始化 MetaInfo 对象
-    struct MetaInfo *mi = calloc(1, sizeof(*mi));
+    mi = calloc(1, sizeof(*mi));
 
     // 计算 info hash, 此后不需要源数据
     make_info_hash(ast, mi->info_hash);
