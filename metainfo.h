@@ -97,6 +97,7 @@ struct MetaInfo
     size_t sub_count;                   ///< 子分片的数量
     struct PieceInfo *pieces;           ///< 分片信息数组
     uint8_t *bitfield;                  ///< 分片完成情况位图
+    uint8_t peer_id[21];                ///< random-generated peer-id, the extra 21th byte is '\0' used by host.
 
     unsigned short port;                ///< 侦听端口
     int listen_fd;                      ///< 侦听套接字

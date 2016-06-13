@@ -139,6 +139,14 @@ main(int argc, char *argv[])
     // 创建并初始化 MetaInfo 对象
     mi = calloc(1, sizeof(*mi));
 
+    // Generate peer id
+    uint8_t symbol[] = "0123456789abcdefghijklmnopqrstuvwxyz!^()_+=-|";
+    int symbol_size = sizeof(symbol) - 1;
+    FILE *random = fopen("/dev/random", "rb");
+    fread(mi->peer_id, 1, 20, random);
+    for (int i = 0; i < 20; i++) mi->peer_id[i] = symbol[ (mi->peer_id[i]) % symbol_size ];
+    printf("peer-id %s", mi->peer_id);
+
     // 计算 info hash, 此后不需要源数据
     make_info_hash(ast, mi->info_hash);
     free(bcode);

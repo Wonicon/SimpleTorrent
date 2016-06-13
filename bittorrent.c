@@ -60,7 +60,7 @@ send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker)
     add_http_request_attr(req, "port", "%d", mi->port);
 
     // 其他一些请求信息
-    add_http_request_attr(req, "peer_id"   , "-Test-Test-Test-Test");
+    add_http_request_attr(req, "peer_id"   , "%s", mi->peer_id);
     add_http_request_attr(req, "uploaded"  , "%ld", mi->uploaded);
     add_http_request_attr(req, "downloaded", "%ld", mi->downloaded);
     add_http_request_attr(req, "left"      , "%ld", mi->left);
