@@ -11,7 +11,6 @@
 #include "util.h"
 #include <string.h>
 #include <openssl/sha.h>
-#include <netinet/in.h>
 
 void
 free_metainfo(struct MetaInfo **pmi)
@@ -205,7 +204,7 @@ del_peer_by_fd(struct MetaInfo *mi, int fd)
     }
 
     if (peer != NULL) {
-        free(peer);
+        peer_free(&peer);
     }
 
     if (i < mi->nr_peers -1) {

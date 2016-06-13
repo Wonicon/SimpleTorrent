@@ -46,8 +46,6 @@ void exit_handler(int signum)
         exit(EXIT_FAILURE);
     }
 
-    struct epoll_event ev = { .events = EPOLLIN };
-
     // 异步连接 tracker
     int nr_trackers = 0;
     for (int i = 0; i < mi->nr_trackers; i++) {
