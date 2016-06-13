@@ -229,12 +229,11 @@ get_peer_by_fd(struct MetaInfo *mi, int fd)
  * peer 自己的 addr 在构造时是网络字节序，但是 port 是本机字节序。
  */
 struct Peer *
-get_peer_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port)
+get_peer_by_addr(struct MetaInfo *mi, uint32_t addr)
 {
-    port = ntohs(port);
     for (int i = 0; i < mi->nr_peers; i++) {
         struct Peer *peer = mi->peers[i];
-        if (addr == mi->peers[i]->addr && port == mi->peers[i]->port) {
+        if (addr == mi->peers[i]->addr) {
             return peer;
         }
     }
@@ -316,11 +315,11 @@ get_wait_peer_index_by_fd(struct MetaInfo *mi, int fd)
 }
 
 int
-get_wait_peer_fd(struct MetaInfo *mi, uint32_t addr, uint16_t port, int direction)
+get_wait_peer_fd(struct MetaInfo *mi, uint32_t addr)
 {
     for (int i = 0; i < mi->nr_wait_peers; i++) {
         struct WaitPeer *p = &mi->wait_peers[i];
-        if (p->addr == addr && (p->port == port || p->direction != direction)) {
+        if (p->addr == addr) {
             return p->fd;
         }
     }

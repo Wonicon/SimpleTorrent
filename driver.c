@@ -524,12 +524,12 @@ handle_peer_list(struct MetaInfo *mi, int efd, struct BNode *bcode)
 
         // 防止从多个 tracker 连接同一个 peer
 
-        if (get_peer_by_addr(mi,p->addr, p->port) != NULL) {
+        if (get_peer_by_addr(mi, p->addr) != NULL) {
             log("already handshaked with peer %d.%d.%d.%d:%d", p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
             continue;
         }
 
-        if (get_wait_peer_fd(mi, p->addr, p->port, 0) != -1) {
+        if (get_wait_peer_fd(mi, p->addr) != -1) {
             log("already connecting to peer %d.%d.%d.%d:%d", p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
             continue;
         }
@@ -731,7 +731,7 @@ finish_handshake(struct MetaInfo *mi, int sfd)
  * @param ev the current epoll event
  * @param efd epoll file descriptor
  */
-void handle_comming_peer(struct MetaInfo *mi, struct epoll_event *ev, int efd)
+void handle_coming_peer(struct MetaInfo *mi, struct epoll_event *ev, int efd)
 {
     struct sockaddr_in peer_addr, local_addr;
     socklen_t peer_len = sizeof(peer_addr), local_len = sizeof(local_addr);
@@ -743,7 +743,10 @@ void handle_comming_peer(struct MetaInfo *mi, struct epoll_event *ev, int efd)
     log("local %s:%u", inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port));
 
     // 防止重复连接
-    if (peer_addr.sin_addr.s_addr != local_addr.sin_addr.s_addr) {
+    if (peer_addr.sin_addr.s_addr != local_addr.sin_addr.s_addr     // connect to self
+        && get_peer_by_addr(mi, peer_addr.sin_addr.s_addr) == NULL  // already peer
+        && get_wait_peer_fd(mi, peer_addr.sin_addr.s_addr) == -1)   // already connecting
+    {
         add_wait_peer(mi, fd, peer_addr.sin_addr.s_addr, peer_addr.sin_port, 1);   // 1 - connecting from
         // 侦听握手消息
         ev->data.fd = fd;
@@ -870,7 +873,7 @@ bt_handler(struct MetaInfo *mi, int efd)
 
             // peer 主动建立连接请求
             if (ev->data.fd == mi->listen_fd) {
-                handle_comming_peer(mi, ev, efd);
+                handle_coming_peer(mi, ev, efd);
                 continue;
             }
 

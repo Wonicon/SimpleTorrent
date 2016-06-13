@@ -157,9 +157,8 @@ struct Peer *get_peer_by_fd(struct MetaInfo *mi, int fd);
  * @brief 根据网络地址搜索 peer
  * @param mi 全局信息
  * @param addr ip 地址，网络字节序
- * @param port 端口号，网络字节序
  */
-struct Peer * get_peer_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port);
+struct Peer *get_peer_by_addr(struct MetaInfo *mi, uint32_t addr);
 
 /**
  * @brief 检查某一分片的子分片状态并打印
@@ -210,19 +209,12 @@ int get_wait_peer_index_by_fd(struct MetaInfo *mi, int fd);
 /**
  * @brief 根据地址找到 peer 的套接字，网络字节序
  *
- * find the waiting peer using all attributes.
- * if a peer has the same ip but different direction,
- * it means we are downloading from the same machine,
- * which is unexpected.
- *
  * @param mi global info
  * @param addr ip address
- * @param port listening port, which is not useful for peers from accept.
- * @param direction connecting to / from, used to determine local peer.
  *
  * @return 对应的套接字，没找到则 -1.
  */
-int get_wait_peer_fd(struct MetaInfo *mi, uint32_t addr, uint16_t port, int direction);
+int get_wait_peer_fd(struct MetaInfo *mi, uint32_t addr);
 
 /** @brief 删除等待 peer */
 void rm_wait_peer(struct MetaInfo *mi, int index);
