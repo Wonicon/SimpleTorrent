@@ -31,7 +31,7 @@ send_handshake(int sfd, struct MetaInfo *mi)
     strncpy(handshake.hs_pstr, PSTR_DEFAULT, PSTRLEN_DEFAULT);
     memset(handshake.hs_reserved, 0, sizeof(handshake.hs_reserved));
     memcpy(handshake.hs_info_hash, mi->info_hash, sizeof(mi->info_hash));
-    memcpy(handshake.hs_peer_id, "-Test-Test-Test-Test", HASH_SIZE);
+    memcpy(handshake.hs_peer_id, mi->peer_id, HASH_SIZE);
 
     if (write(sfd, &handshake, sizeof(handshake)) < sizeof(handshake)) {
         perror("handshake");
@@ -167,16 +167,11 @@ select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
         length = (uint32_t)(piece_sz % mi->sub_size);
     }
 
-    unsigned int req_len = 13;
-    struct PeerMsg temp = {
-        .len = htonl(req_len),
-        .id = BT_REQUEST,
-        .request.index = index,
-        .request.begin = begin,
-        .request.length = length
-    };
-
-    *msg = temp;
+    msg->len = htonl(13);
+    msg->id = BT_REQUEST;
+    msg->request.index = index;
+    msg->request.begin = begin;
+    msg->request.length = length;
 
     return 0;
 }
@@ -964,4 +959,3 @@ bt_handler(struct MetaInfo *mi, int efd)
         log("wait peers <<<");
     }
 }
-
