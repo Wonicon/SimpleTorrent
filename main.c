@@ -141,7 +141,7 @@ main(int argc, char *argv[])
     mi = calloc(1, sizeof(*mi));
 
     // Generate peer id
-    uint8_t symbol[] = "0123456789abcdefghijklmnopqrstuvwxyz!^()_+=-|";
+    uint8_t symbol[] = "0123456789abcdefghijklmnopqrstuvwxyz_-+";
     int symbol_size = sizeof(symbol) - 1;
     FILE *random = fopen("/dev/urandom", "rb");
     fread(mi->peer_id, 1, 20, random);

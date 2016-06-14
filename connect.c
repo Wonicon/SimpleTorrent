@@ -118,6 +118,7 @@ int
 send_http_request(struct HttpRequest *req, int sfd)
 {
     sprintf(req->curr, " HTTP/1.1\r\n\r\n");
+    printf("request: %s", req->buf);
     size_t size = strlen(req->buf);
     if (write(sfd, req->buf, size) < size) {
         perror("send http request");

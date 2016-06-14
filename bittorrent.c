@@ -66,9 +66,11 @@ send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker)
     add_http_request_attr(req, "left"      , "%ld", mi->left);
 
     const char *event = NULL;
-    if (tracker->timerfd == 0) {
+    if (tracker->timerfd == 0 && mi->left != 0) {
         // This tracker is to be connected at the first time,
         // as we haven't set timer according to its response.
+        // It seems we cannot act as a finished peer with start event.
+        // It is reasonalbe. If allowed, the completed event will never be sent.
         event = "start";
     }
     else if (mi->downloaded > 0 && mi->left == 0) {
@@ -475,6 +477,7 @@ handle_tracker_response(int sfd)
     char response[BUF_SIZE] = { 0 };
     char *curr = response;
     size_t size = 0;
+    int is_html = 0;
     while (recv(sfd, curr, 1, MSG_WAITALL) == 1) {
         if (*curr++ != '\n') {
             continue;
@@ -482,8 +485,15 @@ handle_tracker_response(int sfd)
 
         printf("%s", response);
 
-        if (!strncmp(response, "Content-Length", 14)) {
+#define CONTENT_LENGTH "Content-Length"
+#define CONTENT_TYPE "Content-Type"
+        if (!strncmp(response, CONTENT_LENGTH, sizeof(CONTENT_LENGTH) - 1)) {
             size = strtoul(response + 16, NULL, 10);
+        }
+        else if (!strncmp(response, CONTENT_TYPE, sizeof(CONTENT_TYPE) - 1)) {
+            if (strstr(response, "text/html") != NULL) {
+                is_html = 1;
+            }
         }
         else if (!strcmp(response, "\r\n")) {
             break;
@@ -498,12 +508,18 @@ handle_tracker_response(int sfd)
         return NULL;
     }
 
-    void *data = malloc(size);
+    char *data = malloc(size);
     if (recv(sfd, data, size, MSG_WAITALL) < size) {
         perror("read");
     }
 
-    struct BNode *bcode = bparser(data);
+    struct BNode *bcode = NULL;
+    if (is_html) {
+        printf("%s", data);
+    }
+    else {
+        bcode = bparser(data);
+    }
 
     free(data);
 
