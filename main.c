@@ -57,15 +57,6 @@ void exit_handler(int signum)
             nr_trackers++;
             async_connect_to_tracker(tracker, efd);
         }
-        else if (tracker->sfd != -1) {
-            // sfd 在收到 http 响应后才会撤销并赋值成 -1.
-            // 如果 tracker 的 sfd 不是 -1, 意味着还没有收到响应, 或者正在处理过程中, 但至少是可以 connect 的.
-            // 由于 tracker 的 http 是短连接, 所以这里重新进行连接以发送 stopped 消息.
-            /// @note 临界情况下, 可能 tracker 还没有处理 http 请求, 导致旧连接尚有效. 这时候重新连接, 会不会有问题?
-            log("%s:%s%s has been requested but no response is received", tracker->host, tracker->port, tracker->request);
-            nr_trackers++;
-            async_connect_to_tracker(tracker, efd);
-        }
     }
 
     struct epoll_event events[10];
