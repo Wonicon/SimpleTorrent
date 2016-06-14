@@ -712,47 +712,65 @@ finish_handshake(struct MetaInfo *mi, int sfd)
         close(sfd);
         return -1;
     }
-    else {
-        // 处理对方的握手消息：将对方加入到正式 peers 列表中
 
-        struct Peer *peer = peer_new(sfd, mi->nr_pieces);
-        add_peer(mi, peer);
+    //-------------------------------------
+    // 检查 peer 是否重复
+    //-------------------------------------
 
-        log("handshaked with %u.%u.%u.%u:%u",
-            wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
-
-        // 如果是对方主动连接，则我方要返回 handshake
-        if (wp.direction == 1) {
-            send_handshake(wp.fd, mi);
-        }
-
-        // 发送 bitfield
-        struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
-        bitfield_msg->len = htonl((1 + mi->bitfield_size));
-        bitfield_msg->id = BT_BITFIELD;
-        memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
-        peer_send_msg(peer, bitfield_msg);
-        log("send %s to %s:%u", bt_types[bitfield_msg->id], peer->ip, peer->port);
-        free(bitfield_msg);
-
-        // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
-
-        // UNCHOKE 和 INTERESTED 都没有数据载荷，区别只有 id.
-        // 故我们使用同一块缓冲区，修改 id 后进行发送.
-        // 数据结构本身的大小超过 5 字节，但是有意义的报文内容只占 5 字节。
-        struct PeerMsg msg = { .len = htonl(1) };
-        uint8_t msg_type[] = { BT_UNCHOKE, BT_INTERESTED };
-
-        for (int i = 0; i < sizeof(msg_type) / sizeof(msg_type[0]); i++) {
-            msg.id = msg_type[i];
-            if (write(peer->fd, &msg, 5) < 5) {
-                perror("send msg");
-            }
-            log("send %s to %s:%d", bt_types[msg.id], peer->ip, peer->port);
-        }
-
-        return 0;
+    // 防止自己和自己连接
+    if (memcmp(mi->peer_id, handshake.hs_peer_id, HASH_SIZE) == 0) {
+        close(sfd);
+        return -1;
     }
+
+    // 防止和已有 peer 重复
+    for (int i = 0; i < mi->nr_peers; i++) {
+        if (memcmp(mi->peer_id, mi->peers[i]->peer_id, HASH_SIZE) == 0) {
+            close(sfd);
+            return -1;
+        }
+    }
+
+    // 将对方加入到正式 peers 列表中
+
+    struct Peer *peer = peer_new(sfd, mi->nr_pieces);
+    memcpy(peer->peer_id, handshake.hs_peer_id, HASH_SIZE);
+    add_peer(mi, peer);
+
+    log("handshaked with %u.%u.%u.%u:%u",
+        wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
+
+    // 如果是对方主动连接，则我方要返回 handshake
+    if (wp.direction == 1) {
+        send_handshake(wp.fd, mi);
+    }
+
+    // 发送 bitfield
+    struct PeerMsg *bitfield_msg = calloc(4 + 1 + mi->bitfield_size, 1);
+    bitfield_msg->len = htonl((1 + mi->bitfield_size));
+    bitfield_msg->id = BT_BITFIELD;
+    memcpy(bitfield_msg->bitfield, mi->bitfield, mi->bitfield_size);
+    peer_send_msg(peer, bitfield_msg);
+    log("send %s to %s:%u", bt_types[bitfield_msg->id], peer->ip, peer->port);
+    free(bitfield_msg);
+
+    // 出于简单实现的考虑，暂时先无条件发送 UNCHOKE 和 INTERESTED 报文。
+
+    // UNCHOKE 和 INTERESTED 都没有数据载荷，区别只有 id.
+    // 故我们使用同一块缓冲区，修改 id 后进行发送.
+    // 数据结构本身的大小超过 5 字节，但是有意义的报文内容只占 5 字节。
+    struct PeerMsg msg = { .len = htonl(1) };
+    uint8_t msg_type[] = { BT_UNCHOKE, BT_INTERESTED };
+
+    for (int i = 0; i < sizeof(msg_type) / sizeof(msg_type[0]); i++) {
+        msg.id = msg_type[i];
+        if (write(peer->fd, &msg, 5) < 5) {
+            perror("send msg");
+        }
+        log("send %s to %s:%d", bt_types[msg.id], peer->ip, peer->port);
+    }
+
+    return 0;
 }
 
 /**
@@ -772,23 +790,12 @@ void handle_coming_peer(struct MetaInfo *mi, struct epoll_event *ev, int efd)
     log("peer  %s:%u", inet_ntoa(peer_addr.sin_addr), ntohs(peer_addr.sin_port));
     log("local %s:%u", inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port));
 
-    // 防止重复连接
-    if (peer_addr.sin_addr.s_addr != local_addr.sin_addr.s_addr     // connect to self
-        && get_peer_by_addr(mi, peer_addr.sin_addr.s_addr) == NULL  // already peer
-        && get_wait_peer_fd(mi, peer_addr.sin_addr.s_addr) == -1)   // already connecting
-    {
-        add_wait_peer(mi, fd, peer_addr.sin_addr.s_addr, peer_addr.sin_port, 1);   // 1 - connecting from
-        // 侦听握手消息
-        ev->data.fd = fd;
-        ev->events = EPOLLIN;
-        epoll_ctl(efd, EPOLL_CTL_ADD, fd, ev);
-    }
-    else {
-        log("duplicated peer!");
-        close(fd);
-    }
-    // 将连接套接字加入 wait_peers 后，可以在最后的 finish_handshake 里和我方主动连接的套接字统一处理。
-    // 两种情况虽然有是否回复 handshake 的差别，但是可以通过设置 direction 进行区分。
+    add_wait_peer(mi, fd, peer_addr.sin_addr.s_addr, peer_addr.sin_port, 1);   // 1 - connecting from
+
+    // 侦听握手消息
+    ev->data.fd = fd;
+    ev->events = EPOLLIN;
+    epoll_ctl(efd, EPOLL_CTL_ADD, fd, ev);
 }
 
 /**

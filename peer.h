@@ -103,6 +103,7 @@ struct Peer
 {
     int fd;                   ///< 连接套接字
     char ip[16];              ///< ip 地址字符串, 最长不过 |255.255.255.255| + '\0' = 16
+    char peer_id[HASH_SIZE];  ///< 区分 peer 的唯一标志，握手时获取
     unsigned short port;      ///< 端口, 本地字节序
     uint32_t addr;            ///< ip 的整数形式，用于地址比较，直接来自 sin_addr，故是网络字节序
     unsigned char *bitfield;  ///< piece 拥有情况
