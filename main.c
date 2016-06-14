@@ -76,7 +76,7 @@ void exit_handler(int signum)
                     err("fd %d is not a tracker", fd);
                 }
             }
-            else if (event * (EPOLLERR | EPOLLHUP)) {
+            else if (event & (EPOLLERR | EPOLLHUP)) {
                 err("fd %d err", fd);
             }
         }
