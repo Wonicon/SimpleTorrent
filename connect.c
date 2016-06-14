@@ -6,6 +6,7 @@
 #include "util.h"
 #include "metainfo.h"
 #include <string.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <errno.h>
 #include <netdb.h>
