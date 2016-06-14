@@ -34,8 +34,8 @@ struct Tracker
 #define SUB_DOWNLOAD 1
 /** 子分片完成下载 */
 #define SUB_FINISH 2
-/** 子分片最长等待时间 10s */
-#define WAIT_THRESHOLD 10.0
+/** 子分片最长等待时间 60s */
+#define WAIT_THRESHOLD 60.0
 
 /**
  * @brief 分片信息
