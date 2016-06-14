@@ -50,9 +50,19 @@ void exit_handler(int signum)
     int nr_trackers = 0;
     for (int i = 0; i < mi->nr_trackers; i++) {
         struct Tracker *tracker = &mi->trackers[i];
+        // only connect accessible tracker.
         if (tracker->timerfd > 0) {
-            // only connect accessible tracker.
-            // @todo this solution ignores the tracker sent the start message which hasn't response.
+            // timerfd > 0 表示 tracker 已经完成过至少一次 request-response, 说明是可以连接的.
+            // 因为 timerfd 要根据合法的 response 的 interval 项创建定时器
+            nr_trackers++;
+            async_connect_to_tracker(tracker, efd);
+        }
+        else if (tracker->sfd != -1) {
+            // sfd 在收到 http 响应后才会撤销并赋值成 -1.
+            // 如果 tracker 的 sfd 不是 -1, 意味着还没有收到响应, 或者正在处理过程中, 但至少是可以 connect 的.
+            // 由于 tracker 的 http 是短连接, 所以这里重新进行连接以发送 stopped 消息.
+            /// @note 临界情况下, 可能 tracker 还没有处理 http 请求, 导致旧连接尚有效. 这时候重新连接, 会不会有问题?
+            log("%s:%s%s has been requested but no response is received", tracker->host, tracker->port, tracker->request);
             nr_trackers++;
             async_connect_to_tracker(tracker, efd);
         }
