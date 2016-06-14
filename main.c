@@ -143,7 +143,7 @@ main(int argc, char *argv[])
     // Generate peer id
     uint8_t symbol[] = "0123456789abcdefghijklmnopqrstuvwxyz!^()_+=-|";
     int symbol_size = sizeof(symbol) - 1;
-    FILE *random = fopen("/dev/random", "rb");
+    FILE *random = fopen("/dev/urandom", "rb");
     fread(mi->peer_id, 1, 20, random);
     for (int i = 0; i < 20; i++) mi->peer_id[i] = symbol[ (mi->peer_id[i]) % symbol_size ];
     printf("peer-id %s", mi->peer_id);

@@ -230,7 +230,7 @@ send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     assert(piece->substate[sub_idx] == SUB_NA);
     piece->substate[sub_idx] = SUB_DOWNLOAD;
     piece->subtimer[sub_idx] = time(NULL);
-    peer->start_time = piece->subtimer[sub_idx];
+    clock_gettime(CLOCK_BOOTTIME, &peer->st);
 
     msg->request.index = htonl(index);
     msg->request.begin = htonl(begin);
@@ -346,7 +346,10 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     peer->requesting_begin = -1;
 
     // 结算下载速度
-    peer->speed = (dl_size) / difftime(time(NULL), peer->start_time);
+    struct timespec ct;
+    clock_gettime(CLOCK_BOOTTIME, &ct);
+    log("nano diff %ld.%ld %ld.%ld", ct.tv_sec, ct.tv_nsec, peer->st.tv_sec, peer->st.tv_nsec);
+    peer->speed = (dl_size * 1.0e9) / ((ct.tv_sec - peer->st.tv_sec) * 1000000000 + ct.tv_nsec - peer->st.tv_nsec);
     log("%s:%d's speed %lfB/s", peer->ip, peer->port, peer->speed);
 }
 
@@ -943,10 +946,10 @@ bt_handler(struct MetaInfo *mi, int efd)
         log("peers >>>");
         for (int i = 0; i < mi->nr_peers; i++) {
             struct Peer *pr = mi->peers[i];
-            log("%16s:%-5d %7s %s  %10d  %6d  %lf", pr->ip, pr->port,
+            log("%16s:%-5d %7s %s  %10d  %6d  %.2lfKB/s", pr->ip, pr->port,
                    pr->get_choked ? "choke" : "unchoke",
                    pr->get_interested ? "int" : "not",
-                   pr->contribution, pr->wanted, pr->speed);
+                   pr->contribution, pr->wanted, pr->speed / 1000.0);
         }
         log("peers <<<");
 
