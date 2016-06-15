@@ -90,118 +90,6 @@ send_msg_to_tracker(struct MetaInfo *mi, struct Tracker *tracker)
     send_http_request(req, tracker->sfd);
 }
 
-/** @brief 选择需要请求的分片
- *
- * 采取最简单的前面的先下载策略。
- * 使用输出参数 msg 是因为这种 msg 一般都是栈上生成的，用完就丢。
- *
- * @param mi 全局信息
- * @param msg 要发送的请求
- * @return 0 - 成功，-1 - 失败
- *
- * @todo 应用优化策略：最少优先
- */
-int
-select_piece(struct MetaInfo *mi, struct PeerMsg *msg)
-{
-    // 找到一个没有完成的子分片
-
-    uint32_t index = 0;
-    uint32_t begin = 0;
-    uint32_t length = mi->sub_size;
-
-    int sub_idx = 0;
-    size_t piece_sz = mi->piece_size;
-    size_t sub_cnt = mi->sub_count;
-
-    time_t curr_time = time(NULL);
-
-    // 最简单的最前最优先策略
-    for (; index < mi->nr_pieces; index++) {
-        if (mi->pieces[index].is_downloaded) {
-            continue;
-        }
-
-        struct PieceInfo *piece = &mi->pieces[index];
-
-        // 处理最后一个分片的子分片数量
-        if (index + 1 == mi->nr_pieces) {
-            piece_sz = mi->file_size % mi->piece_size;
-            sub_cnt = (piece_sz - 1) / mi->sub_size + 1;
-        }
-
-        for (sub_idx = 0; sub_idx < sub_cnt; sub_idx++) {
-            if (piece->substate[sub_idx] == SUB_NA) {
-                break;
-            }
-        }
-
-        if (sub_idx == sub_cnt) {
-            log("some subpieces of piece %d is being downloaded", index);
-            check_substate(mi, index);
-            for (sub_idx = 0; sub_idx < sub_cnt; sub_idx++) {
-                if (piece->substate[sub_idx] == SUB_DOWNLOAD && difftime(curr_time, piece->subtimer[sub_idx]) > WAIT_THRESHOLD) {
-                    log("index %d begin %d exceeds time limit, re-request", index, sub_idx * mi->sub_size);
-                    piece->substate[sub_idx] = SUB_NA;
-                    break;
-                }
-            }
-        }
-
-        if (sub_idx == sub_cnt) {
-            log("none exceeds time limit");
-        }
-        else {
-            break;
-        }
-    }
-
-    if (index == mi->nr_pieces) {
-        log("all pieces have been / is being downloaded");
-        return -1;
-    }
-
-    begin = sub_idx * mi->sub_size;
-
-    // 处理最后一个子分片的长度
-    // 之前已经默认初始化统一大小了
-    if (sub_idx + 1 == sub_cnt && (piece_sz % mi->sub_size) != 0) {
-        length = (uint32_t)(piece_sz % mi->sub_size);
-    }
-
-    msg->len = htonl(13);
-    msg->id = BT_REQUEST;
-    msg->request.index = index;
-    msg->request.begin = begin;
-    msg->request.length = length;
-
-    return 0;
-}
-
-/** @brief 选择可以发送请求的 peer
- *
- * msg 不要转换字节序
- */
-struct Peer *
-select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
-{
-    double max_speed = -1.0;
-    struct Peer *fastest_peer = NULL;
-
-    for (int i = 0; i < mi->nr_peers; i++) {
-        struct Peer *peer = mi->peers[i];
-        if (!peer->get_choked && peer->requesting_index == -1 && peer_get_bit(peer, msg->request.index)) {
-            // 可以响应的，没有下载任务的，有分片的
-            if (peer->speed > max_speed) {
-                max_speed = peer->speed;
-                fastest_peer = peer;
-            }
-        }
-    }
-
-    return fastest_peer;
-}
-
 /**
  * @brief 向 peer 发送分片请求，同时更新 peer 和对应子分片的大小
  *
@@ -229,9 +117,7 @@ send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     peer->requesting_begin = begin;
 
     struct PieceInfo *piece = &mi->pieces[index];
-    assert(piece->substate[sub_idx] == SUB_NA);
     piece->substate[sub_idx] = SUB_DOWNLOAD;
-    piece->subtimer[sub_idx] = time(NULL);
     clock_gettime(CLOCK_BOOTTIME, &peer->st);
 
     msg->request.index = htonl(index);
@@ -244,6 +130,126 @@ send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
 
     log("send %s [index %d begin %d length %d] to %s:%d",
         bt_types[msg->id], index, begin, length, peer->ip, peer->port);
+}
+
+/**
+ * @brief 选择可以发送请求的 peer
+ *
+ * @oaram is_busy 所有可用 peer 都在工作中。
+ *
+ * @return 0 成功发送, 1 还有可用的，2 没有可用的
+ */
+int
+select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
+{
+    // 没有阻塞我方的、没有下载任务的，是 available 的.
+    int peer_available = 0;
+
+    for (int i = 0; i < mi->nr_peers; i++) {
+        struct Peer *peer = mi->peers[i];
+        if (!peer->get_choked && peer->requesting_index == -1) {
+            peer_available = 1;
+            if (peer_get_bit(peer, msg->request.index)) {
+                // 可以响应的，没有下载任务的，有分片的
+                send_request(mi, peer, msg);
+                return 0;
+            }
+        }
+    }
+
+    return peer_available ? 1 : 2;
+}
+
+/** @brief 选择需要请求的分片
+ *
+ * 采取最简单的前面的先下载策略。
+ * 使用输出参数 msg 是因为这种 msg 一般都是栈上生成的，用完就丢。
+ *
+ * @param mi 全局信息
+ * @param msg 要发送的请求
+ * @param end_game 是否允许抢占正在下载的任务
+ * @return 0 - 成功，-1 - 已经完成，1 - 全部正在下载，可 end game
+ *
+ * @todo 应用优化策略：最少优先
+ */
+int
+select_piece(struct MetaInfo *mi, int end_game)
+{
+    if (end_game) {
+        log("=== END GAME ===");
+    }
+
+    uint32_t index = 0;
+    int sub_idx = 0;
+    size_t piece_sz = mi->piece_size;
+    size_t sub_cnt = mi->sub_count;
+    int is_found_downloading_subpiece = 0;  // 是否遭遇了正在下载的分片，用于判断是否启动 end game.
+    int is_all_piece_finished = 1;          // 是否所有分片下载完成
+
+    // 最简单的最前最优先策略
+    for (; index < mi->nr_pieces; index++) {
+        if (mi->pieces[index].is_downloaded) {
+            continue;
+        }
+
+        is_all_piece_finished = 0;
+
+        struct PieceInfo *piece = &mi->pieces[index];
+
+        // 处理最后一个分片的子分片数量
+        if (index + 1 == mi->nr_pieces) {
+            piece_sz = mi->file_size % mi->piece_size;
+            sub_cnt = (piece_sz - 1) / mi->sub_size + 1;
+        }
+
+        for (sub_idx = 0; sub_idx < sub_cnt; sub_idx++) {
+            if (piece->substate[sub_idx] == SUB_NA || (piece->substate[sub_idx] == SUB_DOWNLOAD && end_game)) {
+                //------------------------------------
+                // 寻找可以发送请求的 peer 并发送请求
+                //------------------------------------
+
+                uint32_t begin = sub_idx * mi->sub_size;
+                uint32_t length = mi->sub_size;
+
+                // 处理最后一个子分片的长度
+                // 之前已经默认初始化统一大小了
+                if (sub_idx + 1 == sub_cnt && (piece_sz % mi->sub_size) != 0) {
+                    length = (uint32_t)(piece_sz % mi->sub_size);
+                }
+
+                struct PeerMsg msg = {
+                    .len = htonl(13),
+                    .id = BT_REQUEST,
+                    .request.index = index,
+                    .request.begin = begin,
+                    .request.length = length
+                };
+
+                if (select_peer(mi, &msg) == 2) {
+                    // 没有可用的 peer 继续查看 piece 也没有意义了。
+                    return 0;
+                }
+            }
+            else if (piece->substate[sub_idx] == SUB_DOWNLOAD) {
+                is_found_downloading_subpiece = 1;
+            }
+        }
+
+        check_substate(mi, index);
+    }
+
+    assert(index == mi->nr_pieces);
+    log("all pieces have been / is being downloaded");
+
+    if (is_found_downloading_subpiece) {
+        return 1;  // enable end-game
+    }
+    else if (is_all_piece_finished) {
+        return 2;  // disable request logic
+    }
+    else {
+        return 0;  // subpiece cannot be sent.
+    }
 }
 
 /**
@@ -850,6 +856,7 @@ bt_handler(struct MetaInfo *mi, int efd)
 
     char *bar = "---------------------------------------------------------------";
     struct epoll_event *events = calloc(100, sizeof(*events));
+    int end_game = 0;
     while (1) {
         int n = epoll_wait(efd, events, 100, -1);  // 超时限制 5s
 
@@ -980,13 +987,18 @@ bt_handler(struct MetaInfo *mi, int efd)
         }
 
         // 处理发送逻辑
-        struct PeerMsg msg;
-        struct Peer *peer;
-        if (select_piece(mi, &msg) != -1) {
-            if ((peer = select_peer(mi, &msg)) != NULL) {
-                send_request(mi, peer, &msg);
+        struct timespec st, ct;
+        clock_gettime(CLOCK_BOOTTIME, &st);
+        if (end_game != 2) {
+            int ret = select_piece(mi, end_game);
+            // 不放过这可以 end-game 的第一次请求机会
+            if (end_game == 0 && ret == end_game) {
+                select_piece(mi, ret);
             }
+            end_game = ret;
         }
+        clock_gettime(CLOCK_BOOTTIME, &ct);
+        log("request logic time cost: %ldns", (ct.tv_sec - st.tv_sec) * 1000000000 + (ct.tv_nsec - ct.tv_nsec));
 
         // 统计信息
         int work_cnt = 0;

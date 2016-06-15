@@ -53,9 +53,7 @@ struct PieceInfo
     unsigned char  hash[HASH_SIZE]; ///< 该分片的 SHA1 摘要。
     int            nr_owners;       ///< 该分片拥有者的数量。
     int            is_downloaded;   ///< 标记该分片是否已经完成下载：1 - 已下载，0 - 未完成。
-
     unsigned char *substate;        ///< 标记子分片完成情况： SUB_NA - 未下载，SUB_DOWNLOAD - 下载中，SUB_FINISH - 下载完成。
-    time_t        *subtimer;        ///< 标记子分片下载等待时间
 };
 
 /**
