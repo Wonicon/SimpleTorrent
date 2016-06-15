@@ -696,41 +696,59 @@ handle_ready(struct MetaInfo *mi, int sfd)
 int
 finish_handshake(struct MetaInfo *mi, int sfd)
 {
-
-    // 更新 wait peers 列表，将成功连接的从队列删除
     int wp_idx = get_wait_peer_index_by_fd(mi, sfd);
     if (wp_idx == -1) {
         log("unexpected fd %d for handshaking", sfd);
         return -1;
     }
 
-    struct WaitPeer wp = mi->wait_peers[wp_idx];  // 暂存以备后续使用
-    rm_wait_peer(mi, wp_idx);  // 无论成功与否，都要从等待列表里删除
+    struct WaitPeer *wp = &mi->wait_peers[wp_idx];
 
-    // 更新 peers 列表
-    PeerHandShake handshake = {};
-    ssize_t nr_read = recv(sfd, &handshake, sizeof(handshake), MSG_WAITALL);
+    if (wp->msg == NULL) {
+        assert(wp->wanted == 0);
+        wp->wanted = sizeof(PeerHandShake);
+        wp->msg = malloc(sizeof(PeerHandShake));
+    }
 
+    //-------------------
+    // 异步读取握手消息
+    //-------------------
+
+    log("partially read handshake msg: start %zu, length %lu", sizeof(PeerHandShake) - wp->wanted, wp->wanted);
+    ssize_t nr_read = read(sfd, wp->msg + sizeof(PeerHandShake) - wp->wanted, wp->wanted);
+    log("nr_read %ld", nr_read);
     if (nr_read == 0) {
-        log("handshaking failed, disconnect %u.%u.%u.%u:%u",
-            wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
+        // 在 EPOLLIN 事件里还能读出 0, 基本是 FIN 了
+        log("disconnect during read handshake from %u.%u.%u.%u:%u", wp->ip[0], wp->ip[1], wp->ip[2], wp->ip[3], wp->port);
+        log("handshaking failed");
         close(sfd);
+        rm_wait_peer(mi, wp_idx);
         return -1;
     }
+
+    wp->wanted -= nr_read;
+
+    if (wp->wanted > 0) {
+        return 0;
+    }
+
+    struct WaitPeer p = *wp;
+    PeerHandShake *hs = (void *)p.msg;
+    rm_wait_peer(mi, wp_idx);
 
     //-------------------------------------
     // 检查 peer 是否重复
     //-------------------------------------
 
     // 防止自己和自己连接
-    if (memcmp(mi->peer_id, handshake.hs_peer_id, HASH_SIZE) == 0) {
+    if (memcmp(mi->peer_id, hs->hs_peer_id, HASH_SIZE) == 0) {
         close(sfd);
         return -1;
     }
 
     // 防止和已有 peer 重复
     for (int i = 0; i < mi->nr_peers; i++) {
-        if (memcmp(handshake.hs_peer_id, mi->peers[i]->peer_id, HASH_SIZE) == 0) {
+        if (memcmp(hs->hs_peer_id, mi->peers[i]->peer_id, HASH_SIZE) == 0) {
             close(sfd);
             return -1;
         }
@@ -739,15 +757,15 @@ finish_handshake(struct MetaInfo *mi, int sfd)
     // 将对方加入到正式 peers 列表中
 
     struct Peer *peer = peer_new(sfd, mi->nr_pieces);
-    memcpy(peer->peer_id, handshake.hs_peer_id, HASH_SIZE);
+    memcpy(peer->peer_id, hs->hs_peer_id, HASH_SIZE);
     add_peer(mi, peer);
 
     log("handshaked with %u.%u.%u.%u:%u",
-        wp.ip[0], wp.ip[1], wp.ip[2], wp.ip[3], ntohs(wp.port));
+        p.ip[0], p.ip[1], p.ip[2], p.ip[3], ntohs(p.port));
 
     // 如果是对方主动连接，则我方要返回 handshake
-    if (wp.direction == 1) {
-        send_handshake(wp.fd, mi);
+    if (p.direction == 1) {
+        send_handshake(p.fd, mi);
     }
 
     // 发送 bitfield

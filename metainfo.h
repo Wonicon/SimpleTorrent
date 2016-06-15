@@ -73,6 +73,8 @@ struct WaitPeer
     };
     uint16_t port;        ///< 端口号，网络字节序
     int direction;        ///< 0: 我方主动连接, 1: 对方主动连接。
+    char *msg;            ///< 指向未完全读取的握手消息
+    size_t wanted;       ///< 握手消息还有多少字节才完整
 };
 
 /**
