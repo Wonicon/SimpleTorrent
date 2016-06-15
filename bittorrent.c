@@ -725,7 +725,7 @@ finish_handshake(struct MetaInfo *mi, int sfd)
 
     // 防止和已有 peer 重复
     for (int i = 0; i < mi->nr_peers; i++) {
-        if (memcmp(mi->peer_id, mi->peers[i]->peer_id, HASH_SIZE) == 0) {
+        if (memcmp(handshake.hs_peer_id, mi->peers[i]->peer_id, HASH_SIZE) == 0) {
             close(sfd);
             return -1;
         }
