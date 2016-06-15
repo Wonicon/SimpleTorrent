@@ -552,14 +552,19 @@ handle_peer_list(struct MetaInfo *mi, int efd, struct BNode *bcode)
             uint16_t port;
         } *p = (void *)&peers->s_data[i];
 
+        //--------------------------------------------
         // 防止从多个 tracker 连接同一个 peer
+        // 只能检查我方主动连接的 peer, 因为对方主动连接的，
+        // 即便 ip 地址相同，端口号也是动态分配的，只能通过
+        // peer-id 检查。
+        //--------------------------------------------
 
-        if (get_peer_by_addr(mi, p->addr) != NULL) {
+        if (get_peer_by_addr(mi, p->addr, p->port) != NULL) {
             log("already handshaked with peer %d.%d.%d.%d:%d", p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
             continue;
         }
 
-        if (get_wait_peer_fd(mi, p->addr) != -1) {
+        if (get_wait_peer_fd(mi, p->addr, p->port) != -1) {
             log("already connecting to peer %d.%d.%d.%d:%d", p->ip[0], p->ip[1], p->ip[2], p->ip[3], ntohs(p->port));
             continue;
         }

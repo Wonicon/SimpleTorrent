@@ -159,7 +159,7 @@ struct Peer *get_peer_by_fd(struct MetaInfo *mi, int fd);
  * @param mi 全局信息
  * @param addr ip 地址，网络字节序
  */
-struct Peer *get_peer_by_addr(struct MetaInfo *mi, uint32_t addr);
+struct Peer *get_peer_by_addr(struct MetaInfo *mi, uint32_t addr, uint16_t port);
 
 /**
  * @brief 检查某一分片的子分片状态并打印
@@ -215,7 +215,7 @@ int get_wait_peer_index_by_fd(struct MetaInfo *mi, int fd);
  *
  * @return 对应的套接字，没找到则 -1.
  */
-int get_wait_peer_fd(struct MetaInfo *mi, uint32_t addr);
+int get_wait_peer_fd(struct MetaInfo *mi, uint32_t addr, uint16_t port);
 
 /** @brief 删除等待 peer */
 void rm_wait_peer(struct MetaInfo *mi, int index);
