@@ -255,7 +255,7 @@ send_request(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
  * @param check correct sha1
  * @return 1 - consistent, 0 - not
  */
-int check_piece(FILE *fp, int piece_idx, uint32_t piece_size, uint32_t file_size, uint8_t check[20])
+int check_piece(FILE *fp, int piece_idx, uint32_t piece_size, uint8_t check[20])
 {
     uint8_t *piece = malloc(piece_size);
     fseek(fp, piece_idx * piece_size, SEEK_SET);
@@ -312,7 +312,7 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         fflush(mi->file);  // sub piece may not be write back, cause the final race never end.
         piece->substate[sub_idx] = SUB_FINISH;
         if (check_substate(mi, msg->piece.index)) {
-            if (check_piece(mi->file, msg->piece.index, mi->piece_size, (uint32_t)mi->file_size, piece->hash)) {
+            if (check_piece(mi->file, msg->piece.index, mi->piece_size, piece->hash)) {
                 piece->is_downloaded = 1;
                 set_bit(mi->bitfield, msg->piece.index);
                 // 发送 HAVE 消息
@@ -602,12 +602,15 @@ handle_interval(struct Tracker *tracker, struct BNode *bcode, int efd)
     }
 
     tracker->timerfd = timerfd_create(CLOCK_REALTIME, 0);
+    if (tracker->timerfd == -1) {
+        perror("timerfd");
+    }
     log("tracker %s timer FD %d", tracker->host, tracker->timerfd);
 
     // 单次定时器，靠重新获取报文来重新定时
     struct itimerspec ts = {
         .it_interval = { .tv_sec = 0, .tv_nsec = 0 },
-        .it_value = { .tv_sec = 10, .tv_nsec = 0 }
+        .it_value = { .tv_sec = interval->i, .tv_nsec = 0 }
     };
 
     if (timerfd_settime(tracker->timerfd, 0, &ts, NULL) == -1) {
@@ -857,6 +860,7 @@ bt_handler(struct MetaInfo *mi, int efd)
             log("handle fd %d", ev->data.fd);
 
             if ((ev->events & EPOLLERR) || (ev->events & EPOLLHUP)) {  // 异步 connect 错误处理
+                log("handle error");
                 handle_error(mi, ev->data.fd);
                 close(ev->data.fd);
                 epoll_ctl(efd, EPOLL_CTL_DEL, ev->data.fd, NULL);
@@ -864,6 +868,7 @@ bt_handler(struct MetaInfo *mi, int efd)
             }
 
             if (ev->events & EPOLLOUT) {  // connect 完成
+                log("handle connect");
                 // EPOLLOUT 表明套接字可写, 对于刚刚调用过 connect 的套接字来讲，
                 // 即意味着连接成功建立.
                 handle_ready(mi, ev->data.fd);
@@ -874,6 +879,7 @@ bt_handler(struct MetaInfo *mi, int efd)
             }
 
             if (!(ev->events & EPOLLIN)) {
+                log("wtf");
                 continue;
             }
 
@@ -939,6 +945,7 @@ bt_handler(struct MetaInfo *mi, int efd)
 
             // tracker 的响应
             if ((tracker = get_tracker_by_fd(mi, ev->data.fd)) != NULL) {
+                log("handle tracker response");
                 struct BNode *bcode = handle_tracker_response(tracker->sfd);
                 if (bcode != NULL) {
                     print_bcode(bcode, 0, 0);

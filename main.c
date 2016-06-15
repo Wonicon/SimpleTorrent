@@ -129,6 +129,7 @@ main(int argc, char *argv[])
     };
     if (sigaction(SIGINT, &act, NULL) == -1) {
         perror("sigaction");
+        exit(EXIT_FAILURE);
     }
 
     // 解析种子文件
@@ -180,9 +181,11 @@ main(int argc, char *argv[])
     };
     if (bind(sfd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
         perror("bind listen socket");
+        exit(EXIT_FAILURE);
     }
     if (listen(sfd, 0) == -1) {
         perror("listen socket");
+        exit(EXIT_FAILURE);
     }
     mi->listen_fd = sfd;
     log("listen fd %d", sfd);
