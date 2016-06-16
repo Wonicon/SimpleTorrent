@@ -117,7 +117,7 @@ int
 main(int argc, char *argv[])
 {
     if (argc < 3) {
-        printf("Usage: %s <torrent> <port>\n", argv[0]);
+        printf("Usage: %s <torrent> <port> [slow]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
@@ -140,6 +140,9 @@ main(int argc, char *argv[])
 
     // 创建并初始化 MetaInfo 对象
     mi = calloc(1, sizeof(*mi));
+    if (argc >= 4) {
+        mi->slow = 1;
+    }
 
     // Generate peer id
     uint8_t symbol[] = "0123456789abcdefghijklmnopqrstuvwxyz_-+";

@@ -34,8 +34,6 @@ struct Tracker
 #define SUB_DOWNLOAD 1
 /** 子分片完成下载 */
 #define SUB_FINISH 2
-/** 子分片最长等待时间 60s */
-#define WAIT_THRESHOLD 60.0
 
 /**
  * @brief 分片信息
@@ -108,6 +106,7 @@ struct MetaInfo
     struct WaitPeer *wait_peers;        ///< 已发出 connect 的 peer 集合
     size_t nr_trackers;                 ///< tracker 数量
     struct Tracker *trackers;           ///< tracker 数组
+    int slow;                           ///< 是否开启慢速模式
 };
 
 /** @brief 释放全局信息 */

@@ -1013,5 +1013,7 @@ bt_handler(struct MetaInfo *mi, int efd)
             log("%2d  %16s:%-5d  %d", p->fd, inet_ntoa(ia), ntohs(p->port), p->direction);
         }
         log("wait peers <<<");
+
+        if (mi->slow) { sleep(4); }
     }
 }
