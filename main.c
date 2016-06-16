@@ -144,6 +144,29 @@ main(int argc, char *argv[])
         mi->slow = 1;
     }
 
+    // 创建侦听 peer 的套接字
+    int sfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sfd == -1) {
+        perror("create listen socket");
+        exit(EXIT_FAILURE);
+    }
+    mi->port = (uint16_t)atoi(argv[2]);
+    struct sockaddr_in addr = {
+            .sin_addr.s_addr = INADDR_ANY,
+            .sin_family = AF_INET,
+            .sin_port = htons(mi->port),
+    };
+    if (bind(sfd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        perror("bind listen socket");
+        exit(EXIT_FAILURE);
+    }
+    if (listen(sfd, 0) == -1) {
+        perror("listen socket");
+        exit(EXIT_FAILURE);
+    }
+    mi->listen_fd = sfd;
+    log("listen fd %d", sfd);
+
     // Generate peer id
     uint8_t symbol[] = "0123456789abcdefghijklmnopqrstuvwxyz_-+";
     int symbol_size = sizeof(symbol) - 1;
@@ -169,29 +192,6 @@ main(int argc, char *argv[])
     log("mi timer FD %d", mi->timerfd);
     struct itimerspec ts = { { 60, 0 }, { 60, 0} };  // 首次超时 1min, 持续间隔 1min.
     timerfd_settime(mi->timerfd, 0, &ts, NULL);
-
-    // 创建侦听 peer 的套接字
-    int sfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sfd == -1) {
-        perror("create listen socket");
-        exit(EXIT_FAILURE);
-    }
-    mi->port = (uint16_t)atoi(argv[2]);
-    struct sockaddr_in addr = {
-        .sin_addr.s_addr = INADDR_ANY,
-        .sin_family = AF_INET,
-        .sin_port = htons(mi->port),
-    };
-    if (bind(sfd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-        perror("bind listen socket");
-        exit(EXIT_FAILURE);
-    }
-    if (listen(sfd, 0) == -1) {
-        perror("listen socket");
-        exit(EXIT_FAILURE);
-    }
-    mi->listen_fd = sfd;
-    log("listen fd %d", sfd);
 
     // 输出相关信息
 
