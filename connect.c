@@ -37,7 +37,7 @@ parse_url(const char *url, char *method, char *host, char *port, char *request)
     url = curr + 3;
 
     // hostname: "hostname[:port][/[reqeust]]"
-    // TODO ":" 是否会出现在 "/" 后面？
+    /// @note ":" 在 url 中要被转义，只会出现在 port 的位置。
     if ((curr = strstr(url, ":")) != NULL) {
         // hostname:port/request
         strncpy(host, url, curr - url);

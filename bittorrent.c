@@ -348,8 +348,6 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
  * @param pInfo global information
  * @param pPeer the peer to send piece
  * @param pMsg the request msg
- *
- * @todo check whether writing a large piece of data in the socket may stall the execution.
  */
 void handle_request(struct MetaInfo *pInfo, struct Peer *pPeer, struct PeerMsg *pMsg) {
     FILE *fp = pInfo->file;
@@ -407,15 +405,18 @@ handle_msg(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         print_bit(msg->bitfield, mi->nr_pieces);
         putchar('\n');
         memcpy(peer->bitfield, msg->bitfield, mi->bitfield_size);
-        /// @todo 根据 bitfield 增加 piece 持有者数量
+        for (uint32_t i = 0; i < mi->nr_pieces; i++) {
+            mi->pieces[i].nr_owners += peer_get_bit(peer, i);
+        }
         break;
     case BT_HAVE:
         msg->have.piece_index = ntohl(msg->have.piece_index);
         log("%s:%d has a new piece %d", peer->ip, peer->port, msg->have.piece_index);
         peer_set_bit(peer, msg->have.piece_index);
+        mi->pieces[ msg->have.piece_index ].nr_owners += 1;
+
         print_bit(peer->bitfield, mi->nr_pieces);
         putchar('\n');
-        /// @todo 根据 have 增加 piece 持有者数量
         break;
     case BT_PIECE:
         msg->piece.index = htonl(msg->piece.index);
