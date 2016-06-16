@@ -143,7 +143,7 @@ int
 select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
 {
     // 没有阻塞我方的、没有下载任务的，是 available 的.
-    int peer_available = 0;
+    int peer_available = 2;
 
     for (int i = 0; i < mi->nr_peers; i++) {
         struct Peer *peer = mi->peers[i];
@@ -157,7 +157,7 @@ select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
         }
     }
 
-    return peer_available ? 1 : 2;
+    return peer_available;
 }
 
 /** @brief 选择需要请求的分片
@@ -175,11 +175,6 @@ select_peer(struct MetaInfo *mi, struct PeerMsg *msg)
 int
 select_piece(struct MetaInfo *mi, int end_game)
 {
-    if (end_game) {
-        log("=== END GAME ===");
-    }
-
-    uint32_t index = 0;
     int sub_idx = 0;
     size_t piece_sz = mi->piece_size;
     size_t sub_cnt = mi->sub_count;
@@ -187,7 +182,7 @@ select_piece(struct MetaInfo *mi, int end_game)
     int is_all_piece_finished = 1;          // 是否所有分片下载完成
 
     // 最简单的最前最优先策略
-    for (; index < mi->nr_pieces; index++) {
+    for (uint32_t index = 0; index < mi->nr_pieces; index++) {
         if (mi->pieces[index].is_downloaded) {
             continue;
         }
@@ -225,26 +220,30 @@ select_piece(struct MetaInfo *mi, int end_game)
                     .request.length = length
                 };
 
-                if (select_peer(mi, &msg) == 2) {
-                    // 没有可用的 peer 继续查看 piece 也没有意义了。
-                    return 0;
+                int ret = select_peer(mi, &msg);
+                if (piece->substate[sub_idx] == SUB_DOWNLOAD && end_game) {
+                    log("override in END GAME!");
+                }
+
+                switch (ret) {
+                case 0: log("successfully sent index %u begin %u length %u", index, begin, length); break;
+                case 1: log("no peers can provide index %u begin %u length %u", index, begin, length); break;
+                case 2: log("no peers available"); return 0;
+                default: err("unexpected return value %d", ret); exit(EXIT_FAILURE);
                 }
             }
             else if (piece->substate[sub_idx] == SUB_DOWNLOAD) {
                 is_found_downloading_subpiece = 1;
             }
         }
-
-        check_substate(mi, index);
     }
 
-    assert(index == mi->nr_pieces);
-    log("all pieces have been / is being downloaded");
-
     if (is_found_downloading_subpiece) {
+        log("all pieces is being downloaded, start end game.");
         return 1;  // enable end-game
     }
     else if (is_all_piece_finished) {
+        log("all pieces have been downloaded");
         return 2;  // disable request logic
     }
     else {
@@ -266,31 +265,19 @@ int check_piece(FILE *fp, int piece_idx, uint32_t piece_size, uint8_t check[20])
     uint8_t *piece = malloc(piece_size);
     fseek(fp, piece_idx * piece_size, SEEK_SET);
     ssize_t nr_read = fread(piece, 1, piece_size, fp);
-    if (nr_read < piece_size) {
-        if (feof(fp)) {
-            err("EOF");
-        }
-        else if (ferror(fp)) {
-            err("err");
-        }
-        perror("");
+    if (nr_read < piece_size && ferror(fp)) {
+        err("failed to read file");
+        exit(EXIT_FAILURE);
     }
     uint8_t md[20];
     log("idx %d size %u, read %ld", piece_idx, piece_size, nr_read);
     SHA1(piece, nr_read, md);
-    for (int i = 0; i < 20; i++) {
-        printf("%02x", check[i]);
-    }
-    putchar('\n');
-    for (int i = 0; i < 20; i++) {
-        printf("%02x", md[i]);
-    }
-    puts("");
     free(piece);
     return memcmp(check, md, 20) == 0;
 }
 
-/** @brief 处理分片消息
+/**
+ * @brief 处理分片消息
  *
  * 收到分片消息后，期望调用者处理字节序。
  * 会将子分片写入到对应的分片文件中，如果一个子分片已经被写入过，则抛弃。
@@ -317,6 +304,11 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
         fwrite(msg->piece.block, 1, dl_size, mi->file);
         fflush(mi->file);  // sub piece may not be write back, cause the final race never end.
         piece->substate[sub_idx] = SUB_FINISH;
+        peer->contribution += dl_size;
+        mi->downloaded += dl_size;
+        mi->left -= dl_size;
+        log("downloaded %lu", mi->downloaded);
+
         if (check_substate(mi, msg->piece.index)) {
             if (check_piece(mi->file, msg->piece.index, mi->piece_size, piece->hash)) {
                 piece->is_downloaded = 1;
@@ -326,9 +318,7 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
                 for (int i = 0; i < mi->nr_peers; i++) {
                     if (!peer_get_bit(peer, msg->piece.index)) {
                         peer_send_msg(peer, &have_msg);
-                        log("send %s %d to %s:%u",
-                            bt_types[have_msg.id], have_msg.have.piece_index,
-                            peer->ip, peer->port);
+                        log("send %s %d to %s:%u", bt_types[have_msg.id], have_msg.have.piece_index, peer->ip, peer->port);
                     }
                 }
             }
@@ -339,10 +329,6 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
                 mi->left += dl_size;  // make up the following subtraction
             }
         }
-        peer->contribution += dl_size;
-        mi->downloaded += dl_size;
-        mi->left -= dl_size;
-        log("downloaded %lu", mi->downloaded);
     }
     else {
         log("discard piece %d subpiece %d from %s:%d due to previous accomplishment",
@@ -353,12 +339,10 @@ handle_piece(struct MetaInfo *mi, struct Peer *peer, struct PeerMsg *msg)
     peer->requesting_index = -1;
     peer->requesting_begin = -1;
 
-    // 结算下载速度
+    // 更新下载速度
     struct timespec ct;
     clock_gettime(CLOCK_BOOTTIME, &ct);
-    log("nano diff %ld.%ld %ld.%ld", ct.tv_sec, ct.tv_nsec, peer->st.tv_sec, peer->st.tv_nsec);
     peer->speed = (dl_size * 1.0e9) / ((ct.tv_sec - peer->st.tv_sec) * 1000000000 + ct.tv_nsec - peer->st.tv_nsec);
-    log("%s:%d's speed %lfB/s", peer->ip, peer->port, peer->speed);
 }
 
 /**
@@ -646,23 +630,31 @@ handle_error(struct MetaInfo *mi, int error_fd)
 {
     int result;
     socklen_t result_len = sizeof(result);
+    struct Peer *peer;
     struct Tracker *tracker;
+    int wp_idx;
 
     if (getsockopt(error_fd, SOL_SOCKET, SO_ERROR, &result, &result_len) < 0) {
         perror("getsockopt");
     }
 
     if ((tracker = get_tracker_by_fd(mi, error_fd)) != NULL) {
-        err("%s:%s%s: %s", tracker->host, tracker->port, tracker->request, strerror(result));
         // tracker 列表不需要修改，无法连接的 tracker 留在列表里不会产生冲突。
+        err("%s:%s%s: %s", tracker->host, tracker->port, tracker->request, strerror(result));
+    }
+    else if ((peer = get_peer_by_fd(mi, error_fd)) != NULL) {
+        err("rm peer %s:%u: %s", peer->ip, peer->port, strerror(result));
+        del_peer_by_fd(mi, error_fd);
+    }
+    else if ((wp_idx = get_wait_peer_index_by_fd(mi, error_fd)) != -1) {
+        // 更新 wait peers 列表，将连接失败的从队列删除。
+        struct in_addr addr = { .s_addr = mi->wait_peers[wp_idx].addr };
+        err("rm wait peer %s:%u: %s", inet_ntoa(addr), mi->wait_peers[wp_idx].port, strerror(result));
+        rm_wait_peer(mi, wp_idx);
     }
     else {
-        err("%d: %s", error_fd, strerror(result));
-        // 更新 wait peers 列表，将连接失败的从队列删除。
-        int wp_idx = get_wait_peer_index_by_fd(mi, error_fd);
-        if (wp_idx != -1) {
-            rm_wait_peer(mi, wp_idx);
-        }
+        err("unexpected fd %d", error_fd);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -723,9 +715,7 @@ finish_handshake(struct MetaInfo *mi, int sfd)
     // 异步读取握手消息
     //-------------------
 
-    log("partially read handshake msg: start %zu, length %lu", sizeof(PeerHandShake) - wp->wanted, wp->wanted);
     ssize_t nr_read = read(sfd, wp->msg + sizeof(PeerHandShake) - wp->wanted, wp->wanted);
-    log("nr_read %ld", nr_read);
     if (nr_read == 0) {
         // 在 EPOLLIN 事件里还能读出 0, 基本是 FIN 了
         log("disconnect during read handshake from %u.%u.%u.%u:%u", wp->ip[0], wp->ip[1], wp->ip[2], wp->ip[3], wp->port);
@@ -740,6 +730,10 @@ finish_handshake(struct MetaInfo *mi, int sfd)
     if (wp->wanted > 0) {
         return 0;
     }
+
+    //-------------------------------------
+    // 完成握手消息读取，执行添加 peer 逻辑
+    //-------------------------------------
 
     struct WaitPeer p = *wp;
     PeerHandShake *hs = (void *)p.msg;
@@ -818,7 +812,7 @@ void handle_coming_peer(struct MetaInfo *mi, struct epoll_event *ev, int efd)
 
     int fd = accept(mi->listen_fd, (struct sockaddr *)&peer_addr, &peer_len);
     getsockname(fd, (void *)&local_addr, &local_len);
-    log("one peer wants to connect, conn_fd %d", fd);
+    log("one peer wants to connect, assigned connnection fd %d", fd);
     log("peer  %s:%u", inet_ntoa(peer_addr.sin_addr), ntohs(peer_addr.sin_port));
     log("local %s:%u", inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port));
 
@@ -866,7 +860,7 @@ bt_handler(struct MetaInfo *mi, int efd)
             struct epoll_event *ev = &events[i];
             log("handle fd %d", ev->data.fd);
 
-            if ((ev->events & EPOLLERR) || (ev->events & EPOLLHUP)) {  // 异步 connect 错误处理
+            if (ev->events & (EPOLLERR | EPOLLHUP)) {  // 异步 connect 错误处理
                 log("handle error");
                 handle_error(mi, ev->data.fd);
                 close(ev->data.fd);
@@ -886,21 +880,20 @@ bt_handler(struct MetaInfo *mi, int efd)
             }
 
             if (!(ev->events & EPOLLIN)) {
-                log("wtf");
-                continue;
+                log("unexpected event %x", ev->events);
+                exit(EXIT_FAILURE);
             }
 
+            //----------------------
             // 接受并处理 BT 报文
+            //----------------------
 
-            /*
-             * 关于握手报文与 BT 报文的区分方法:
-             *
-             *   握手报文和 BT 报文无法从数据格式上进行区分, 但是一个没有完成
-             *   握手的 peer 是不会发送 BT 报文的. 我们将完成握手的 peer 记录
-             *   在一个集合 peers 中(抽象). 对于当前的可读套接字, 如果它不在
-             *   peers 集合里, 则是没有完成握手的 peer, 那么它送来的数据, 只
-             *   可能是握手信息或者 FIN 报文.
-             */
+            // 关于握手报文与 BT 报文的区分方法:
+            //   握手报文和 BT 报文无法从数据格式上进行区分, 但是一个没有完成
+            //   握手的 peer 是不会发送 BT 报文的. 我们将完成握手的 peer 记录
+            //   在一个集合 peers 中(抽象). 对于当前的可读套接字, 如果它不在
+            //   peers 集合里, 则是没有完成握手的 peer, 那么它送来的数据, 只
+            //   可能是握手信息或者 FIN 报文.
 
             // peers, trackers 等查询函数有线性时间复杂度，而 peer 的 BT 消息最为频繁，
             // 所以优先考虑套接字属于 peer 可以减少开销。
@@ -987,8 +980,6 @@ bt_handler(struct MetaInfo *mi, int efd)
         }
 
         // 处理发送逻辑
-        struct timespec st, ct;
-        clock_gettime(CLOCK_BOOTTIME, &st);
         if (end_game != 2) {
             int ret = select_piece(mi, end_game);
             // 不放过这可以 end-game 的第一次请求机会
@@ -997,8 +988,6 @@ bt_handler(struct MetaInfo *mi, int efd)
             }
             end_game = ret;
         }
-        clock_gettime(CLOCK_BOOTTIME, &ct);
-        log("request logic time cost: %ldns", (ct.tv_sec - st.tv_sec) * 1000000000 + (ct.tv_nsec - ct.tv_nsec));
 
         // 统计信息
         int work_cnt = 0;
