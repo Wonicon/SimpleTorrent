@@ -225,12 +225,10 @@ select_piece(struct MetaInfo *mi, int end_game)
                     log("override in END GAME!");
                 }
 
-                switch (ret) {
-                case 0: log("successfully sent index %u begin %u length %u", index, begin, length); break;
-                case 1: log("no peers can provide index %u begin %u length %u", index, begin, length); break;
-                case 2: log("no peers available"); return 0;
-                default: err("unexpected return value %d", ret); exit(EXIT_FAILURE);
-                }
+                if      (ret == 0) log("successfully request index %u begin %u length %u", index, begin, length);
+                else if (ret == 1) break;     // 没有可以满足这个分片请求的 peer, 放弃这个分片的所有子分片
+                else if (ret == 2) return 0;  // 没有可以请求的 peer, 结束整个选择过程
+                else { err("unexpected return value %d", ret); exit(EXIT_FAILURE); }
             }
             else if (piece->substate[sub_idx] == SUB_DOWNLOAD) {
                 is_found_downloading_subpiece = 1;
