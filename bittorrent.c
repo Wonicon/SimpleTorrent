@@ -181,8 +181,20 @@ select_piece(struct MetaInfo *mi, int end_game)
     int is_found_downloading_subpiece = 0;  // 是否遭遇了正在下载的分片，用于判断是否启动 end game.
     int is_all_piece_finished = 1;          // 是否所有分片下载完成
 
+    /// @todo 只需要创建一次 base, 另外只要在需要的时候更新排序！
+    struct PieceInfo **base = malloc(sizeof(*base) * mi->nr_pieces);
+    for (int i = 0; i < mi->nr_pieces; i++) base[i] = &mi->pieces[i];
+
+    int comp(const void *x, const void *y) {
+        const struct PieceInfo *left = *(struct PieceInfo **)x;
+        const struct PieceInfo *right = *(struct PieceInfo **)y;
+        return left->nr_owners - right->nr_owners;
+    }
+    qsort(base, mi->nr_pieces, sizeof(*base), comp);
+
     // 最简单的最前最优先策略
-    for (uint32_t index = 0; index < mi->nr_pieces; index++) {
+    for (int i = 0; i < mi->nr_pieces; i++) {
+        uint32_t index = (uint32_t)(base[i] - mi->pieces);  // 由于是连续的，可以保证 piece 的数量不会超过 uint32_t 的范围。
         if (mi->pieces[index].is_downloaded) {
             continue;
         }
@@ -190,6 +202,7 @@ select_piece(struct MetaInfo *mi, int end_game)
         is_all_piece_finished = 0;
 
         struct PieceInfo *piece = &mi->pieces[index];
+        assert(piece == base[i]);
 
         // 处理最后一个分片的子分片数量
         if (index + 1 == mi->nr_pieces) {
@@ -227,7 +240,7 @@ select_piece(struct MetaInfo *mi, int end_game)
 
                 if      (ret == 0) log("successfully request index %u begin %u length %u", index, begin, length);
                 else if (ret == 1) break;     // 没有可以满足这个分片请求的 peer, 放弃这个分片的所有子分片
-                else if (ret == 2) return 0;  // 没有可以请求的 peer, 结束整个选择过程
+                else if (ret == 2) { free(base); return 0; }  // 没有可以请求的 peer, 结束整个选择过程
                 else { err("unexpected return value %d", ret); exit(EXIT_FAILURE); }
             }
             else if (piece->substate[sub_idx] == SUB_DOWNLOAD) {
@@ -235,6 +248,8 @@ select_piece(struct MetaInfo *mi, int end_game)
             }
         }
     }
+
+    free(base);
 
     if (is_found_downloading_subpiece) {
         log("all pieces is being downloaded, start end game.");
