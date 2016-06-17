@@ -979,7 +979,7 @@ bt_handler(struct MetaInfo *mi, int efd)
         }
 
         // 处理发送逻辑
-        if (end_game != 2) {
+        if (end_game != 2 && mi->left != 0) {
             int ret = select_piece(mi, end_game);
             // 不放过这可以 end-game 的第一次请求机会
             if (end_game == 0 && ret == end_game) {
